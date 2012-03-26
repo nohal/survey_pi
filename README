@@ -1,7 +1,20 @@
 Survey plugin for OpenCPN
+=========================
 
 Uses the excellent Spatialite library from http://www.gaia-gis.it/gaia-sins/
 To browse and organize your data, get https://www.gaia-gis.it/fossil/spatialite_gui/index and/or https://www.gaia-gis.it/fossil/spatialite_gis/index
+
+On Windows you need iconv.dll somewhere in your PATH or in OpenCPN's program directory. Get it from https://github.com/downloads/nohal/survey_pi/iconv.dll
+
+To compile on Windows you need iconv - The easiest to get it is to use OSGeo4W - described a bit more in the note bellow.
+
+Note
+====
+
+If, in the future, we will want to get all the functionality from spatialite
+
+Compilation on Linux
+sudo apt-get install libgeos-dev libproj-dev libfreexl-dev
 
 Compilation on Windows:
 Get OSGeo4Win: http://trac.osgeo.org/osgeo4w/
