@@ -1,1 +1,9 @@
 Survey plugin for OpenCPN
+
+Compilation on Windows:
+Get OSGeo4Win: http://trac.osgeo.org/osgeo4w/
+Install the following libraries: proj.4, freexl, geos, iconv
+If you don't like the default location C:\OSGeo4W, you will have to modify CMakeLists.txt
+
+Usage on Windows
+Copy the following DLLs to the OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll - They can be found in the bin subfolder of your OSGeo4W instalation

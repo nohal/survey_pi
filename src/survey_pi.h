@@ -22,7 +22,7 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,  USA.             *
  ***************************************************************************
  */
 
@@ -33,6 +33,7 @@
 
 #ifndef  WX_PRECOMP
   #include "wx/wx.h"
+  #include <wx/glcanvas.h>
 #endif //precompiled headers
 
 #include <wx/fileconf.h>
@@ -41,11 +42,18 @@
 #define     PLUGIN_VERSION_MINOR    1
 
 #define     MY_API_VERSION_MAJOR    1
-#define     MY_API_VERSION_MINOR    6
+#define     MY_API_VERSION_MINOR    7
+
+#define METERS  1
+#define FEET    2
+#define FATHOMS 3
 
 #include "../../../include/ocpn_plugin.h"
+#include "nmea0183/nmea0183.h"
 
 #include "surveygui.h"
+#include "libspatialite-amalgamation-3.0.1/headers/spatialite/sqlite3.h"
+#include "libspatialite-amalgamation-3.0.1/headers/spatialite.h"
 
 //----------------------------------------------------------------------------------------------------------
 //    The PlugIn Class Definition
@@ -53,7 +61,7 @@
 
 #define SURVEY_TOOL_POSITION    -1          // Request default positioning of toolbar tool
 
-class survey_pi : public opencpn_plugin
+class survey_pi : public opencpn_plugin_17
 {
 public:
       survey_pi(void *ppimgr);
@@ -61,7 +69,7 @@ public:
 //    The required PlugIn Methods
       int Init(void);
       bool DeInit(void);
-
+      
       int GetAPIVersionMajor();
       int GetAPIVersionMinor();
       int GetPlugInVersionMajor();
@@ -79,6 +87,11 @@ public:
 
 //    Optional plugin overrides
       void SetColorScheme(PI_ColorScheme cs);
+      void SetNMEASentence(wxString &sentence);
+
+//    The override PlugIn Methods
+      bool RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp);
+      bool RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
 
 //    Other public methods
       void SetSurveyDialogX    (int x){ m_survey_dialog_x = x;};
@@ -87,22 +100,52 @@ public:
       void OnSurveyDialogClose();
 
 private:
+      NMEA0183          m_NMEA0183;                 // Used to parse NMEA Sentences
+
+      sqlite3          *m_database;
+      sqlite3_stmt     *m_stmt;
+      int               ret;
+      char             *err_msg;
+      bool              b_dbUsable;
+
       wxFileConfig     *m_pconfig;
       wxWindow         *m_parent_window;
       bool              LoadConfig(void);
       bool              SaveConfig(void);
 
+      void              StoreSounding(double depth);
+      double            m_lat, m_lon;
+      wxDateTime        m_lastPosReport;
+
+      bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y);
+      void DrawSounding(wxDC &dc, int x, int y, double depth);
+
       SurveyCfgDlg      *m_pSurveyDialog;
 
       int               m_survey_dialog_x, m_survey_dialog_y;
       int               m_display_width, m_display_height;
-      int               m_iViewType;
-      bool              m_bShowAtCursor;
+      bool              m_bRenderOverlay;
       int               m_iOpacity;
+      int               m_iUnits;
+      bool              m_bRenderAllSurveys;
+      bool              m_bConnectSoundings;
+      wxString          m_sSoundingColor;
+      wxString          m_sConnectorColor;
+      wxString          m_sFont;
+      wxString          m_sFontColor;
+      double            m_fLOA;
+      double            m_fBeam;
+      double            m_fSounderBow;
+      double            m_fWaterlineOffset;
+      double            m_fGPSBow;
+      double            m_fGPSPort;
+      double            m_fMinDistance;
+      double            m_fAutoNewDistance;
 
       int               m_leftclick_tool_id;
 
-      wxString          m_survey_dir;
+      short             mPriPosition, mPriDepth;
+      int               mLastX, mLastY;
 };
 
 #endif

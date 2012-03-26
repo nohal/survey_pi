@@ -22,7 +22,7 @@ MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 
 #SET(CMAKE_BUILD_TYPE Debug)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src C:/OSGeo4W/include ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers/spatialite)
 
 # require proper c++
 #ADD_DEFINITIONS( "-Wall -ansi -pedantic -Wno-variadic-macros" )
@@ -43,6 +43,7 @@ ENDIF(NOT WIN32)
 IF(WIN32)
     ADD_DEFINITIONS(-D__MSVC__)
     ADD_DEFINITIONS(-D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_DEPRECATE)
+    ADD_DEFINITIONS( /DOMIT_GEOS /DOMIT_PROJ /DOMIT_FREEXL /DSQLITE_ENABLE_RTREE=1 /DVERSION="\\"3.0.1\\"")
 ENDIF(WIN32)
 
 
@@ -57,6 +58,67 @@ FIND_PACKAGE(Gettext REQUIRED)
 # For convenience we define the sources as a variable. You can add 
 # header files and cpp/c files and CMake will sort them out
 
+SET(SRC_NMEA0183
+		src/nmea0183/LatLong.hpp
+		src/nmea0183/latlong.cpp
+		src/nmea0183/long.cpp
+		src/nmea0183/nmea0183.cpp
+		src/nmea0183/nmea0183.hpp
+		src/nmea0183/Response.hpp
+		src/nmea0183/response.cpp
+		src/nmea0183/RMB.hpp
+		src/nmea0183/rmb.cpp
+		src/nmea0183/Sentence.hpp
+		src/nmea0183/sentence.cpp
+		src/nmea0183/talkerid.cpp
+		src/nmea0183/RMC.HPP
+		src/nmea0183/rmc.cpp
+		src/nmea0183/hexvalue.cpp
+		src/nmea0183/lat.cpp
+		src/nmea0183/expid.cpp
+		src/nmea0183/wpl.hpp
+		src/nmea0183/wpl.cpp
+		src/nmea0183/rte.hpp
+		src/nmea0183/rte.cpp
+		src/nmea0183/hdt.hpp
+		src/nmea0183/hdt.cpp
+		src/nmea0183/hdg.hpp
+		src/nmea0183/hdg.cpp
+		src/nmea0183/hdm.hpp
+		src/nmea0183/hdm.cpp
+		src/nmea0183/gll.hpp
+		src/nmea0183/gll.cpp
+		src/nmea0183/vtg.hpp
+		src/nmea0183/vtg.cpp
+		src/nmea0183/gga.hpp
+		src/nmea0183/gga.cpp
+		src/nmea0183/gsv.hpp
+		src/nmea0183/gsv.cpp
+            src/nmea0183/dbt.cpp
+            src/nmea0183/dbt.hpp
+            src/nmea0183/dpt.cpp
+            src/nmea0183/dpt.hpp
+            src/nmea0183/mtw.cpp
+            src/nmea0183/mtw.hpp
+            src/nmea0183/mwv.cpp
+            src/nmea0183/mwv.hpp
+            src/nmea0183/vhw.hpp
+            src/nmea0183/vhw.cpp
+            src/nmea0183/vwr.cpp
+            src/nmea0183/vwr.hpp
+            src/nmea0183/zda.cpp
+            src/nmea0183/zda.hpp
+		src/nmea0183/rsa.hpp
+		src/nmea0183/rsa.cpp
+		src/nmea0183/SatInfo.h
+            src/nmea0183/mwd.cpp
+            src/nmea0183/mwd.hpp
+            src/nmea0183/vwt.cpp
+            src/nmea0183/vwt.hpp
+
+	)
+INCLUDE_DIRECTORIES(src/nmea0183)
+
 SET(SRC_SURVEY
             src/survey_pi.h
             src/survey_pi.cpp
@@ -64,8 +126,10 @@ SET(SRC_SURVEY
             src/icons.cpp
 	    src/surveygui.h
 	    src/surveygui.cpp
+	    src/libspatialite-amalgamation-3.0.1/spatialite.c
+	    src/libspatialite-amalgamation-3.0.1/sqlite3.c
 	)
-ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_SURVEY})
+ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_SURVEY} ${SRC_NMEA0183})
 
 IF(WIN32)
   SET(OPENCPN_IMPORT_LIB "../../${CMAKE_CFG_INTDIR}/${PARENT}")
@@ -73,7 +137,11 @@ IF(WIN32)
   ADD_DEPENDENCIES(${PACKAGE_NAME} ${PARENT})
 ENDIF(WIN32)
 
+TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${ICONV_LIBRARIES} )
+
 TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${wxWidgets_LIBRARIES} )
+
+TARGET_LINK_LIBRARIES( ${PACKAGE_NAME}  C:/OSGeo4W/lib/proj_i.lib C:/OSGeo4W/lib/geos_c_i.lib C:/OSGeo4W/lib/freexl_i.lib C:/OSGeo4W/lib/iconv.lib )
 
 IF(APPLE)
  FIND_PACKAGE(ZLIB REQUIRED)
