@@ -115,7 +115,7 @@ int survey_pi::Init(void)
 #ifdef __WXMSW__
       pHome_Locn.Append(std_path.GetConfigDir());          // on w98, produces "/windows/Application Data"
 #else
-      pHome_Locn->Append(std_path.GetUserConfigDir());
+      pHome_Locn.Append(std_path.GetUserConfigDir());
 #endif
       appendOSDirSlash(&pHome_Locn) ;
 #ifdef __WXMSW__
