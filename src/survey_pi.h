@@ -91,7 +91,7 @@ public:
 
 //    The override PlugIn Methods
       bool RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp);
-      bool RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
+      //bool RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
 
 //    Other public methods
       void SetSurveyDialogX    (int x){ m_survey_dialog_x = x;};
@@ -118,7 +118,7 @@ private:
       wxDateTime        m_lastPosReport;
 
       bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y);
-      void DrawSounding(wxDC &dc, int x, int y, double depth);
+      void DrawSounding(wxDC &dc, int x, int y, double depth, long sounding_id, long survey_id);
 
       SurveyCfgDlg      *m_pSurveyDialog;
 
@@ -146,6 +146,7 @@ private:
 
       short             mPriPosition, mPriDepth;
       int               mLastX, mLastY;
+      long              mLastSdgId, mLastSurveyId;
 };
 
 #endif

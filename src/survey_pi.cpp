@@ -84,6 +84,8 @@ int survey_pi::Init(void)
       m_lon = 999.0;
       mLastX = -1;
       mLastY = -1;
+      mLastSdgId = -1;
+      mLastSurveyId = -1;
       m_lastPosReport = wxDateTime::Now();
       AddLocaleCatalog( _T("opencpn-survey_pi") );
       spatialite_init(0);
@@ -490,8 +492,8 @@ int survey_pi::Init(void)
               WANTS_NMEA_EVENTS         |
               WANTS_OVERLAY_CALLBACK    |
               WANTS_ONPAINT_VIEWPORT    |
-              WANTS_OPENGL_OVERLAY_CALLBACK |
-              WANTS_DYNAMIC_OPENGL_OVERLAY_CALLBACK |
+              //WANTS_OPENGL_OVERLAY_CALLBACK |
+              //WANTS_DYNAMIC_OPENGL_OVERLAY_CALLBACK |
               WANTS_CONFIG
            );
 }
@@ -736,7 +738,7 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
       delete dialog;
 }
 
-void survey_pi::DrawSounding(wxDC &dc, int x, int y, double depth)
+void survey_pi::DrawSounding(wxDC &dc, int x, int y, double depth, long sounding_id, long survey_id)
 {
       double coef = 1.0;
       if (m_iUnits == FATHOMS)
@@ -752,7 +754,7 @@ void survey_pi::DrawSounding(wxDC &dc, int x, int y, double depth)
       dc.DrawText(wxString::Format(wxT("%.1f"), depth / coef), x, y);
       if (m_bConnectSoundings)
       {
-            if (mLastX != -1 && mLastY != -1)
+            if (mLastX != -1 && mLastY != -1 && mLastSdgId == sounding_id -1 && mLastSurveyId == survey_id)
             {
                   wxPen p (wxColour(m_sConnectorColor), 1);
                   dc.SetPen(p);
@@ -760,6 +762,8 @@ void survey_pi::DrawSounding(wxDC &dc, int x, int y, double depth)
             }
             mLastX = x;
             mLastY = y;
+            mLastSdgId = sounding_id;
+            mLastSurveyId = survey_id;
       }
 }
 
@@ -768,18 +772,20 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
       if (!b_dbUsable || !m_bRenderOverlay)
             return false;
       //wxString sql = wxString::Format(_T("SELECT depth, AsText(geom) FROM sounding WHERE Within(geom, PolygonFromText('POLYGON((%f %f, %f %f, %f %f, %f %f))'))"), vp->lat_min, vp->lon_min, vp->lat_min, vp->lon_max, vp->lat_max, vp->lon_max, vp->lat_max, vp->lon_min);
-      wxString sql = wxString::Format(_T("SELECT depth, AsText(geom) FROM sounding WHERE MbrWithin(geom,BuildMbr(%f, %f, %f, %f))"), vp->lat_min, vp->lon_min, vp->lat_max, vp->lon_max);
+      wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id FROM sounding WHERE MbrWithin(geom,BuildMbr(%f, %f, %f, %f))"), vp->lat_min, vp->lon_min, vp->lat_max, vp->lon_max);
       char **results;
       int n_rows;
       int n_columns;
       char *dpt;
       char *pos;
+      char *sdgid;
+      char *surid;
 
       ret = sqlite3_get_table (m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
 	if (ret != SQLITE_OK)
 	{
 /* some error occurred */
-	      printf ("Spatialite SQL error: %s\n", err_msg);
+            wxLogMessage (_T("Spatialite SQL error: %s\n"), err_msg);
 	      sqlite3_free (err_msg);
 	      return false;
 	}
@@ -788,6 +794,8 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
 	{
 		dpt = results[(i * n_columns) + 0];
             pos = results[(i * n_columns) + 1];
+            sdgid = results[(i * n_columns) + 2];
+            surid = results[(i * n_columns) + 3];
             double depth = atof(dpt);
             wxString s(pos, wxConvUTF8);
             double latl;
@@ -798,7 +806,7 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
             GetCanvasPixLL(vp, &pl, latl, lonl);
             if(dc.IsOk())
             {
-                  DrawSounding(dc, pl.x, pl.y, depth);
+                  DrawSounding(dc, pl.x, pl.y, depth, atoi(sdgid), atoi(surid));
             }
 	}
       
@@ -810,10 +818,10 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
       return true;
 }
 
-bool survey_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
-{
-      return false;
-}
+//bool survey_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
+//{
+//      return false;
+//}
 
 // Is the given point in the vp ??
 bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y)
