@@ -215,7 +215,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.527777778 , current_timestamp, 1, GeomFromText('POINT(37.87553333 -122.31705)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.527777778 , current_timestamp, 1, GeomFromText('POINT(-122.31705 37.87553333)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -224,7 +224,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.5 , current_timestamp, 1, GeomFromText('POINT(37.87543333 -122.3167667)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.5 , current_timestamp, 1, GeomFromText('POINT(-122.3167667 37.87543333)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -233,7 +233,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.472222222 , current_timestamp, 1, GeomFromText('POINT(37.87476667 -122.3163167)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.472222222 , current_timestamp, 1, GeomFromText('POINT(-122.3163167 37.87476667)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -242,7 +242,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.444444444 , current_timestamp, 1, GeomFromText('POINT(37.87388333 -122.31565)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.444444444 , current_timestamp, 1, GeomFromText('POINT(-122.31565 37.87388333)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -251,7 +251,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.5 , current_timestamp, 1, GeomFromText('POINT(37.87305 -122.3149667)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.5 , current_timestamp, 1, GeomFromText('POINT(-122.3149667 37.87305)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -260,7 +260,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.472222222 , current_timestamp, 1, GeomFromText('POINT(37.87221667 -122.3143833)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.472222222 , current_timestamp, 1, GeomFromText('POINT(-122.3143833 37.87221667)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -269,7 +269,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.361111111 , current_timestamp, 1, GeomFromText('POINT(37.87135 -122.3138)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.361111111 , current_timestamp, 1, GeomFromText('POINT(-122.3138 37.87135)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -278,7 +278,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.277777778 , current_timestamp, 1, GeomFromText('POINT(37.87076667 -122.3136667)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.277777778 , current_timestamp, 1, GeomFromText('POINT(-122.3136667 37.87076667)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -287,7 +287,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.083333333 , current_timestamp, 1, GeomFromText('POINT(37.87015 -122.3132333)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.083333333 , current_timestamp, 1, GeomFromText('POINT(-122.3132333 37.87015)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -296,7 +296,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.055555556 , current_timestamp, 1, GeomFromText('POINT(37.87006667 -122.3127)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.055555556 , current_timestamp, 1, GeomFromText('POINT(-122.3127 37.87006667)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -305,7 +305,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.083333333 , current_timestamp, 1, GeomFromText('POINT(37.87013333 -122.3122833)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.083333333 , current_timestamp, 1, GeomFromText('POINT(-122.3122833 37.87013333)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -314,7 +314,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.25 , current_timestamp, 1, GeomFromText('POINT(37.87038333 -122.3117333)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.25 , current_timestamp, 1, GeomFromText('POINT(-122.3117333 37.87038333)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -323,7 +323,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.305555556 , current_timestamp, 1, GeomFromText('POINT(37.87066667 -122.3113333)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.305555556 , current_timestamp, 1, GeomFromText('POINT(-122.3113333 37.87066667)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -332,7 +332,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.25 , current_timestamp, 1, GeomFromText('POINT(37.8708 -122.31075)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.25 , current_timestamp, 1, GeomFromText('POINT(-122.31075 37.8708)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -341,7 +341,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.138888889 , current_timestamp, 1, GeomFromText('POINT(37.87088333 -122.3103333)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.138888889 , current_timestamp, 1, GeomFromText('POINT(-122.3103333 37.87088333)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -350,7 +350,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.083333333 , current_timestamp, 1, GeomFromText('POINT(37.8711 -122.31005)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.083333333 , current_timestamp, 1, GeomFromText('POINT(-122.31005 37.8711)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -359,7 +359,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.111111111 , current_timestamp, 1, GeomFromText('POINT(37.8713 -122.3096667)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.111111111 , current_timestamp, 1, GeomFromText('POINT(-122.3096667 37.8713)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -368,7 +368,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.305555556 , current_timestamp, 1, GeomFromText('POINT(37.87156667 -122.3103)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.305555556 , current_timestamp, 1, GeomFromText('POINT(-122.3103 37.87156667)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -377,7 +377,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.444444444 , current_timestamp, 1, GeomFromText('POINT(37.87181667 -122.3115)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.444444444 , current_timestamp, 1, GeomFromText('POINT(-122.3115 37.87181667)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -386,7 +386,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.527777778 , current_timestamp, 1, GeomFromText('POINT(37.8721 -122.3125833)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.527777778 , current_timestamp, 1, GeomFromText('POINT(-122.3125833 37.8721)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -395,7 +395,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.611111111 , current_timestamp, 1, GeomFromText('POINT(37.87265 -122.31355)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.611111111 , current_timestamp, 1, GeomFromText('POINT(-122.31355 37.87265)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -404,7 +404,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.666666667 , current_timestamp, 1, GeomFromText('POINT(37.87298333 -122.31425)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.666666667 , current_timestamp, 1, GeomFromText('POINT(-122.31425 37.87298333)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -413,7 +413,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.75 , current_timestamp, 1, GeomFromText('POINT(37.87395 -122.3144833)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.75 , current_timestamp, 1, GeomFromText('POINT(-122.3144833 37.87395)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -422,7 +422,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.833333333 , current_timestamp, 1, GeomFromText('POINT(37.87471667 -122.3135667)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.833333333 , current_timestamp, 1, GeomFromText('POINT(-122.3135667 37.87471667)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -431,7 +431,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.777777778 , current_timestamp, 1, GeomFromText('POINT(37.87536667 -122.3126167)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.777777778 , current_timestamp, 1, GeomFromText('POINT(-122.3126167 37.87536667)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -440,7 +440,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.694444444 , current_timestamp, 1, GeomFromText('POINT(37.875 -122.3114)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.694444444 , current_timestamp, 1, GeomFromText('POINT(-122.3114 37.875)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -449,7 +449,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.583333333 , current_timestamp, 1, GeomFromText('POINT(37.87428333 -122.3105667)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.583333333 , current_timestamp, 1, GeomFromText('POINT(-122.3105667 37.87428333)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -458,7 +458,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.722222222 , current_timestamp, 1, GeomFromText('POINT(37.87581667 -122.3142333)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.722222222 , current_timestamp, 1, GeomFromText('POINT(-122.3142333 37.87581667)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -467,7 +467,7 @@ int survey_pi::Init(void)
 	            sqlite3_free (err_msg);
                   b_dbUsable = false;
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.916666667 , current_timestamp, 1, GeomFromText('POINT(37.87645 -122.3158167)', 32632))");
+            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.916666667 , current_timestamp, 1, GeomFromText('POINT(-122.3158167 37.87645)', 32632))");
             ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
             if (ret != SQLITE_OK)
             {
@@ -772,7 +772,7 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
       if (!b_dbUsable || !m_bRenderOverlay)
             return false;
       //wxString sql = wxString::Format(_T("SELECT depth, AsText(geom) FROM sounding WHERE Within(geom, PolygonFromText('POLYGON((%f %f, %f %f, %f %f, %f %f))'))"), vp->lat_min, vp->lon_min, vp->lat_min, vp->lon_max, vp->lat_max, vp->lon_max, vp->lat_max, vp->lon_min);
-      wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id FROM sounding WHERE MbrWithin(geom,BuildMbr(%f, %f, %f, %f))"), vp->lat_min, vp->lon_min, vp->lat_max, vp->lon_max);
+      wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id FROM sounding WHERE MbrWithin(geom,BuildMbr(%f, %f, %f, %f))"), vp->lon_min, vp->lat_min, vp->lon_max, vp->lat_max);
       char **results;
       int n_rows;
       int n_columns;
@@ -799,9 +799,9 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
             double depth = atof(dpt);
             wxString s(pos, wxConvUTF8);
             double latl;
-            s.SubString(6, s.First(_T(" "))).ToDouble(&latl);
             double lonl;
-            s.SubString(s.First(_T(" ")), s.Length() - 1).ToDouble(&lonl);
+            s.SubString(6, s.First(_T(" "))).ToDouble(&lonl);
+            s.SubString(s.First(_T(" ")), s.Length() - 1).ToDouble(&latl);
             wxPoint pl;
             GetCanvasPixLL(vp, &pl, latl, lonl);
             if(dc.IsOk())
@@ -838,7 +838,7 @@ void survey_pi::StoreSounding(double depth)
 {
       if (m_lastPosReport.Subtract(wxDateTime::Now()).GetSeconds() > 2 || m_lat == 999.0 || m_lon == 999.0)
             return;
-      wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (%f , current_timestamp, 1, GeomFromText('POINT(%f %f)', 32632))"), depth, m_lat, m_lon);
+      wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (%f , current_timestamp, 1, GeomFromText('POINT(%f %f)', 32632))"), depth, m_lon, m_lat);
       ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
       if (ret != SQLITE_OK)
       {
