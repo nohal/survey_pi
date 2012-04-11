@@ -48,7 +48,7 @@
 #define FEET    2
 #define FATHOMS 3
 
-#include "../../../include/ocpn_plugin.h"
+#include "ocpn_plugin.h"
 #include "nmea0183/nmea0183.h"
 
 #include "surveygui.h"

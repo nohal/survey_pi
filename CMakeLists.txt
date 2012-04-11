@@ -20,9 +20,18 @@ SET(PACKAGE_NAME survey_pi)
 SET(PLUGIN_SOURCE_DIR .)
 MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 
+SET(OPENCPN_DIR "../OpenCPN")
+
 #SET(CMAKE_BUILD_TYPE Debug)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src C:/OSGeo4W/include ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers/spatialite)
+INCLUDE_DIRECTORIES(
+      ${OPENCPN_DIR}/include
+      {CMAKE_SOURCE_DIR}/include
+      ${CMAKE_SOURCE_DIR}/src
+      C:/OSGeo4W/include
+      ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers
+      ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers/spatialite
+)
 
 # require proper c++
 #ADD_DEFINITIONS( "-Wall -ansi -pedantic -Wno-variadic-macros" )
@@ -48,10 +57,10 @@ IF(WIN32)
 ENDIF(WIN32)
 
 
-#SET(wxWidgets_USE_LIBS base core net xml html adv)
-#SET(BUILD_SHARED_LIBS TRUE)
-#FIND_PACKAGE(wxWidgets REQUIRED)
-
+SET(wxWidgets_USE_LIBS base core net xml html adv)
+SET(BUILD_SHARED_LIBS TRUE)
+FIND_PACKAGE(wxWidgets REQUIRED)
+MESSAGE(STATUS ${wxWidgets_USE_FILE})
 INCLUDE(${wxWidgets_USE_FILE})
 
 FIND_PACKAGE(Gettext REQUIRED)
@@ -120,6 +129,7 @@ SET(SRC_NMEA0183
 	)
 INCLUDE_DIRECTORIES(src/nmea0183)
 
+
 SET(SRC_SURVEY
             src/survey_pi.h
             src/survey_pi.cpp
@@ -153,7 +163,11 @@ IF(APPLE)
 ENDIF(APPLE)
 
 IF(UNIX AND NOT APPLE)
-	INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION ${PREFIX_PLUGINS})
+	set(PREFIX_PLUGINS "plugins")
+	INSTALL(TARGETS ${PACKAGE_NAME}
+	RUNTIME DESTINATION ${PREFIX_PLUGINS}
+	LIBRARY DESTINATION ${PREFIX_PLUGINS}
+	)
 ENDIF(UNIX AND NOT APPLE)
 
 IF(WIN32)
