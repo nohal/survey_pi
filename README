@@ -23,3 +23,8 @@ If you don't like the default location C:\OSGeo4W, you will have to modify CMake
 
 Usage on Windows
 Copy the following DLLs to the OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll - They can be found in the bin subfolder of your OSGeo4W instalation
+
+License
+=======
+The plugin is licensed under the terms of GPL v2 or, at your will, later.
+Some of icons used come from Pastel SVG icon set (http://codefisher.org/pastel-svg/), created by Michael Buckley is licensed under the Creative Commons Attribution-Share Alike 3.0 Unported (http://creativecommons.org/licenses/by-sa/3.0/)
