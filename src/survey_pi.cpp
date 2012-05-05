@@ -36,6 +36,8 @@
 #include <wx/stdpaths.h>
 #include "survey_pi.h"
 
+#include "tinyxml.h"
+
 // the class factories, used to create and destroy instances of the PlugIn
 
 extern "C" DECL_EXP opencpn_plugin* create_pi(void *ppimgr)
@@ -70,14 +72,44 @@ void appendOSDirSlash(wxString* pString)
 //---------------------------------------------------------------------------------------------------------
 
 survey_pi::survey_pi(void *ppimgr)
-      :opencpn_plugin_17(ppimgr)
+      :opencpn_plugin_18(ppimgr)
 {
       // Create the PlugIn icons
       initialize_images();
 }
 
+bool survey_pi::ImportHydromagic(wxString filename)
+{
+      TiXmlDocument *doc = new TiXmlDocument(filename.mb_str());
+      TiXmlElement *trackpoints = doc->FirstChildElement();
+      TiXmlElement *trackpoint =  trackpoints->FirstChildElement();
+      while (trackpoint)
+      {
+            //TODO: parse and save
+            trackpoint = trackpoint->NextSiblingElement();
+      }
+
+      return true;
+}
+
+bool survey_pi::dbQuery(wxString sql)
+{
+      if (!b_dbUsable)
+            return false;
+      ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
+      if (ret != SQLITE_OK)
+      {
+            // some error occurred
+            wxLogMessage (_T("Database error: %s in query: %s\n"), *err_msg, sql.c_str());
+	      sqlite3_free (err_msg);
+            b_dbUsable = false;
+      }
+      return b_dbUsable;
+}
+
 int survey_pi::Init(void)
 {
+      int db_ver = 1;
       mPriPosition = 99;
       mPriDepth = 99;
       m_lat = 999.0;
@@ -148,38 +180,15 @@ int survey_pi::Init(void)
       if (newDB && b_dbUsable)
       {
             //create empty db
-            sql = _T("SELECT InitSpatialMetadata()");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("InitSpatialMetadata() error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO spatial_ref_sys (srid, auth_name, auth_srid, ref_sys_name, proj4text) VALUES(32632, 'epsg', 32632, 'WGS 84 / UTM zone 32N', '+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ')");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("spatial_ref_sys error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
+            dbQuery(_T("SELECT InitSpatialMetadata()"));
+            //dbQuery(_T("INSERT INTO spatial_ref_sys (srid, auth_name, auth_srid, ref_sys_name, proj4text) VALUES(32632, 'epsg', 32632, 'WGS 84 / UTM zone 32N', '+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ')"));
             //CREATE OUR TABLES
             sql = _T("CREATE TABLE survey (")
                   _T("survey_id INTEGER PRIMARY KEY AUTOINCREMENT,")
                   _T("survey_name TEXT,")
                   _T("created INTEGER,")
                   _T("submitted INTEGER)");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("CREATE TABLE survey error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
+            dbQuery(sql);
 
             sql = _T("CREATE TABLE sounding (")
                   _T("sounding_id INTEGER PRIMARY KEY AUTOINCREMENT,")
@@ -187,295 +196,72 @@ int survey_pi::Init(void)
                   _T("measured INTEGER NOT NULL,")
                   _T("survey_id INTEGER NOT NULL,")
                   _T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("CREATE TABLE sounding error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("SELECT AddGeometryColumn('sounding', 'geom', 32632, 'POINT', 2)");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("AddGeometryColumn error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
+            dbQuery(sql);
+            dbQuery(_T("SELECT AddGeometryColumn('sounding', 'geom', 32632, 'POINT', 2)"));
+      }
 
-            //INSERT TESTING DATA
-            sql = _T("INSERT INTO \"survey\" (\"survey_name\", \"created\", \"submitted\") VALUES (\"test survey\", current_timestamp, NULL)");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
+      //Update DB structure and contents
+      if (b_dbUsable)
+      {
+            char **results;
+            int n_rows;
+            int n_columns;
+            sql = _T("SELECT value FROM settings WHERE key = 'DBVersion'");
+            ret = sqlite3_get_table (m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
             if (ret != SQLITE_OK)
             {
-                  // some error occurred
-	            wxLogMessage (_T("survey insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.527777778 , current_timestamp, 1, GeomFromText('POINT(-122.31705 37.87553333)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
+                  sqlite3_free (err_msg);
+                  sql = _T("CREATE TABLE settings (")
+                  _T("key TEXT NOT NULL UNIQUE,")
+                  _T("value TEXT)");
+                  dbQuery(sql);
+                  dbQuery(_T("INSERT INTO settings (key, value) VALUES ('DBVersion', '2')"));
+                  db_ver = 2;
+            } 
+            else
             {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
+                  db_ver = atoi(results[1]);
             }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.5 , current_timestamp, 1, GeomFromText('POINT(-122.3167667 37.87543333)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.472222222 , current_timestamp, 1, GeomFromText('POINT(-122.3163167 37.87476667)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.444444444 , current_timestamp, 1, GeomFromText('POINT(-122.31565 37.87388333)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.5 , current_timestamp, 1, GeomFromText('POINT(-122.3149667 37.87305)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.472222222 , current_timestamp, 1, GeomFromText('POINT(-122.3143833 37.87221667)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.361111111 , current_timestamp, 1, GeomFromText('POINT(-122.3138 37.87135)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.277777778 , current_timestamp, 1, GeomFromText('POINT(-122.3136667 37.87076667)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.083333333 , current_timestamp, 1, GeomFromText('POINT(-122.3132333 37.87015)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.055555556 , current_timestamp, 1, GeomFromText('POINT(-122.3127 37.87006667)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.083333333 , current_timestamp, 1, GeomFromText('POINT(-122.3122833 37.87013333)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.25 , current_timestamp, 1, GeomFromText('POINT(-122.3117333 37.87038333)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.305555556 , current_timestamp, 1, GeomFromText('POINT(-122.3113333 37.87066667)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.25 , current_timestamp, 1, GeomFromText('POINT(-122.31075 37.8708)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.138888889 , current_timestamp, 1, GeomFromText('POINT(-122.3103333 37.87088333)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.083333333 , current_timestamp, 1, GeomFromText('POINT(-122.31005 37.8711)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.111111111 , current_timestamp, 1, GeomFromText('POINT(-122.3096667 37.8713)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.305555556 , current_timestamp, 1, GeomFromText('POINT(-122.3103 37.87156667)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.444444444 , current_timestamp, 1, GeomFromText('POINT(-122.3115 37.87181667)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.527777778 , current_timestamp, 1, GeomFromText('POINT(-122.3125833 37.8721)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.611111111 , current_timestamp, 1, GeomFromText('POINT(-122.31355 37.87265)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.666666667 , current_timestamp, 1, GeomFromText('POINT(-122.31425 37.87298333)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.75 , current_timestamp, 1, GeomFromText('POINT(-122.3144833 37.87395)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.833333333 , current_timestamp, 1, GeomFromText('POINT(-122.3135667 37.87471667)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.777777778 , current_timestamp, 1, GeomFromText('POINT(-122.3126167 37.87536667)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.694444444 , current_timestamp, 1, GeomFromText('POINT(-122.3114 37.875)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.583333333 , current_timestamp, 1, GeomFromText('POINT(-122.3105667 37.87428333)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.722222222 , current_timestamp, 1, GeomFromText('POINT(-122.3142333 37.87581667)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
-            sql = _T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (2.916666667 , current_timestamp, 1, GeomFromText('POINT(-122.3158167 37.87645)', 32632))");
-            ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  // some error occurred
-	            wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	            sqlite3_free (err_msg);
-                  b_dbUsable = false;
-            }
+            sqlite3_free_table (results);
+            wxLogMessage (_T("SURVEY_PI: Database version: %i\n"), db_ver);
+      }
+
+      if (b_dbUsable && db_ver == 2)
+      {
+            sql = _T("ALTER TABLE sounding ")
+                  _T("ADD COLUMN tide REAL NOT NULL DEFAULT 0.0");
+            dbQuery(sql);
+            dbQuery(_T("UPDATE settings SET value = 3 WHERE key = 'DBVersion'"));
+            db_ver = 3;
+      }
+      if (b_dbUsable && db_ver == 3)
+      {
+            sql = _T("CREATE TABLE new_sounding (")
+                  _T("sounding_id INTEGER PRIMARY KEY AUTOINCREMENT,")
+                  _T("depth REAL NOT NULL,")
+                  _T("measured INTEGER NOT NULL,")
+                  _T("survey_id INTEGER NOT NULL,")
+                  _T("tide REAL NOT NULL DEFAULT 0.0,")
+                  _T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
+            dbQuery(sql);
+            dbQuery(_T("SELECT AddGeometryColumn('new_sounding', 'geom', 3395, 'POINT', 2)"));
+            dbQuery(_T("INSERT INTO new_sounding SELECT sounding_id, depth, measured, survey_id, tide, SetSRID('geom', 3395) FROM sounding"));
+            dbQuery(_T("DROP TABLE sounding"));
+            dbQuery(_T("SELECT DiscardGeometryColumn('sounding', 'geom')"));
+            sql = _T("CREATE TABLE sounding (")
+                  _T("sounding_id INTEGER PRIMARY KEY AUTOINCREMENT,")
+                  _T("depth REAL NOT NULL,")
+                  _T("measured INTEGER NOT NULL,")
+                  _T("survey_id INTEGER NOT NULL,")
+                  _T("tide REAL NOT NULL DEFAULT 0.0,")
+                  _T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
+            dbQuery(sql);
+            dbQuery(_T("SELECT AddGeometryColumn('sounding', 'geom', 3395, 'POINT', 2)"));
+            dbQuery(_T("INSERT INTO sounding SELECT sounding_id, depth, measured, survey_id, tide, SetSRID('geom', 3395) FROM new_sounding"));
+            dbQuery(_T("DROP TABLE new_sounding"));
+            dbQuery(_T("SELECT DiscardGeometryColumn('new_sounding', 'geom')"));
+            dbQuery(_T("UPDATE settings SET value = 4 WHERE key = 'DBVersion'"));
+            db_ver = 4;
       }
 
       //    This PlugIn needs a toolbar icon, so request its insertion
@@ -570,20 +356,18 @@ void survey_pi::SetColorScheme(PI_ColorScheme cs)
       if (NULL == m_pSurveyDialog)
             return;
 
-      //DimeDialog
+      DimeWindow(m_pSurveyDialog);
 }
 
 void survey_pi::OnToolbarToolCallback(int id)
 {
-      /*
       if(NULL == m_pSurveyDialog)
       {
-            m_pSurveyDialog = new SurveyCfgDlg(m_parent_window);
+            m_pSurveyDialog = new SurveyDlg(m_parent_window);
             m_pSurveyDialog->Move(wxPoint(m_survey_dialog_x, m_survey_dialog_y));
       }
 
       m_pSurveyDialog->Show(!m_pSurveyDialog->IsShown());
-      */
 }
 
 bool survey_pi::LoadConfig(void)
@@ -667,8 +451,7 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
       SurveyCfgDlg *dialog = new SurveyCfgDlg( parent, wxID_ANY, _("Survey Preferences"), wxPoint( m_survey_dialog_x, m_survey_dialog_y), wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
       dialog->Fit();
       wxColour cl;
-      GetGlobalColor(_T("DILG1"), &cl);
-      //dialog->SetBackgroundColour(cl);
+      DimeWindow(dialog);
       dialog->m_cbRenderOverlay->SetValue(m_bRenderOverlay);
       dialog->m_sOpacity->SetValue(m_iOpacity);
       switch(m_iUnits)
@@ -838,7 +621,7 @@ void survey_pi::StoreSounding(double depth)
 {
       if (m_lastPosReport.Subtract(wxDateTime::Now()).GetSeconds() > 2 || m_lat == 999.0 || m_lon == 999.0)
             return;
-      wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (%f , current_timestamp, 1, GeomFromText('POINT(%f %f)', 32632))"), depth, m_lon, m_lat);
+      wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (%f , current_timestamp, 1, GeomFromText('POINT(%f %f)', 3395))"), depth, m_lon, m_lat);
       ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
       if (ret != SQLITE_OK)
       {
@@ -974,4 +757,3 @@ void survey_pi::SetNMEASentence(wxString &sentence)
             }
       }
 }
-

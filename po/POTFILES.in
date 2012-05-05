@@ -2,3 +2,5 @@ src/survey_pi.cpp
 src/survey_pi.h
 src/surveygui.cpp
 src/surveygui.h
+src/surveygui_impl.cpp
+src/surveygui_impl.h

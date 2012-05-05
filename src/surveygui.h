@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Mar 17 2012)
+// C++ code generated with wxFormBuilder (version Apr 10 2012)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -27,14 +27,24 @@
 #include <wx/textctrl.h>
 #include <wx/button.h>
 #include <wx/dialog.h>
+#include <wx/choice.h>
+#include <wx/gbsizer.h>
+#include <wx/tglbtn.h>
+#include <wx/grid.h>
+#include <wx/panel.h>
+#include <wx/bitmap.h>
+#include <wx/image.h>
+#include <wx/icon.h>
+#include <wx/statbmp.h>
+#include <wx/notebook.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class SurveyCfgDlg
+/// Class SurveyCfgDlgDef
 ///////////////////////////////////////////////////////////////////////////////
-class SurveyCfgDlg : public wxDialog 
+class SurveyCfgDlgDef : public wxDialog 
 {
 	private:
 	
@@ -88,8 +98,84 @@ class SurveyCfgDlg : public wxDialog
 		wxTextCtrl* m_tMinDistance;
 		wxTextCtrl* m_tAutoNewDistance;
 		
-		SurveyCfgDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey preferences"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 496,587 ), long style = wxDEFAULT_DIALOG_STYLE ); 
-		~SurveyCfgDlg();
+		SurveyCfgDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey preferences"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 496,587 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		~SurveyCfgDlgDef();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class SurveyDlgDef
+///////////////////////////////////////////////////////////////////////////////
+class SurveyDlgDef : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxChoice* m_chSurvey;
+		wxStaticText* m_tNrSoundings;
+		wxStaticText* m_tArea;
+		wxStaticText* m_tMinDepth;
+		wxStaticText* m_tMaxDepth;
+		wxToggleButton* m_tbRecord;
+		wxNotebook* m_notebook1;
+		wxPanel* m_panel1;
+		wxGrid* m_gdSoundings;
+		wxPanel* m_panel2;
+		wxStaticBitmap* m_profilegraph;
+		wxButton* m_btnNew;
+		wxButton* m_btnDelete;
+		wxButton* m_btnProperties;
+		wxButton* m_btnZoomTo;
+		wxButton* m_btnMerge;
+		wxButton* m_btnImport;
+		wxButton* m_btnExport;
+		wxStdDialogButtonSizer* m_sdbSizer2;
+		wxButton* m_sdbSizer2OK;
+		wxButton* m_sdbSizer2Cancel;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnRecordToggle( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnNewSurvey( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnDeleteSurvey( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSurveyProperties( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnZoomToSurvey( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMergeSurvey( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnImportSurvey( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnExportSurvey( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSurveyCancelClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSurveyOkClick( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		SurveyDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		~SurveyDlgDef();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class SurveyMergeDlgDef
+///////////////////////////////////////////////////////////////////////////////
+class SurveyMergeDlgDef : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText28;
+		wxChoice* m_cMergeWith;
+		wxStdDialogButtonSizer* m_sdbSizer3;
+		wxButton* m_sdbSizer3OK;
+		wxButton* m_sdbSizer3Cancel;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnMergeCancelClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMergeOkClick( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		SurveyMergeDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Merge surveys"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 525,286 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		~SurveyMergeDlgDef();
 	
 };
 

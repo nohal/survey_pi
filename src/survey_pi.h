@@ -39,10 +39,10 @@
 #include <wx/fileconf.h>
 
 #define     PLUGIN_VERSION_MAJOR    0
-#define     PLUGIN_VERSION_MINOR    1
+#define     PLUGIN_VERSION_MINOR    2
 
 #define     MY_API_VERSION_MAJOR    1
-#define     MY_API_VERSION_MINOR    7
+#define     MY_API_VERSION_MINOR    8
 
 #define METERS  1
 #define FEET    2
@@ -51,7 +51,7 @@
 #include "../../../include/ocpn_plugin.h"
 #include "nmea0183/nmea0183.h"
 
-#include "surveygui.h"
+#include "surveygui_impl.h"
 #include "libspatialite-amalgamation-3.0.1/headers/spatialite/sqlite3.h"
 #include "libspatialite-amalgamation-3.0.1/headers/spatialite.h"
 
@@ -61,7 +61,7 @@
 
 #define SURVEY_TOOL_POSITION    -1          // Request default positioning of toolbar tool
 
-class survey_pi : public opencpn_plugin_17
+class survey_pi : public opencpn_plugin_18
 {
 public:
       survey_pi(void *ppimgr);
@@ -120,7 +120,7 @@ private:
       bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y);
       void DrawSounding(wxDC &dc, int x, int y, double depth, long sounding_id, long survey_id);
 
-      SurveyCfgDlg      *m_pSurveyDialog;
+      SurveyDlg        *m_pSurveyDialog;
 
       int               m_survey_dialog_x, m_survey_dialog_y;
       int               m_display_width, m_display_height;
@@ -147,6 +147,8 @@ private:
       short             mPriPosition, mPriDepth;
       int               mLastX, mLastY;
       long              mLastSdgId, mLastSurveyId;
+      bool              dbQuery(wxString sql);
+      bool              ImportHydromagic(wxString filename);
 };
 
 #endif
