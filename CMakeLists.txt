@@ -133,6 +133,10 @@ SET(SRC_SURVEY
 	    src/surveygui.cpp
 	    src/surveygui_impl.cpp
 	    src/surveygui_impl.h
+	    src/mygridtablebase.cpp
+	    src/mygridtablebase.h
+	    src/soundinggridtable.cpp
+	    src/soundinggridtable.h
 	    src/libspatialite-amalgamation-3.0.1/spatialite.c
 	    src/libspatialite-amalgamation-3.0.1/sqlite3.c
 	)
