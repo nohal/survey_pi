@@ -37,6 +37,9 @@
 #endif //precompiled headers
 
 #include <wx/fileconf.h>
+#include <wx/hashmap.h>
+
+#include "tinyxml.h"
 
 #define     PLUGIN_VERSION_MAJOR    0
 #define     PLUGIN_VERSION_MINOR    2
@@ -48,12 +51,17 @@
 #define FEET    2
 #define FATHOMS 3
 
+//World Mercator
+#define PROJECTION 3395
+
 #include "../../../include/ocpn_plugin.h"
 #include "nmea0183/nmea0183.h"
 
 #include "surveygui_impl.h"
 #include "libspatialite-amalgamation-3.0.1/headers/spatialite/sqlite3.h"
 #include "libspatialite-amalgamation-3.0.1/headers/spatialite.h"
+
+class SurveyDlg;
 
 //----------------------------------------------------------------------------------------------------------
 //    The PlugIn Class Definition
@@ -98,6 +106,20 @@ public:
       void SetSurveyDialogY    (int x){ m_survey_dialog_y = x;}
 
       void OnSurveyDialogClose();
+
+      bool              ImportHydromagic(wxString filename);
+      void              ExportHydromagic(int survey_id, wxString filename);
+      int               CreateSurvey(wxString name);
+      void              DeleteSurvey(int id);
+      void              FillSurveyDropdown();
+      int               InsertSounding(double depth, double lat, double lon, double tide = 0.0, time_t timestamp = 0, int projection = PROJECTION);
+      wxArrayString     GetSurveyList();
+      int               GetSurveyId(wxString survey_name);
+      wxString          GetSurveyName(int survey_id);
+
+      int               GetActiveSurveyId(){ return m_activesurvey; }
+      void              SetActiveSurveyId(int id){ m_activesurvey = id; }
+      void              SetActiveSurvey(wxString name){ m_activesurveyname = name; m_activesurvey = GetSurveyId(name); }
 
 private:
       NMEA0183          m_NMEA0183;                 // Used to parse NMEA Sentences
@@ -144,11 +166,19 @@ private:
 
       int               m_leftclick_tool_id;
 
+      int               m_activesurvey;
+      wxString          m_activesurveyname;
+      int               m_projection;
+
       short             mPriPosition, mPriDepth;
       int               mLastX, mLastY;
       long              mLastSdgId, mLastSurveyId;
       bool              dbQuery(wxString sql);
-      bool              ImportHydromagic(wxString filename);
+      void              dbGetTable(wxString sql, char ***results, int &n_rows, int &n_columns);
+      void              dbFreeResults(char **results);
+      int               dbGetIntNotNullValue(wxString sql);
+      wxString          dbGetStringValue(wxString sql);
+      void              ImportHydromagicTrack(TiXmlElement *track);
 };
 
 #endif

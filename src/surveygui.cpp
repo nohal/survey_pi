@@ -440,6 +440,7 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	this->Centre( wxBOTH );
 	
 	// Connect Events
+	m_chSurvey->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( SurveyDlgDef::OnSurveySelection ), NULL, this );
 	m_tbRecord->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnRecordToggle ), NULL, this );
 	m_btnNew->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnNewSurvey ), NULL, this );
 	m_btnDelete->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnDeleteSurvey ), NULL, this );
@@ -455,6 +456,7 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 SurveyDlgDef::~SurveyDlgDef()
 {
 	// Disconnect Events
+	m_chSurvey->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( SurveyDlgDef::OnSurveySelection ), NULL, this );
 	m_tbRecord->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnRecordToggle ), NULL, this );
 	m_btnNew->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnNewSurvey ), NULL, this );
 	m_btnDelete->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnDeleteSurvey ), NULL, this );

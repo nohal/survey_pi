@@ -111,7 +111,6 @@ class SurveyDlgDef : public wxDialog
 	private:
 	
 	protected:
-		wxChoice* m_chSurvey;
 		wxStaticText* m_tNrSoundings;
 		wxStaticText* m_tArea;
 		wxStaticText* m_tMinDepth;
@@ -134,6 +133,7 @@ class SurveyDlgDef : public wxDialog
 		wxButton* m_sdbSizer2Cancel;
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnSurveySelection( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRecordToggle( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnNewSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnDeleteSurvey( wxCommandEvent& event ) { event.Skip(); }
@@ -147,6 +147,7 @@ class SurveyDlgDef : public wxDialog
 		
 	
 	public:
+		wxChoice* m_chSurvey;
 		
 		SurveyDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~SurveyDlgDef();

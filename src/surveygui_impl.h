@@ -30,6 +30,11 @@
 #define _SURVEYGUI_IMPL_H_
 
 #include "surveygui.h"
+#include "survey_pi.h"
+
+#include <wx/filedlg.h>
+
+class survey_pi;
 
 class SurveyCfgDlg : public SurveyCfgDlgDef
 {
@@ -41,6 +46,18 @@ class SurveyDlg : public SurveyDlgDef
 {
 public:
       SurveyDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE );
+      void OnSurveySelection( wxCommandEvent& event );
+      void OnRecordToggle( wxCommandEvent& event );
+	void OnNewSurvey( wxCommandEvent& event );
+	void OnDeleteSurvey( wxCommandEvent& event );
+	void OnSurveyProperties( wxCommandEvent& event );
+	void OnZoomToSurvey( wxCommandEvent& event );
+	void OnMergeSurvey( wxCommandEvent& event );
+	void OnImportSurvey( wxCommandEvent& event );
+	void OnExportSurvey( wxCommandEvent& event );
+	void OnSurveyCancelClick( wxCommandEvent& event );
+	void OnSurveyOkClick( wxCommandEvent& event );
+      survey_pi *plugin;
 };
 
 #endif

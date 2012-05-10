@@ -36,8 +36,6 @@
 #include <wx/stdpaths.h>
 #include "survey_pi.h"
 
-#include "tinyxml.h"
-
 // the class factories, used to create and destroy instances of the PlugIn
 
 extern "C" DECL_EXP opencpn_plugin* create_pi(void *ppimgr)
@@ -78,17 +76,348 @@ survey_pi::survey_pi(void *ppimgr)
       initialize_images();
 }
 
+void survey_pi::ImportHydromagicTrack(TiXmlElement *track)
+{
+      TiXmlElement *parameter = track->FirstChildElement();
+      while (parameter)
+      {
+            wxString paramname = wxString::FromUTF8(parameter->Value());
+            if (paramname == _T("name"))
+            {
+                  wxString trackname = wxString::FromUTF8(parameter->GetText());
+                  m_activesurvey = CreateSurvey(trackname);
+            }
+            else if (paramname == _T("desc"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("visible"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("lines"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("values"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("active"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("fixes"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("color"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("width"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("textunits"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("units"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("textsize"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (paramname == _T("trackpoints"))
+            {
+                  TiXmlElement *trackpoint = parameter->FirstChildElement();
+                  while (trackpoint)
+                  {
+                        float lat = atof(trackpoint->Attribute("lat"));
+                        float lon = atof(trackpoint->Attribute("lon"));
+                        float dpt = atof(trackpoint->Attribute("dpt"));
+                        float tide = atof(trackpoint->Attribute("tide"));
+                        float ele = atof(trackpoint->Attribute("ele"));
+                        long time = atol(trackpoint->Attribute("time"));
+                        int mark = atoi(trackpoint->Attribute("mark"));
+                        InsertSounding(dpt, lat, lon, tide, time);
+                        trackpoint = trackpoint->NextSiblingElement();
+                  }
+            }
+            parameter = parameter->NextSiblingElement();
+      }
+}
+
+void survey_pi::ExportHydromagic(int survey_id, wxString filename)
+{
+      TiXmlDocument * doc = new TiXmlDocument();
+      TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf-8", "" );
+      TiXmlElement * root = new TiXmlElement("project");
+
+      doc->LinkEndChild(decl);
+
+      TiXmlElement * projection = new TiXmlElement("projection");
+      TiXmlElement * grid = new TiXmlElement("grid");
+      grid->LinkEndChild(new TiXmlText(wxString::Format(_T("%i"), m_projection).ToUTF8()));
+      projection->LinkEndChild(grid);
+      root->LinkEndChild(projection);
+
+      TiXmlElement * currentview = new TiXmlElement("currentview");
+      root->LinkEndChild(currentview);
+
+      TiXmlElement * colors = new TiXmlElement("colors");
+      root->LinkEndChild(colors);
+
+      TiXmlElement * tides = new TiXmlElement("tides");
+      root->LinkEndChild(tides);
+
+      TiXmlElement * layers = new TiXmlElement("layers");
+      root->LinkEndChild(layers);
+
+      TiXmlElement * comments = new TiXmlElement("comments");
+      root->LinkEndChild(comments);
+
+      TiXmlElement * tracks = new TiXmlElement("tracks");
+      tracks->SetAttribute("visible", 1);
+      TiXmlElement * track = new TiXmlElement("track");
+
+      TiXmlElement * name = new TiXmlElement("name");
+      name->LinkEndChild(new TiXmlText(GetSurveyName(survey_id).mb_str()));
+      track->LinkEndChild(name);
+
+      TiXmlElement * desc = new TiXmlElement("desc");
+      track->LinkEndChild(desc);
+
+      TiXmlElement * visible = new TiXmlElement("visible");
+      visible->LinkEndChild(new TiXmlText("1"));
+      track->LinkEndChild(visible);
+
+      TiXmlElement * lines = new TiXmlElement("lines");
+      lines->LinkEndChild(new TiXmlText("1"));
+      track->LinkEndChild(lines);
+
+      TiXmlElement * values = new TiXmlElement("values");
+      values->LinkEndChild(new TiXmlText("1"));
+      track->LinkEndChild(values);
+
+      TiXmlElement * active = new TiXmlElement("active");
+      active->LinkEndChild(new TiXmlText("1"));
+      track->LinkEndChild(active);
+
+      TiXmlElement * fixes = new TiXmlElement("fixes");
+      fixes->LinkEndChild(new TiXmlText("1"));
+      track->LinkEndChild(fixes);
+
+      TiXmlElement * color = new TiXmlElement("color");
+      color->LinkEndChild(new TiXmlText("0"));
+      track->LinkEndChild(color);
+
+      TiXmlElement * width = new TiXmlElement("width");
+      width->LinkEndChild(new TiXmlText("4"));
+      track->LinkEndChild(width);
+
+      TiXmlElement * textunits = new TiXmlElement("textunits");
+      textunits->LinkEndChild(new TiXmlText("0"));
+      track->LinkEndChild(textunits);
+
+      TiXmlElement * units = new TiXmlElement("units");
+      units->LinkEndChild(new TiXmlText("0"));
+      track->LinkEndChild(units);
+
+      TiXmlElement * textsize = new TiXmlElement("textsize");
+      textsize->LinkEndChild(new TiXmlText("12"));
+      track->LinkEndChild(textsize);
+
+      TiXmlElement * trackpoints = new TiXmlElement("trackpoints");
+      wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), tide, strftime('%%s', measured) FROM sounding WHERE survey_id=%i"), survey_id);
+      char **results;
+      int n_rows;
+      int n_columns;
+      char *dpt;
+      char *pos;
+      char *tid;
+      char *tim;
+
+      ret = sqlite3_get_table (m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
+	if (ret != SQLITE_OK)
+	{
+/* some error occurred */
+            wxLogMessage (_T("Spatialite SQL error: %s\n"), err_msg);
+	      sqlite3_free (err_msg);
+	      return;
+	}
+
+      for (int i = 1; i <= n_rows; i++)
+	{
+		dpt = results[(i * n_columns) + 0];
+            pos = results[(i * n_columns) + 1];
+            tid = results[(i * n_columns) + 2];
+            tim = results[(i * n_columns) + 3];
+            double tide = atof(tid);
+            wxString s(pos, wxConvUTF8);
+            wxString latl;
+            wxString lonl;
+            lonl = s.SubString(6, s.First(_T(" ")));
+            latl = s.SubString(s.First(_T(" ")), s.Length() - 1);
+            TiXmlElement * trackpoint = new TiXmlElement("trackpoint");
+            trackpoint->SetAttribute("lat", latl.ToUTF8());
+            trackpoint->SetAttribute("lon", lonl.ToUTF8());
+            trackpoint->SetAttribute("dpt", dpt);
+            trackpoint->SetAttribute("tide", tid);
+            trackpoint->SetAttribute("ele", 0);
+            trackpoint->SetAttribute("time", tim);
+            trackpoint->SetAttribute("mark", 0);
+            trackpoints->LinkEndChild(trackpoint);
+      }
+      track->LinkEndChild(trackpoints);
+      tracks->LinkEndChild(track);
+      root->LinkEndChild(tracks);
+
+      TiXmlElement * waypoints = new TiXmlElement("waypoints");
+      root->LinkEndChild(waypoints);
+
+      TiXmlElement * routes = new TiXmlElement("routes");
+      root->LinkEndChild(routes);
+
+      TiXmlElement * areas = new TiXmlElement("areas");
+      root->LinkEndChild(areas);
+
+      TiXmlElement * sections = new TiXmlElement("sections");
+      root->LinkEndChild(sections);
+
+      TiXmlElement * soundvelocity = new TiXmlElement("soundvelocity");
+      root->LinkEndChild(soundvelocity);
+
+      TiXmlElement * draftcorrections = new TiXmlElement("draftcorrections");
+      root->LinkEndChild(draftcorrections);
+
+      doc->LinkEndChild(root);
+
+      doc->SaveFile(filename.mb_str());
+
+      doc->Clear();
+
+      delete doc;
+}
+
+
 bool survey_pi::ImportHydromagic(wxString filename)
 {
-      TiXmlDocument *doc = new TiXmlDocument(filename.mb_str());
-      TiXmlElement *trackpoints = doc->FirstChildElement();
-      TiXmlElement *trackpoint =  trackpoints->FirstChildElement();
-      while (trackpoint)
+      TiXmlDocument *doc = new TiXmlDocument();
+      doc->LoadFile(filename.mb_str());
+      TiXmlElement *project = doc->FirstChildElement();
+      if (!project)
       {
-            //TODO: parse and save
-            trackpoint = trackpoint->NextSiblingElement();
+            doc->Clear();
+            delete doc;
+            return false;
+      }
+      TiXmlElement *section =  project->FirstChildElement();
+
+      while (section)
+      {
+            wxString secname = wxString::FromUTF8(section->Value());
+            if (secname == _T("projection"))
+            {
+                  const char *val = section->FirstChildElement()->GetText();
+                  m_projection = atoi(val);
+            }
+            else if (secname == _T("currentview"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+                  /*
+                   <currentview>
+                    <MinX>-13631297.850343</MinX>
+                    <MinY>4526885.079842</MinY>
+                    <MaxX>-13630637.648546</MaxX>
+                    <MaxY>4527386.011166</MaxY>
+                    <DelX>660.201797</DelX>
+                    <DelY>500.931324</DelY>
+                    <Skew>0.00</Skew>
+                   </currentview>
+                  */
+            }
+            else if (secname == _T("colors"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+                  /*
+                   <colors>
+                    <color lower="0.00" upper="1.00" value="FF3F3F" />
+                    <color lower="1.00" upper="2.00" value="FF653F" />
+                    <color lower="2.00" upper="3.00" value="FF8C3F" />
+                    <color lower="3.00" upper="4.00" value="FFB23F" />
+                    <color lower="4.00" upper="5.00" value="FFD83F" />
+                    <color lower="5.00" upper="6.00" value="FFFF3F" />
+                    <color lower="6.00" upper="7.00" value="D8FF3F" />
+                    <color lower="7.00" upper="8.00" value="B2FF3F" />
+                    <color lower="8.00" upper="9.00" value="8CFF3F" />
+                    <color lower="9.00" upper="10.00" value="65FF3F" />
+                    <color lower="10.00" upper="11.00" value="3FFF3F" />
+                    <color lower="11.00" upper="12.00" value="3FFF66" />
+                    <color lower="12.00" upper="13.00" value="3FFF8C" />
+                    <color lower="13.00" upper="14.00" value="3FFFB2" />
+                    <color lower="14.00" upper="15.00" value="3FFFD8" />
+                    <color lower="15.00" upper="16.00" value="3FFFFF" />
+                    <color lower="16.00" upper="17.00" value="3FD8FF" />
+                    <color lower="17.00" upper="18.00" value="3FB2FF" />
+                    <color lower="18.00" upper="19.00" value="3F8CFF" />
+                    <color lower="19.00" upper="20.00" value="3F66FF" />
+                   </colors>
+                  */
+            }
+            else if (secname == _T("tides"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (secname == _T("layers"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (secname == _T("comments"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (secname == _T("tracks"))
+            {
+                  TiXmlElement *track = section->FirstChildElement();
+                  while(track)
+                  {
+                        ImportHydromagicTrack(track);
+                        track = track->NextSiblingElement();
+                  }
+            }
+            else if (secname == _T("waypoints"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (secname == _T("routes"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (secname == _T("areas"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (secname == _T("sections"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (secname == _T("soundvelocity"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            else if (secname == _T("draftcorrections"))
+            {
+                  //TODO: We do not need this, so let's ignore it for now
+            }
+            section = section->NextSiblingElement();
       }
 
+      doc->Clear();
+      delete doc;
       return true;
 }
 
@@ -107,8 +436,112 @@ bool survey_pi::dbQuery(wxString sql)
       return b_dbUsable;
 }
 
+void survey_pi::dbGetTable(wxString sql, char ***results, int &n_rows, int &n_columns)
+{
+      ret = sqlite3_get_table (m_database, sql.mb_str(), results, &n_rows, &n_columns, &err_msg);
+      if (ret != SQLITE_OK)
+      {
+            wxLogMessage (_T("Database error: %s in query: %s\n"), *err_msg, sql.c_str());
+	      sqlite3_free (err_msg);
+            b_dbUsable = false;
+      } 
+}
+
+wxArrayString survey_pi::GetSurveyList()
+{
+      char **result;
+      int n_rows;
+      int n_columns;
+      dbGetTable(_T("SELECT * FROM survey"), &result, n_rows, n_columns);
+      wxArrayString surveys;
+      for (int i = 1; i <= n_rows; i++)
+	{
+		char *id = result[(i * n_columns) + 0];
+            char *name = result[(i * n_columns) + 1];
+            int survey_id = atoi(id);
+            wxString survey_name(name, wxConvUTF8);
+            surveys.Add(survey_name);
+	}
+      dbFreeResults(result);
+      return surveys;
+}
+
+wxString survey_pi::dbGetStringValue(wxString sql)
+{
+      char **result;
+      int n_rows;
+      int n_columns;
+      dbGetTable(sql, &result, n_rows, n_columns);
+      wxArrayString surveys;
+      wxString ret = wxString::FromUTF8(result[1]);
+      dbFreeResults(result);
+      if(n_rows == 1)
+            return ret;
+      else
+            return wxEmptyString;
+}
+
+int survey_pi::dbGetIntNotNullValue(wxString sql)
+{
+      char **result;
+      int n_rows;
+      int n_columns;
+      dbGetTable(sql, &result, n_rows, n_columns);
+      wxArrayString surveys;
+      int ret = atoi(result[1]);
+      dbFreeResults(result);
+      if(n_rows == 1)
+            return ret;
+      else
+            return 0;
+}
+
+wxString survey_pi::GetSurveyName(int survey_id)
+{
+      return dbGetStringValue(wxString::Format(_T("SELECT survey_name FROM survey WHERE survey_id=%i"), survey_id));
+}
+
+int survey_pi::GetSurveyId(wxString survey_name)
+{
+      return dbGetIntNotNullValue(wxString::Format(_T("SELECT survey_id FROM survey WHERE survey_name='%s'"), survey_name.c_str()));
+}
+
+void survey_pi::dbFreeResults(char **results)
+{
+      sqlite3_free_table (results);
+}
+
+int survey_pi::CreateSurvey(wxString name)
+{
+      wxString sql = wxString::Format(_T("INSERT INTO survey (survey_name, created, submitted) VALUES ('%s', current_timestamp, 0)"), name.c_str());
+      dbQuery(sql);
+      return sqlite3_last_insert_rowid(m_database);
+}
+
+void survey_pi::DeleteSurvey(int id)
+{
+      wxString sql = wxString::Format(_T("DELETE FROM sounding WHERE survey_id=%i"), id);
+      dbQuery(sql);
+      sql = wxString::Format(_T("DELETE FROM survey WHERE survey_id=%i"), id);
+      dbQuery(sql);
+      m_activesurvey = 0;
+      m_activesurveyname = wxEmptyString;
+}
+
+int survey_pi::InsertSounding(double depth, double lat, double lon, double tide, time_t timestamp, int projection)
+{
+      wxString time = _T("current_timestamp");
+      if (timestamp > 0)
+            time = wxDateTime(timestamp).FormatISODate().Append(_T(" ")).Append(wxDateTime(timestamp).FormatISOTime()); 
+      wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\",) VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time.c_str(), m_activesurvey, lon, lat, projection, tide);
+      dbQuery (sql);
+      return sqlite3_last_insert_rowid(m_database);
+}
+
 int survey_pi::Init(void)
 {
+      m_projection = PROJECTION;
+      m_activesurvey = 0;
       int db_ver = 1;
       mPriPosition = 99;
       mPriDepth = 99;
@@ -359,12 +792,23 @@ void survey_pi::SetColorScheme(PI_ColorScheme cs)
       DimeWindow(m_pSurveyDialog);
 }
 
+void survey_pi::FillSurveyDropdown()
+{
+      m_pSurveyDialog->m_chSurvey->Clear();
+      m_pSurveyDialog->m_chSurvey->Append(GetSurveyList());
+      for(int i = 0; i < GetSurveyList().Count(); i++)
+            if (GetSurveyList()[i] == m_activesurveyname)
+                  m_pSurveyDialog->m_chSurvey->SetSelection(i);
+}
+
 void survey_pi::OnToolbarToolCallback(int id)
 {
       if(NULL == m_pSurveyDialog)
       {
             m_pSurveyDialog = new SurveyDlg(m_parent_window);
+            m_pSurveyDialog->plugin = this;
             m_pSurveyDialog->Move(wxPoint(m_survey_dialog_x, m_survey_dialog_y));
+            FillSurveyDropdown();
       }
 
       m_pSurveyDialog->Show(!m_pSurveyDialog->IsShown());
@@ -387,6 +831,7 @@ bool survey_pi::LoadConfig(void)
             pConf->Read ( _T ( "ConnectorColor" ), &m_sConnectorColor );
             pConf->Read ( _T ( "SoundingFont" ), &m_sFont );
             pConf->Read ( _T ( "SoundingFontColor" ), &m_sFontColor );
+            pConf->Read ( _T ( "ActiveSurvey" ), &m_activesurvey, 0 );
 
             pConf->Read ( _T ( "LOA" ), &m_fLOA, 0.0 );
             pConf->Read ( _T ( "Beam" ), &m_fBeam, 0.0 );
@@ -426,6 +871,7 @@ bool survey_pi::SaveConfig(void)
             pConf->Write ( _T ( "ConnectorColor" ), m_sConnectorColor );
             pConf->Write ( _T ( "SoundingFont" ), m_sFont );
             pConf->Write ( _T ( "SoundingFontColor" ), m_sFontColor );
+            pConf->Write ( _T ( "ActiveSurvey" ), m_activesurvey );
 
             pConf->Write ( _T ( "LOA" ), m_fLOA );
             pConf->Write ( _T ( "Beam" ), m_fBeam );
@@ -621,15 +1067,7 @@ void survey_pi::StoreSounding(double depth)
 {
       if (m_lastPosReport.Subtract(wxDateTime::Now()).GetSeconds() > 2 || m_lat == 999.0 || m_lon == 999.0)
             return;
-      wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\") VALUES (%f , current_timestamp, 1, GeomFromText('POINT(%f %f)', 3395))"), depth, m_lon, m_lat);
-      ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
-      if (ret != SQLITE_OK)
-      {
-            // some error occurred
-	      wxLogMessage (_T("sounding insert error: %s\n"), err_msg);
-	      sqlite3_free (err_msg);
-            b_dbUsable = false;
-      }
+      InsertSounding(depth, m_lat, m_lon);
 }
 
 void survey_pi::SetNMEASentence(wxString &sentence)
