@@ -1,4 +1,4 @@
-    #include "SoundingGridTable.h"
+    #include "soundinggridtable.h"
 
     SoundingGridTable::SoundingGridTable()
     {

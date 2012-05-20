@@ -63,7 +63,7 @@ void SurveyDlg::OnNewSurvey( wxCommandEvent& event )
 
 void SurveyDlg::OnDeleteSurvey( wxCommandEvent& event )
 {
-      int answer = wxMessageBox(wxString::Format(_("Are you sure you want to permanently delete the survey %s?"), m_chSurvey->GetStringSelection()), _("Confirm"),
+      int answer = wxMessageBox(wxString::Format(_("Are you sure you want to permanently delete the survey %s?"), m_chSurvey->GetStringSelection().c_str()), _("Confirm"),
                             wxYES_NO | wxCANCEL, this);
       if (answer == wxYES)
       {
