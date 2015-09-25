@@ -137,6 +137,8 @@ SET(SRC_SURVEY
 	    src/mygridtablebase.h
 	    src/soundinggridtable.cpp
 	    src/soundinggridtable.h
+		src/ProfileWin.cpp
+		src/ProfileWin.h
 	    src/libspatialite-amalgamation-3.0.1/spatialite.c
 	    src/libspatialite-amalgamation-3.0.1/sqlite3.c
 	)

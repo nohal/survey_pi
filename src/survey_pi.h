@@ -56,13 +56,37 @@
 
 #include "../../../include/ocpn_plugin.h"
 #include "nmea0183/nmea0183.h"
+#include <wx/tokenzr.h>
+#include <vector>
+#include <algorithm>
 
 #include "surveygui_impl.h"
 #include "libspatialite-amalgamation-3.0.1/headers/spatialite/sqlite3.h"
 #include "libspatialite-amalgamation-3.0.1/headers/spatialite.h"
+#include "libspatialite-amalgamation-3.0.1/headers/spatialite/gaiageo.h"
+
+using namespace std;
 
 class SurveyDlg;
+class GPXTimeAndZDA;
+class soundingdata;
 
+class GPXTimeAndZDA{
+public:
+	wxString m_date, m_time, m_ZDA;
+
+};
+
+class soundingdata{
+public:
+
+	wxString lat, lon, ele, time, magvar, geoidheight, name, cmt, desc,
+		src, link, sym, type, fix, sat, hdop, vdop, pdop,
+		ageofdgpsdata, dgpsid, xmltag, speed, depth, temp, ZDA;
+
+private:
+
+};
 //----------------------------------------------------------------------------------------------------------
 //    The PlugIn Class Definition
 //----------------------------------------------------------------------------------------------------------
@@ -120,6 +144,19 @@ public:
       int               GetActiveSurveyId(){ return m_activesurvey; }
       void              SetActiveSurveyId(int id){ m_activesurvey = id; }
       void              SetActiveSurvey(wxString name){ m_activesurveyname = name; m_activesurvey = GetSurveyId(name); }
+	  vector<soundingdata>  SetTable(int i);
+
+	  wxArrayString     SetProfile(int i);
+	  void				ParseNMEASentence(wxString &sentence);
+	  void				timeToZDA(wxString myGPXTime);
+	  GPXTimeAndZDA     myTZDA;
+	  wxString			DDMLatToDecimal(wxString myString);
+	  wxString			DDMLonToDecimal(wxString myString);
+	  
+	  bool				b_gotdepth;
+	  soundingdata		mydata;
+	  vector<soundingdata> all_soundingdata;
+	  int               numsoundings;
 
 private:
       NMEA0183          m_NMEA0183;                 // Used to parse NMEA Sentences

@@ -31,10 +31,18 @@
 
 #include "surveygui.h"
 #include "survey_pi.h"
+#include "ProfileWin.h"
 
 #include <wx/filedlg.h>
+#include <wx/textfile.h>
+#include <wx/wfstream.h>
+#include <wx/txtstrm.h>
+#include <wx/numdlg.h> 
+
+using namespace std;
 
 class survey_pi;
+class soundingdata;
 
 class SurveyCfgDlg : public SurveyCfgDlgDef
 {
@@ -57,7 +65,10 @@ public:
 	void OnExportSurvey( wxCommandEvent& event );
 	void OnSurveyCancelClick( wxCommandEvent& event );
 	void OnSurveyOkClick( wxCommandEvent& event );
-      survey_pi *plugin;
+	void IsProfileSelected( wxNotebookEvent& event );
+	void ProfileShown( wxPaintEvent& event );
+    survey_pi *plugin;
+	vector<soundingdata> mysoundings;
 };
 
 #endif

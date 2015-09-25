@@ -325,7 +325,7 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	wxBoxSizer* bSizer12;
 	bSizer12 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_tbRecord = new wxToggleButton( this, wxID_ANY, _("Record"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_tbRecord = new wxToggleButton( this, wxID_ANY, _("Read NMEA File"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer12->Add( m_tbRecord, 0, wxALL, 5 );
 	
 	
@@ -451,6 +451,9 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_btnExport->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnExportSurvey ), NULL, this );
 	m_sdbSizer2Cancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyCancelClick ), NULL, this );
 	m_sdbSizer2OK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyOkClick ), NULL, this );
+	m_notebook1->Connect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( SurveyDlgDef::IsProfileSelected ), NULL, this );
+	//m_panel2->Connect( wxEVT_PAINT, wxPaintEventHandler( SurveyDlgDef::ProfileShown ), NULL, this );
+
 }
 
 SurveyDlgDef::~SurveyDlgDef()
@@ -467,7 +470,9 @@ SurveyDlgDef::~SurveyDlgDef()
 	m_btnExport->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnExportSurvey ), NULL, this );
 	m_sdbSizer2Cancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyCancelClick ), NULL, this );
 	m_sdbSizer2OK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyOkClick ), NULL, this );
-	
+	m_notebook1->Disconnect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( SurveyDlgDef::IsProfileSelected ), NULL, this );
+	//m_panel2->Disconnect( wxEVT_PAINT, wxPaintEventHandler( SurveyDlgDef::ProfileShown ), NULL, this );
+
 }
 
 SurveyMergeDlgDef::SurveyMergeDlgDef( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )

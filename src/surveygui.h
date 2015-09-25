@@ -145,6 +145,8 @@ class SurveyDlgDef : public wxDialog
 		virtual void OnSurveyCancelClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSurveyOkClick( wxCommandEvent& event ) { event.Skip(); }
 		
+		virtual void IsProfileSelected( wxNotebookEvent& event ) { event.Skip(); }
+		//virtual void ProfileShown( wxPaintEvent& event ) { event.Skip(); }
 	
 	public:
 		wxChoice* m_chSurvey;
