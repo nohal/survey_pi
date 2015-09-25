@@ -1,3 +1,16 @@
+This is a fork of the Nohal survey_pi plugin.
+
+Contains a Windows compiled version of the plugin for use with OpenCPN 4.0.0. Also the necessary dll to run the program as 
+set out below. 
+
+There is a Hydromagic format file to use with the Import facility. 
+
+'Read NMEA File' reads the sentences from an OpenCPN VDR plugin text file. I created an .exe to produce NMEA sentences
+from a Garmin "ACTIVE_LOG" file, with depths (Not included). Rausch.txt is included, to allow work with NMEA sentences.
+
+Problem: With the plugin installed OpenCPN crashes when O is closed. 
+
+Original README notes from Nohal:
 Survey plugin for OpenCPN
 =========================
 
@@ -6,7 +19,7 @@ To browse and organize your data, get https://www.gaia-gis.it/fossil/spatialite_
 
 On Windows you need iconv.dll somewhere in your PATH or in OpenCPN's program directory. Get it from https://github.com/downloads/nohal/survey_pi/iconv.dll
 
-To compile on Windows you need iconv - The easiest to get it is to use OSGeo4W - described a bit more in the note bellow.
+To compile on Windows you need iconv - The easiest to get it is to use OSGeo4W - described a bit more in the note below.
 
 Note
 ====
