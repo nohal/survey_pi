@@ -11,6 +11,15 @@
 #include <wx/graphics.h>
 #include <wx/wxchar.h>
 
+//
+// some compilers (i.e. MSVC++) defines their own 'snprintf' function
+// so if it is not defined, define it in the following lines
+// please note that we cannot use the wxWidget's counterpart 'wxSnprintf'
+// because the latter uses 'wxChar' but wxJSON only use 'char'
+#if !defined(snprintf) && defined(_MSC_VER)
+#define snprintf _snprintf
+#endif
+
 enum
 {
       ID_ProfileWin_NX,
@@ -235,10 +244,10 @@ ProfileWin::~ProfileWin()
 
 void ProfileWin::OKEvent( wxCommandEvent& event )
 {
-    wxString m_PortNo = wxString::Format(wxT("%i"),m_passPort);
+    wxString m_PortNo = wxString::Format( wxT("T%i"), m_passPort );
 
-	DeleteSingleWaypoint(_T("T") + m_PortNo);
-	Hide();
+    DeleteSingleWaypoint( m_PortNo );
+    Hide();
     delete m_tList;
     Destroy(); // that hurts
 	
@@ -246,10 +255,10 @@ void ProfileWin::OKEvent( wxCommandEvent& event )
 
 void ProfileWin::OnCloseWindow( wxCloseEvent& event )
 {
-    wxString m_PortNo = wxString::Format(wxT("%i"),m_passPort);
+    wxString m_PortNo = wxString::Format( wxT("T%i"), m_passPort );
 
-	DeleteSingleWaypoint(_T("T") + m_PortNo);
-	Hide();
+    DeleteSingleWaypoint( m_PortNo );
+    Hide();
     delete m_tList;
     Destroy(); // that hurts
 }
@@ -403,7 +412,7 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
                 dc.SetPen( *pblack_1 );
 
             dc.DrawLine( m_graph_rect.x, yd, m_graph_rect.x + m_graph_rect.width, yd );
-            _snprintf( sbuf, 99, "%d", i );
+            snprintf( sbuf, 99, "%d", i );
             dc.DrawText( wxString( sbuf, wxConvUTF8 ), m_graph_rect.x - 20, yd - 5 );
             i += i_skip;
 
