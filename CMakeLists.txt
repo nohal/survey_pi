@@ -28,7 +28,8 @@ add_definitions (
 
 INCLUDE("cmake/PluginConfigure.cmake")
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src C:/OSGeo4W/include ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers/spatialite)
+#INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src C:/OSGeo4W/include ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers/spatialite)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src)
 
 SET(SRC_NMEA0183
     src/nmea0183/LatLong.hpp
@@ -106,8 +107,10 @@ SET(SRC_SURVEY
     src/soundinggridtable.h
     src/ProfileWin.cpp
     src/ProfileWin.h
-    src/libspatialite-amalgamation-3.0.1/spatialite.c
-    src/libspatialite-amalgamation-3.0.1/sqlite3.c
+#    src/libspatialite-amalgamation-3.0.1/spatialite.c
+#    src/libspatialite-amalgamation-3.0.1/sqlite3.c
+#    src/libspatialite-amalgamation-3.0.1/headers/spatialite.h
+#    src/libspatialite-amalgamation-3.0.1/headers/spatialite/sqlite3.h
     )
 
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
@@ -145,6 +148,12 @@ IF(WIN32)
 ENDIF(WIN32)
 
 TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${ICONV_LIBRARIES} )
+
+TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} freexl )
+TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} geos_c )
+TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} proj )
+TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} sqlite3 )
+TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} spatialite )
 
 INCLUDE("cmake/PluginInstall.cmake")
 INCLUDE("cmake/PluginLocalization.cmake")
