@@ -60,9 +60,9 @@
 #include <algorithm>
 
 #include "surveygui_impl.h"
-#include "libspatialite-amalgamation-3.0.1/headers/spatialite/sqlite3.h"
-#include "libspatialite-amalgamation-3.0.1/headers/spatialite.h"
-#include "libspatialite-amalgamation-3.0.1/headers/spatialite/gaiageo.h"
+#include <sqlite3.h>
+#include <spatialite.h>
+
 
 using namespace std;
 
