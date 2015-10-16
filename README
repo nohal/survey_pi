@@ -10,6 +10,8 @@ from a Garmin "ACTIVE_LOG" file, with depths (Not included). Rausch.txt is inclu
 
 Problem: With the plugin installed OpenCPN crashes when O is closed. 
 
+Problem solved: Removed MSVisual C++ 2013 and associated programs. Using only VS2010 the crash did not happen.
+
 Original README notes from Nohal:
 Survey plugin for OpenCPN
 =========================
