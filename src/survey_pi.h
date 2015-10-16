@@ -41,8 +41,8 @@
 
 #include "tinyxml.h"
 
-#define     PLUGIN_VERSION_MAJOR    0
-#define     PLUGIN_VERSION_MINOR    2
+#define     PLUGIN_VERSION_MAJOR    1
+#define     PLUGIN_VERSION_MINOR    0
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
@@ -162,7 +162,7 @@ private:
       NMEA0183          m_NMEA0183;                 // Used to parse NMEA Sentences
 
       sqlite3          *m_database;
-      sqlite3_stmt     *m_stmt;
+      //sqlite3_stmt     *m_stmt;
       int               ret;
       char             *err_msg;
       bool              b_dbUsable;

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project>
+    <projection>
+        <grid>3395</grid>
+    </projection>
+    <currentview />
+    <colors />
+    <tides />
+    <layers />
+    <comments />
+    <tracks visible="1">
+        <track>
+            <name>test2</name>
+            <desc />
+            <visible>1</visible>
+            <lines>1</lines>
+            <values>1</values>
+            <active>1</active>
+            <fixes>1</fixes>
+            <color>0</color>
+            <width>4</width>
+            <textunits>0</textunits>
+            <units>0</units>
+            <textsize>12</textsize>
+            <trackpoints>
+                <trackpoint lat=" -122.31705" lon="37.875533 " dpt="2.527777778" tide="0.0" ele="0" time="1442240797" mark="0" />
+                <trackpoint lat=" -122.31705" lon="37.875533 " dpt="2.527777778" tide="0.0" ele="0" time="1442240900" mark="0" />
+                <trackpoint lat=" -122.316767" lon="37.875433 " dpt="2.5" tide="0.0" ele="0" time="1442240900" mark="0" />
+                <trackpoint lat=" -122.316317" lon="37.874767 " dpt="2.472222222" tide="0.0" ele="0" time="1442240900" mark="0" />
+                <trackpoint lat=" -122.31565" lon="37.873883 " dpt="2.444444444" tide="0.0" ele="0" time="1442240900" mark="0" />
+                <trackpoint lat=" -122.314967" lon="37.87305 " dpt="2.5" tide="0.0" ele="0" time="1442240900" mark="0" />
+                <trackpoint lat=" -122.314383" lon="37.872217 " dpt="2.472222222" tide="0.0" ele="0" time="1442240900" mark="0" />
+                <trackpoint lat=" -122.3138" lon="37.87135 " dpt="2.361111111" tide="0.0" ele="0" time="1442240900" mark="0" />
+                <trackpoint lat=" -122.313667" lon="37.870767 " dpt="2.277777778" tide="0.0" ele="0" time="1442240900" mark="0" />
+                <trackpoint lat=" -122.313233" lon="37.87015 " dpt="2.083333333" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.3127" lon="37.870067 " dpt="2.055555556" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.312283" lon="37.870133 " dpt="2.083333333" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.311733" lon="37.870383 " dpt="2.25" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.311333" lon="37.870667 " dpt="2.305555556" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.31075" lon="37.8708 " dpt="2.25" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.310333" lon="37.870883 " dpt="2.138888889" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.31005" lon="37.8711 " dpt="2.083333333" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.309667" lon="37.8713 " dpt="2.111111111" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.3103" lon="37.871567 " dpt="2.305555556" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.3115" lon="37.871817 " dpt="2.444444444" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.312583" lon="37.8721 " dpt="2.527777778" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.31355" lon="37.87265 " dpt="2.611111111" tide="0.0" ele="0" time="1442240901" mark="0" />
+                <trackpoint lat=" -122.31425" lon="37.872983 " dpt="2.666666667" tide="0.0" ele="0" time="1442240902" mark="0" />
+                <trackpoint lat=" -122.314483" lon="37.87395 " dpt="2.75" tide="0.0" ele="0" time="1442240902" mark="0" />
+                <trackpoint lat=" -122.313567" lon="37.874717 " dpt="2.833333333" tide="0.0" ele="0" time="1442240902" mark="0" />
+                <trackpoint lat=" -122.312617" lon="37.875367 " dpt="2.777777778" tide="0.0" ele="0" time="1442240902" mark="0" />
+                <trackpoint lat=" -122.3114" lon="37.875 " dpt="2.694444444" tide="0.0" ele="0" time="1442240902" mark="0" />
+                <trackpoint lat=" -122.310567" lon="37.874283 " dpt="2.583333333" tide="0.0" ele="0" time="1442240902" mark="0" />
+                <trackpoint lat=" -122.314233" lon="37.875817 " dpt="2.722222222" tide="0.0" ele="0" time="1442240902" mark="0" />
+                <trackpoint lat=" -122.315817" lon="37.87645 " dpt="2.916666667" tide="0.0" ele="0" time="1442240902" mark="0" />
+            </trackpoints>
+        </track>
+    </tracks>
+    <waypoints />
+    <routes />
+    <areas />
+    <sections />
+    <soundvelocity />
+    <draftcorrections />
+</project>

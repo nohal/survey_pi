@@ -451,7 +451,7 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_btnExport->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnExportSurvey ), NULL, this );
 	m_sdbSizer2Cancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyCancelClick ), NULL, this );
 	m_sdbSizer2OK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyOkClick ), NULL, this );
-	m_notebook1->Connect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( SurveyDlgDef::IsProfileSelected ), NULL, this );
+	//m_notebook1->Connect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( SurveyDlgDef::IsProfileSelected ), NULL, this );
 	//m_panel2->Connect( wxEVT_PAINT, wxPaintEventHandler( SurveyDlgDef::ProfileShown ), NULL, this );
 
 }
@@ -470,7 +470,7 @@ SurveyDlgDef::~SurveyDlgDef()
 	m_btnExport->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnExportSurvey ), NULL, this );
 	m_sdbSizer2Cancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyCancelClick ), NULL, this );
 	m_sdbSizer2OK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyOkClick ), NULL, this );
-	m_notebook1->Disconnect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( SurveyDlgDef::IsProfileSelected ), NULL, this );
+	//m_notebook1->Disconnect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( SurveyDlgDef::IsProfileSelected ), NULL, this );
 	//m_panel2->Disconnect( wxEVT_PAINT, wxPaintEventHandler( SurveyDlgDef::ProfileShown ), NULL, this );
 
 }
