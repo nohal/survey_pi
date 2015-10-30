@@ -27,6 +27,7 @@
  */
 
 #include "surveygui_impl.h"
+#include "icons.h"
 
 SurveyCfgDlg::SurveyCfgDlg( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : SurveyCfgDlgDef( parent, id, title, pos, size, style )
 {
@@ -36,7 +37,78 @@ SurveyDlg::SurveyDlg( wxWindow* parent, wxWindowID id, const wxString& title, co
 {
 }
 
-void SurveyDlg::OnRecordToggle( wxCommandEvent& event )
+void SurveyDlg::OnSurveyRecordToggleNMEA(wxCommandEvent& event)
+{
+	bool b = m_tbRecordNMEA->GetValue();
+	bool t = m_btbRecord->GetValue();
+
+	if (b && !plugin->m_recording){
+		int t = m_chSurvey->GetSelection();
+
+		if (t == -1){
+			wxMessageBox(_T("No survey selected"));
+			return;
+		}
+		m_btbRecord->SetValue(true);
+		m_btbRecord->SetBitmap(*_img_survey_recording);
+		plugin->m_recording = true;
+		return;
+	}
+	
+	if (b && plugin->m_recording){
+		m_btbRecord->SetValue(true);
+		m_btbRecord->SetBitmap(*_img_survey_paused);
+		plugin->m_recording = false;
+		return;
+	}
+
+	if (!b){
+		m_btbRecord->SetValue(false);
+		m_btbRecord->SetBitmap(*_img_survey);
+		plugin->m_recording = false;
+		return;
+	}
+}
+
+void SurveyDlg::RecordNMEA(wxCommandEvent& event){
+	bool tb = m_tbRecordNMEA->GetValue();
+	if (tb){
+		
+		int t = m_chSurvey->GetSelection();
+
+		if (t == -1){
+			wxMessageBox(_T("No survey selected, please select a survey or create a new survey"));
+			m_tbRecordNMEA->SetValue(false);
+			return;
+		}
+		m_btbRecord->SetValue(true);
+		m_btbRecord->SetBitmap(*_img_survey_recording);
+		plugin->m_recording = true;
+	}
+	else {
+		m_btbRecord->SetBitmap(*_img_survey);
+		m_btbRecord->SetValue(false);
+		plugin->m_recording = false;
+	}
+	
+	/*
+	int id;
+	wxFileDialog fdlg(GetOCPNCanvasWindow(), _("Choose a file"), wxT(""), m_ofilename, wxT("*.*"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	if (fdlg.ShowModal() != wxID_OK)
+	{
+		//SetToolbarItemState(id, false);
+		return;
+	}
+	m_ofilename.Clear();
+	m_ofilename = fdlg.GetPath();
+
+	//m_ostream.Open( m_ofilename, wxFile::write_append );
+	m_ostream.Open(m_ofilename, wxFile::write);
+	m_recording = true;
+	*/
+}
+
+void SurveyDlg::LoadFromFile( wxCommandEvent& event )
 {
 	int t = m_chSurvey->GetSelection();
     
@@ -87,10 +159,68 @@ void SurveyDlg::OnRecordToggle( wxCommandEvent& event )
 	}
 
 	m_istream.Close();
+
+	
 	//wxMessageBox(plugin->posdepth[0], _T("in function record"));
 
 	event.Skip(); 
 }
+
+/*
+void SurveyDlg::SetNMEASentence(wxString &sentence)
+{
+	if (m_recording){
+	wxMessageBox(sentence);
+	m_ostream.Write(sentence);
+    }
+}
+
+void SurveyDlg::StopRecordNMEA(wxCommandEvent& event){
+
+	if (m_recording)
+	{
+		m_ostream.Close();
+		m_recording = false;
+	}
+
+}
+
+*/
+
+
+
+void SurveyDlg::LoadSurvey_0()
+{
+
+	int s = plugin->GetSurveyId(m_chSurvey->GetStringSelection());
+	
+		wxArrayString myTable;
+
+		mysoundings = plugin->SetTable(s);
+
+		int i = 0;
+		for (std::vector<soundingdata>::iterator it = mysoundings.begin(); it != mysoundings.end(); it++)
+		{
+			m_gdSoundings->SetCellValue(i, 0, it->depth);
+			m_gdSoundings->SetCellValue(i, 1, it->time);
+			//for (int col = 0;col<5; col++){
+			//	wxString s = it->depth;
+			//	m_gdSoundings->SetCellValue(i,0,s);
+			//}
+			m_gdSoundings->AppendRows(1);//_T("test");		
+			i++;
+		}
+
+	
+	//int c = mysoundings.Count();
+	//wxString mystring = wxString::Format(wxT("%i"),c);
+	// wxMessageBox(mystring);
+	//for (int i = 0; i<c;i++){
+
+	//}
+	
+}
+
 
 void SurveyDlg::OnSurveySelection( wxCommandEvent& event )
 {
@@ -151,6 +281,7 @@ void SurveyDlg::OnDeleteSurvey( wxCommandEvent& event )
             plugin->DeleteSurvey(c); 
 			m_gdSoundings->ClearGrid();  
             plugin->FillSurveyDropdown();
+			m_chSurvey->SetSelection(0);
       }
 
       event.Skip(); 

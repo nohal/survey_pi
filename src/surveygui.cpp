@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include "surveygui.h"
+#include "icons.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -325,10 +326,21 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	wxBoxSizer* bSizer12;
 	bSizer12 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_tbRecord = new wxToggleButton( this, wxID_ANY, _("Read NMEA File"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer12->Add( m_tbRecord, 0, wxALL, 5 );
 	
-	
+	//m_tbRecordN = new wxToggleButton(this, wxID_ANY, _("Read NMEA connection"), wxDefaultPosition, wxDefaultSize, 0);
+	//bSizer12->Add(m_tbRecordN, 0, wxALL, 5);
+
+	m_tbRecordNMEA = new wxToggleButton(this, wxID_ANY, _("Record from NMEA"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer12->Add(m_tbRecordNMEA, 0, wxALL, 5);
+
+	m_btbRecord = new wxBitmapToggleButton(this, wxID_ANY, *_img_survey, wxDefaultPosition, wxSize(32, 32), 0);
+	bSizer12->Add(m_btbRecord, 0, wxALL, 5);
+
+	bSizer12->Add(0, 0, 1, wxEXPAND, 5);
+
+	m_btnLoadFromFile = new wxButton( this, wxID_ANY, _("Load NMEA File"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer12->Add( m_btnLoadFromFile, 0, wxALL, 5 );
+
 	sbSizer5->Add( bSizer12, 0, wxEXPAND, 5 );
 	
 	
@@ -441,7 +453,9 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	// Connect Events
 	m_chSurvey->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( SurveyDlgDef::OnSurveySelection ), NULL, this );
-	m_tbRecord->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnRecordToggle ), NULL, this );
+	m_btnLoadFromFile->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::LoadFromFile), NULL, this );
+	m_btbRecord->Connect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::OnSurveyRecordToggleNMEA), NULL, this);
+	m_tbRecordNMEA->Connect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::RecordNMEA), NULL, this);
 	m_btnNew->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnNewSurvey ), NULL, this );
 	m_btnDelete->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnDeleteSurvey ), NULL, this );
 	m_btnProperties->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyProperties ), NULL, this );
@@ -460,7 +474,11 @@ SurveyDlgDef::~SurveyDlgDef()
 {
 	// Disconnect Events
 	m_chSurvey->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( SurveyDlgDef::OnSurveySelection ), NULL, this );
-	m_tbRecord->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnRecordToggle ), NULL, this );
+	m_btnLoadFromFile->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::LoadFromFile ), NULL, this );
+	m_btbRecord->Disconnect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::OnSurveyRecordToggleNMEA), NULL, this);
+	m_tbRecordNMEA->Disconnect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::RecordNMEA), NULL, this);
+	//m_tbRecordN->Disconnect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::OnRecordToggleNMEA), NULL, this);
+	//m_tbStopRecordN->Disconnect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::StopRecordNMEA), NULL, this);
 	m_btnNew->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnNewSurvey ), NULL, this );
 	m_btnDelete->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnDeleteSurvey ), NULL, this );
 	m_btnProperties->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyProperties ), NULL, this );

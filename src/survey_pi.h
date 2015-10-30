@@ -54,7 +54,7 @@
 //World Mercator
 #define PROJECTION 3395
 
-#include "../../../include/ocpn_plugin.h"
+#include "ocpn_plugin.h"
 #include "nmea0183/nmea0183.h"
 #include <wx/tokenzr.h>
 #include <vector>
@@ -157,6 +157,7 @@ public:
 	  soundingdata		mydata;
 	  vector<soundingdata> all_soundingdata;
 	  int               numsoundings;
+	  bool				m_recording;
 
 private:
       NMEA0183          m_NMEA0183;                 // Used to parse NMEA Sentences

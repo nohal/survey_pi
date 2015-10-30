@@ -615,6 +615,7 @@ int survey_pi::InsertSounding(double depth, double lat, double lon, double tide,
             time = _T("'") + wxDateTime(timestamp).FormatISODate().Append(_T(" ")).Append(wxDateTime(timestamp).FormatISOTime()) +  _T("'"); 
       // wxString myTime = _T("'2015-09-14 15:00:00'");
 	  wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\") VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time, i, lon, lat, projection, tide);
+	 // wxMessageBox(sql);
 	  numsoundings++;
 	  dbQuery (sql);
       return sqlite3_last_insert_rowid(m_database);	  
@@ -886,7 +887,7 @@ void survey_pi::FillSurveyDropdown()
       m_pSurveyDialog->m_chSurvey->Append(GetSurveyList());
       for(int i = 0; i < GetSurveyList().Count(); i++)
             if (GetSurveyList()[i] == m_activesurveyname)
-                  m_pSurveyDialog->m_chSurvey->SetSelection(i);
+                  m_pSurveyDialog->m_chSurvey->SetSelection(i);			
 }
 
 void survey_pi::OnToolbarToolCallback(int id)
@@ -897,6 +898,7 @@ void survey_pi::OnToolbarToolCallback(int id)
             m_pSurveyDialog->plugin = this;
             m_pSurveyDialog->Move(wxPoint(m_survey_dialog_x, m_survey_dialog_y));
             FillSurveyDropdown();
+			
       }
 
       m_pSurveyDialog->Show(!m_pSurveyDialog->IsShown());
@@ -1157,143 +1159,145 @@ void survey_pi::StoreSounding(double depth)
 {
       if (m_lastPosReport.Subtract(wxDateTime::Now()).GetSeconds() > 2 || m_lat == 999.0 || m_lon == 999.0)
             return;
-      InsertSounding(depth, m_lat, m_lon);
+
+      InsertSounding(depth, m_lon, m_lat,00.0, 00.0 ,3395);
 }
 
 void survey_pi::SetNMEASentence(wxString &sentence)
 {
-      m_NMEA0183 << sentence;
+	if (m_recording){
+		m_NMEA0183 << sentence;
 
-      if(m_NMEA0183.PreParse())
-      {
-            if(m_NMEA0183.LastSentenceIDReceived == _T("DBT"))
-            {
-                  if(m_NMEA0183.Parse())
-                  {
-                        if (mPriDepth >= 1)
-                        {
-                              mPriDepth = 1;
+		if (m_NMEA0183.PreParse())
+		{
+			if (m_NMEA0183.LastSentenceIDReceived == _T("DBT"))
+			{
+				if (m_NMEA0183.Parse())
+				{
+					if (mPriDepth >= 1)
+					{
+						mPriDepth = 1;
 
-                              StoreSounding(m_NMEA0183.Dbt.DepthMeters);
-                        }
-                  }
-            }
+						StoreSounding(m_NMEA0183.Dbt.DepthMeters);
+					}
+				}
+			}
 
-            else if(m_NMEA0183.LastSentenceIDReceived == _T("DPT"))
-            {
-                  if(m_NMEA0183.Parse())
-                  {
-                        if (mPriDepth >= 2)
-                        {
-                              mPriDepth = 2;
+			else if (m_NMEA0183.LastSentenceIDReceived == _T("DPT"))
+			{
+				if (m_NMEA0183.Parse())
+				{
+					if (mPriDepth >= 2)
+					{
+						mPriDepth = 2;
 
-                              /*
-                              double m_NMEA0183.Dpt.DepthMeters
-                              double m_NMEA0183.Dpt.OffsetFromTransducerMeters
-                              */
-                              StoreSounding(m_NMEA0183.Dpt.DepthMeters);
-                        }
-                  }
-            }
-// TODO: GBS - GPS Satellite fault detection
-            else if(m_NMEA0183.LastSentenceIDReceived == _T("GGA"))
-            {
-                  if(m_NMEA0183.Parse())
-                  {
-                        if(m_NMEA0183.Gga.GPSQuality > 0)
-                        {
-                              if (mPriPosition >= 3) {
-                                    mPriPosition = 3;
-                                    float llt = m_NMEA0183.Gga.Position.Latitude.Latitude;
-                                    int lat_deg_int = (int)(llt / 100);
-                                    float lat_deg = lat_deg_int;
-                                    float lat_min = llt - (lat_deg * 100);
-                                    m_lat = lat_deg + (lat_min/60.);
-                                    if(m_NMEA0183.Gga.Position.Latitude.Northing == South)
-                                          m_lat = -m_lat;
+						/*
+						double m_NMEA0183.Dpt.DepthMeters
+						double m_NMEA0183.Dpt.OffsetFromTransducerMeters
+						*/
+						StoreSounding(m_NMEA0183.Dpt.DepthMeters);
+					}
+				}
+			}
+			// TODO: GBS - GPS Satellite fault detection
+			else if (m_NMEA0183.LastSentenceIDReceived == _T("GGA"))
+			{
+				if (m_NMEA0183.Parse())
+				{
+					if (m_NMEA0183.Gga.GPSQuality > 0)
+					{
+						if (mPriPosition >= 3) {
+							mPriPosition = 3;
+							float llt = m_NMEA0183.Gga.Position.Latitude.Latitude;
+							int lat_deg_int = (int)(llt / 100);
+							float lat_deg = lat_deg_int;
+							float lat_min = llt - (lat_deg * 100);
+							m_lat = lat_deg + (lat_min / 60.);
+							if (m_NMEA0183.Gga.Position.Latitude.Northing == South)
+								m_lat = -m_lat;
 
-                                    float lln = m_NMEA0183.Gga.Position.Longitude.Longitude;
-                                    int lon_deg_int = (int)(lln / 100);
-                                    float lon_deg = lon_deg_int;
-                                    float lon_min = lln - (lon_deg * 100);
-                                    m_lon = lon_deg + (lon_min/60.);
-                                    if(m_NMEA0183.Gga.Position.Longitude.Easting == West)
-                                          m_lon = -m_lon;
-                                    m_lastPosReport = wxDateTime::Now();
-                              }
-                        }
-                  }
-            }
+							float lln = m_NMEA0183.Gga.Position.Longitude.Longitude;
+							int lon_deg_int = (int)(lln / 100);
+							float lon_deg = lon_deg_int;
+							float lon_min = lln - (lon_deg * 100);
+							m_lon = lon_deg + (lon_min / 60.);
+							if (m_NMEA0183.Gga.Position.Longitude.Easting == West)
+								m_lon = -m_lon;
+							m_lastPosReport = wxDateTime::Now();
+						}
+					}
+				}
+			}
 
-            else if(m_NMEA0183.LastSentenceIDReceived == _T("GLL"))
-            {
-                  if(m_NMEA0183.Parse())
-                  {
-                        if(m_NMEA0183.Gll.IsDataValid == NTrue)
-                        {
-                              if (mPriPosition >= 2) {
-                                    mPriPosition = 2;
-                                    float llt = m_NMEA0183.Gll.Position.Latitude.Latitude;
-                                    int lat_deg_int = (int)(llt / 100);
-                                    float lat_deg = lat_deg_int;
-                                    float lat_min = llt - (lat_deg * 100);
-                                    m_lat = lat_deg + (lat_min/60.);
-                                    if(m_NMEA0183.Gll.Position.Latitude.Northing == South)
-                                          m_lat = -m_lat;
+			else if (m_NMEA0183.LastSentenceIDReceived == _T("GLL"))
+			{
+				if (m_NMEA0183.Parse())
+				{
+					if (m_NMEA0183.Gll.IsDataValid == NTrue)
+					{
+						if (mPriPosition >= 2) {
+							mPriPosition = 2;
+							float llt = m_NMEA0183.Gll.Position.Latitude.Latitude;
+							int lat_deg_int = (int)(llt / 100);
+							float lat_deg = lat_deg_int;
+							float lat_min = llt - (lat_deg * 100);
+							m_lat = lat_deg + (lat_min / 60.);
+							if (m_NMEA0183.Gll.Position.Latitude.Northing == South)
+								m_lat = -m_lat;
 
-                                    float lln = m_NMEA0183.Gll.Position.Longitude.Longitude;
-                                    int lon_deg_int = (int)(lln / 100);
-                                    float lon_deg = lon_deg_int;
-                                    float lon_min = lln - (lon_deg * 100);
-                                    m_lon = lon_deg + (lon_min/60.);
-                                    if(m_NMEA0183.Gll.Position.Longitude.Easting == West)
-                                          m_lon = -m_lon;
-                                    m_lastPosReport = wxDateTime::Now();
-                              }
+							float lln = m_NMEA0183.Gll.Position.Longitude.Longitude;
+							int lon_deg_int = (int)(lln / 100);
+							float lon_deg = lon_deg_int;
+							float lon_min = lln - (lon_deg * 100);
+							m_lon = lon_deg + (lon_min / 60.);
+							if (m_NMEA0183.Gll.Position.Longitude.Easting == West)
+								m_lon = -m_lon;
+							m_lastPosReport = wxDateTime::Now();
+						}
 
-                        }
-                  }
-            }
+					}
+				}
+			}
 
-            else if(m_NMEA0183.LastSentenceIDReceived == _T("RMC"))
-            {
-                  if(m_NMEA0183.Parse())
-                  {
-                        if(m_NMEA0183.Rmc.IsDataValid == NTrue)
-                        {
-                              if (mPriPosition >= 4) {
-                                    mPriPosition = 4;
-                                    float llt = m_NMEA0183.Rmc.Position.Latitude.Latitude;
-                                    int lat_deg_int = (int)(llt / 100);
-                                    float lat_deg = lat_deg_int;
-                                    float lat_min = llt - (lat_deg * 100);
-                                    m_lat = lat_deg + (lat_min/60.);
-                                    if(m_NMEA0183.Rmc.Position.Latitude.Northing == South)
-                                          m_lat = -m_lat;
+			else if (m_NMEA0183.LastSentenceIDReceived == _T("RMC"))
+			{
+				if (m_NMEA0183.Parse())
+				{
+					if (m_NMEA0183.Rmc.IsDataValid == NTrue)
+					{
+						if (mPriPosition >= 4) {
+							mPriPosition = 4;
+							float llt = m_NMEA0183.Rmc.Position.Latitude.Latitude;
+							int lat_deg_int = (int)(llt / 100);
+							float lat_deg = lat_deg_int;
+							float lat_min = llt - (lat_deg * 100);
+							m_lat = lat_deg + (lat_min / 60.);
+							if (m_NMEA0183.Rmc.Position.Latitude.Northing == South)
+								m_lat = -m_lat;
 
-                                    float lln = m_NMEA0183.Rmc.Position.Longitude.Longitude;
-                                    int lon_deg_int = (int)(lln / 100);
-                                    float lon_deg = lon_deg_int;
-                                    float lon_min = lln - (lon_deg * 100);
-                                    m_lon = lon_deg + (lon_min/60.);
-                                    if(m_NMEA0183.Rmc.Position.Longitude.Easting == West)
-                                          m_lon = -m_lon;
-                                    m_lastPosReport = wxDateTime::Now();
-                              }
-                        }
-                  }
-            }
-      }
+							float lln = m_NMEA0183.Rmc.Position.Longitude.Longitude;
+							int lon_deg_int = (int)(lln / 100);
+							float lon_deg = lon_deg_int;
+							float lon_min = lln - (lon_deg * 100);
+							m_lon = lon_deg + (lon_min / 60.);
+							if (m_NMEA0183.Rmc.Position.Longitude.Easting == West)
+								m_lon = -m_lon;
+							m_lastPosReport = wxDateTime::Now();
+						}
+					}
+				}
+			}
+		}
+	}
+
 }
-
-
 
 void survey_pi::ParseNMEASentence(wxString &sentence)
 {
    // wxMessageBox(sentence);
 	wxString m_depth;  
 	wxString token[20];
-	wxString s0,s1,s2,s3,s4,s5,s6,s7,s8;
+	wxString s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11;
 	token[0] = _T("");
 	b_gotdepth = false;
 	wxStringTokenizer tokenizer(sentence,wxT(","));
@@ -1303,15 +1307,15 @@ void survey_pi::ParseNMEASentence(wxString &sentence)
 		token[i] = tokenizer.GetNextToken();
 		i++;
 	}
-		if (token[0] == _T("$IIGLL" )){
+		if (token[0].Right(3) == _T("GLL" )){
 			b_gotdepth = false;
 			s0 = token[1] + token[2];
 			s1 = token[3] + token[4];
 			mydata.lat = DDMLatToDecimal(s0);
 			mydata.lon = DDMLonToDecimal(s1);												
-		}
+		}/*
 		else{						
-			if (token[0] == _T("$IIZDA")){
+			if (token[0].Right(3) == _T("ZDA")){
 				b_gotdepth = false;
 				s0 = token[1];
 				s1 = s0.Mid(0,2);
@@ -1321,14 +1325,43 @@ void survey_pi::ParseNMEASentence(wxString &sentence)
 				s5 = token[2];
 				s6 = token[3];
 				s7 = token[4];
-				s8 = s7 + _T("-") + s6 + _T("-") + s5 + _T(" ") + s4;    
-				mydata.time = s8;// _T("$IIZDA,055842,15,09,2012,,*5D");  // 
-			}		
+				s8 = s7 + _T("-") + s6 + _T("-") + s5 + _T(" ") + s4;   
+				//wxMessageBox(s8,_T("ZDA"));
+				//mydata.time = s8;// _T("$IIZDA,055842,15,09,2012,,*5D");  // 
+			}	*/
 			else{
-				if (token[0] == _T("$IIDBT")){								
-					mydata.depth = token[3];
-					b_gotdepth = true;					
-				}	
+				if (token[0].Right(3) == _T("RMC")){
+					//$GPRMC, 110858.989, A, 4549.9135, N, 00612.2671, E, 003.7, 207.5, 050513, , , A * 60
+
+					s10 = token[3]+token[4];
+					s11 = token[5]+token[6];
+					mydata.lat = DDMLatToDecimal(s10);
+					mydata.lon = DDMLonToDecimal(s11);
+
+					b_gotdepth = false;
+					s0 = token[1];
+					s1 = s0.Mid(0, 2);
+					s2 = s0.Mid(2, 2);
+					s3 = s0.Mid(4, 2);
+					s4 = s1 + _T(":") + s2 + _T(":") + s3;
+					s5 = token[9];
+					s6 = s5.Mid(0, 2);
+					s7 = s5.Mid(2, 2);
+					s8 = _T("20") + s5.Mid(4, 2);
+
+						
+					s9	= s8 + _T("-") + s7 + _T("-") + s6 + _T(" ") + s4;
+					//wxMessageBox(s9 + s10 + s11, _T("RMC"));
+					mydata.time = s9;// _T("$IIZDA,055842,15,09,2012,,*5D");  // 
+				}
+			
+				else{
+					if (token[0].Right(3) == _T("DBT")){
+						mydata.depth = token[3];
+						b_gotdepth = true;					
+					}	
+			
+	
 		}
 	}
 	

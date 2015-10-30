@@ -54,8 +54,14 @@ class SurveyDlg : public SurveyDlgDef
 {
 public:
       SurveyDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE );
-      void OnSurveySelection( wxCommandEvent& event );
-      void OnRecordToggle( wxCommandEvent& event );
+	  void SurveyDlg::LoadSurvey_0();
+	  void OnSurveySelection( wxCommandEvent& event );
+      void LoadFromFile( wxCommandEvent& event );
+	  void OnSurveyRecordToggleNMEA(wxCommandEvent& event);
+	  void RecordNMEA(wxCommandEvent& event) ;
+
+	 // void OnRecordToggleNMEA(wxCommandEvent& event);
+	 // void StopRecordNMEA(wxCommandEvent& event);
 	void OnNewSurvey( wxCommandEvent& event );
 	void OnDeleteSurvey( wxCommandEvent& event );
 	void OnSurveyProperties( wxCommandEvent& event );
@@ -69,6 +75,17 @@ public:
 	void ProfileShown( wxPaintEvent& event );
     survey_pi *plugin;
 	vector<soundingdata> mysoundings;
+
+	//void SetNMEASentence(wxString &sentence);
+
+private:
+	wxString          m_ifilename;
+	wxString          m_ofilename;
+	int               m_interval;
+	wxTextFile        m_istream;
+	wxFile            m_ostream;
+
+
 };
 
 #endif

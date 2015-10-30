@@ -115,7 +115,10 @@ class SurveyDlgDef : public wxDialog
 		wxStaticText* m_tArea;
 		wxStaticText* m_tMinDepth;
 		wxStaticText* m_tMaxDepth;
-		wxToggleButton* m_tbRecord;
+		wxButton* m_btnLoadFromFile;
+		wxBitmapToggleButton* m_btbRecord;
+		wxToggleButton* m_tbRecordNMEA;
+		//wxToggleButton* m_tbStopRecordN;
 		wxNotebook* m_notebook1;
 		wxPanel* m_panel1;
 		wxGrid* m_gdSoundings;
@@ -131,10 +134,16 @@ class SurveyDlgDef : public wxDialog
 		wxStdDialogButtonSizer* m_sdbSizer2;
 		wxButton* m_sdbSizer2OK;
 		wxButton* m_sdbSizer2Cancel;
+
+
+		
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnSurveySelection( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnRecordToggle( wxCommandEvent& event ) { event.Skip(); }
+		virtual void LoadFromFile( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSurveyRecordToggleNMEA(wxCommandEvent& event) { event.Skip(); }
+		virtual void RecordNMEA(wxCommandEvent& event) { event.Skip(); }
+		//virtual void StopRecordNMEA(wxCommandEvent& event) { event.Skip(); }
 		virtual void OnNewSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnDeleteSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSurveyProperties( wxCommandEvent& event ) { event.Skip(); }
