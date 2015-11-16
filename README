@@ -11,6 +11,8 @@ Also included in 'Extras' are some NMEA files to use for testing survey_pi.
 
 In the 'Extras/GMP' folder is a Hydromagic file to test Import.
 
+I have included the 'splite-msvc' folder for those people working with Windows.
+
 Changes (16 Nov 2015):
 Rendering is for the active survey only, even if 'Preferences' set up differently (TODO)
 Stop/Start works when recording NMEA underway or from the VDR plugin
