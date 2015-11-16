@@ -308,14 +308,14 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_tNrSoundings->Wrap( -1 );
 	gbSizer1->Add( m_tNrSoundings, wxGBPosition( 0, 0 ), wxGBSpan( 1, 1 ), wxALL, 5 );
 	
-	m_tArea = new wxStaticText( this, wxID_ANY, _("Area: XXXsq.m"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_tArea = new wxStaticText( this, wxID_ANY, _(""), wxDefaultPosition, wxDefaultSize, 0 );//Area: XXXsq.m
 	m_tArea->Wrap( -1 );
 	gbSizer1->Add( m_tArea, wxGBPosition( 0, 1 ), wxGBSpan( 1, 1 ), wxALL, 5 );
 	
 	m_tMinDepth = new wxStaticText( this, wxID_ANY, _("Minimal depth: XXXm"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_tMinDepth->Wrap( -1 );
 	gbSizer1->Add( m_tMinDepth, wxGBPosition( 0, 2 ), wxGBSpan( 1, 1 ), wxALL, 5 );
-	
+
 	m_tMaxDepth = new wxStaticText( this, wxID_ANY, _("Maximal depth: XXXm"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_tMaxDepth->Wrap( -1 );
 	gbSizer1->Add( m_tMaxDepth, wxGBPosition( 0, 3 ), wxGBSpan( 1, 1 ), wxALL, 5 );
@@ -326,10 +326,6 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	wxBoxSizer* bSizer12;
 	bSizer12 = new wxBoxSizer( wxHORIZONTAL );
 	
-	
-	//m_tbRecordN = new wxToggleButton(this, wxID_ANY, _("Read NMEA connection"), wxDefaultPosition, wxDefaultSize, 0);
-	//bSizer12->Add(m_tbRecordN, 0, wxALL, 5);
-
 	m_tbRecordNMEA = new wxToggleButton(this, wxID_ANY, _("Record from NMEA"), wxDefaultPosition, wxDefaultSize, 0);
 	bSizer12->Add(m_tbRecordNMEA, 0, wxALL, 5);
 
@@ -396,8 +392,27 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_panel2->SetSizer( bSizer11 );
 	m_panel2->Layout();
 	bSizer11->Fit( m_panel2 );
-	m_notebook1->AddPage( m_panel2, _("Profile"), false );
+	m_notebook1->AddPage( m_panel2, _("Trace"), false );
 	
+	m_panel3 = new wxPanel(m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	wxBoxSizer* bSizer13;
+	bSizer13 = new wxBoxSizer(wxVERTICAL);
+
+	m_profilegraph1 = new wxStaticBitmap(m_panel3, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0);
+	bSizer13->Add(m_profilegraph1, 1, wxALL | wxBOTTOM | wxEXPAND, 5);
+
+	wxArrayString num_soundingsChoices;
+	num_soundings = new wxChoice(m_panel3, wxID_ANY, wxDefaultPosition, wxDefaultSize, num_soundingsChoices, 0);
+	num_soundings->SetSelection(0);
+	bSizer13->Add(num_soundings, 0, wxALIGN_TOP, 5);
+
+
+	m_panel3->SetSizer(bSizer13);
+	m_panel3->Layout();
+	bSizer13->Fit(m_panel3);
+	m_notebook1->AddPage(m_panel3, _("Profile"), false);
+
+
 	sbSizer6->Add( m_notebook1, 1, wxEXPAND | wxALL, 5 );
 	
 	
@@ -465,9 +480,7 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_btnExport->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnExportSurvey ), NULL, this );
 	m_sdbSizer2Cancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyCancelClick ), NULL, this );
 	m_sdbSizer2OK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyOkClick ), NULL, this );
-	//m_notebook1->Connect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( SurveyDlgDef::IsProfileSelected ), NULL, this );
-	//m_panel2->Connect( wxEVT_PAINT, wxPaintEventHandler( SurveyDlgDef::ProfileShown ), NULL, this );
-
+	m_notebook1->Connect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( SurveyDlgDef::IsPanelSelected ), NULL, this );
 }
 
 SurveyDlgDef::~SurveyDlgDef()
@@ -477,8 +490,6 @@ SurveyDlgDef::~SurveyDlgDef()
 	m_btnLoadFromFile->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::LoadFromFile ), NULL, this );
 	m_btbRecord->Disconnect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::OnSurveyRecordToggleNMEA), NULL, this);
 	m_tbRecordNMEA->Disconnect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::RecordNMEA), NULL, this);
-	//m_tbRecordN->Disconnect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::OnRecordToggleNMEA), NULL, this);
-	//m_tbStopRecordN->Disconnect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::StopRecordNMEA), NULL, this);
 	m_btnNew->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnNewSurvey ), NULL, this );
 	m_btnDelete->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnDeleteSurvey ), NULL, this );
 	m_btnProperties->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyProperties ), NULL, this );
@@ -488,9 +499,7 @@ SurveyDlgDef::~SurveyDlgDef()
 	m_btnExport->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnExportSurvey ), NULL, this );
 	m_sdbSizer2Cancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyCancelClick ), NULL, this );
 	m_sdbSizer2OK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyOkClick ), NULL, this );
-	//m_notebook1->Disconnect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( SurveyDlgDef::IsProfileSelected ), NULL, this );
-	//m_panel2->Disconnect( wxEVT_PAINT, wxPaintEventHandler( SurveyDlgDef::ProfileShown ), NULL, this );
-
+	m_notebook1->Disconnect(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler(SurveyDlgDef::IsPanelSelected), NULL, this);
 }
 
 SurveyMergeDlgDef::SurveyMergeDlgDef( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
@@ -541,4 +550,61 @@ SurveyMergeDlgDef::~SurveyMergeDlgDef()
 	m_sdbSizer3Cancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyMergeDlgDef::OnMergeCancelClick ), NULL, this );
 	m_sdbSizer3OK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyMergeDlgDef::OnMergeOkClick ), NULL, this );
 	
+}
+
+
+SurveyPropDlgDef::SurveyPropDlgDef(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxDialog(parent, id, title, pos, size, style)
+{
+	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
+
+	wxBoxSizer* bSizer13;
+	bSizer13 = new wxBoxSizer(wxVERTICAL);
+
+	wxBoxSizer* bSizer14;
+	bSizer14 = new wxBoxSizer(wxVERTICAL);
+	
+	m_staticText28 = new wxStaticText(this, wxID_ANY, _("Number of soundings: "), wxDefaultPosition, wxDefaultSize, 0);
+	m_staticText28->Wrap(-1);
+	bSizer14->Add(m_staticText28, 0, wxALL, 5);
+
+	m_staticText29 = new wxStaticText(this, wxID_ANY, _("Maximum Depth: "), wxDefaultPosition, wxDefaultSize, 0);
+	m_staticText29->Wrap(-1);
+	bSizer14->Add(m_staticText29, 0, wxALL, 5);
+
+	m_staticText30 = new wxStaticText(this, wxID_ANY, _("Minimum Depth: "), wxDefaultPosition, wxDefaultSize, 0);
+	m_staticText30->Wrap(-1);
+	bSizer14->Add(m_staticText30, 0, wxALL, 5);
+
+	m_staticText31 = new wxStaticText(this, wxID_ANY, _("Extra: "), wxDefaultPosition, wxDefaultSize, 0);
+	m_staticText31->Wrap(-1);
+	bSizer14->Add(m_staticText31, 0, wxALL, 5);
+
+	bSizer13->Add(bSizer14, 1, wxEXPAND, 5);
+
+	wxBoxSizer* bSizer15;
+	bSizer15 = new wxBoxSizer(wxVERTICAL);
+
+	m_sdbSizer3 = new wxStdDialogButtonSizer();
+	m_sdbSizer3OK = new wxButton(this, wxID_OK);
+	m_sdbSizer3->AddButton(m_sdbSizer3OK);
+	m_sdbSizer3->Realize();
+
+	bSizer15->Add(m_sdbSizer3, 0, wxEXPAND, 5);
+
+	bSizer13->Add(bSizer15, 1, wxEXPAND, 5);
+
+	this->SetSizer(bSizer13);
+	this->Layout();
+
+	this->Centre(wxBOTH);
+
+	// Connect Events
+	m_sdbSizer3OK->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyPropDlgDef::OnPropOkClick), NULL, this);
+}
+
+SurveyPropDlgDef::~SurveyPropDlgDef()
+{
+	// Disconnect Events
+	m_sdbSizer3OK->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyPropDlgDef::OnPropOkClick), NULL, this);
+
 }

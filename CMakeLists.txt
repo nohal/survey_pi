@@ -67,28 +67,27 @@ SET(SRC_NMEA0183
 		src/nmea0183/gga.cpp
 		src/nmea0183/gsv.hpp
 		src/nmea0183/gsv.cpp
-        src/nmea0183/dbt.cpp
-        src/nmea0183/dbt.hpp
-        src/nmea0183/dpt.cpp
-        src/nmea0183/dpt.hpp
-        src/nmea0183/mtw.cpp
-        src/nmea0183/mtw.hpp
-        src/nmea0183/mwv.cpp
-        src/nmea0183/mwv.hpp
-        src/nmea0183/vhw.hpp
-        src/nmea0183/vhw.cpp
-        src/nmea0183/vwr.cpp
-        src/nmea0183/vwr.hpp
-        src/nmea0183/zda.cpp
-        src/nmea0183/zda.hpp
+        	src/nmea0183/dbt.cpp
+        	src/nmea0183/dbt.hpp
+        	src/nmea0183/dpt.cpp
+        	src/nmea0183/dpt.hpp
+        	src/nmea0183/mtw.cpp
+        	src/nmea0183/mtw.hpp
+        	src/nmea0183/mwv.cpp
+        	src/nmea0183/mwv.hpp
+        	src/nmea0183/vhw.hpp
+        	src/nmea0183/vhw.cpp
+        	src/nmea0183/vwr.cpp
+        	src/nmea0183/vwr.hpp
+        	src/nmea0183/zda.cpp
+        	src/nmea0183/zda.hpp
 		src/nmea0183/rsa.hpp
 		src/nmea0183/rsa.cpp
 		src/nmea0183/SatInfo.h
-        src/nmea0183/mwd.cpp
-        src/nmea0183/mwd.hpp
-        src/nmea0183/vwt.cpp
-        src/nmea0183/vwt.hpp
-
+        	src/nmea0183/mwd.cpp
+        	src/nmea0183/mwd.hpp
+        	src/nmea0183/vwt.cpp
+        	src/nmea0183/vwt.hpp
 	)
 INCLUDE_DIRECTORIES(src/nmea0183)
 
@@ -97,23 +96,27 @@ SET(SRC_SURVEY
         src/survey_pi.cpp
         src/icons.h
         src/icons.cpp
-	    src/surveygui.h
-	    src/surveygui.cpp
-	    src/surveygui_impl.cpp
-	    src/surveygui_impl.h
-	    src/mygridtablebase.cpp
-	    src/mygridtablebase.h
-	    src/soundinggridtable.cpp
-	    src/soundinggridtable.h
-		src/ProfileWin.cpp
-		src/ProfileWin.h
-	    src/libspatialite-amalgamation-3.0.1/spatialite.c
-	    src/libspatialite-amalgamation-3.0.1/sqlite3.c
+	src/surveygui.h
+	src/surveygui.cpp
+	src/surveygui_impl.cpp
+	src/surveygui_impl.h
+	src/mygridtablebase.cpp
+	src/mygridtablebase.h
+	src/soundinggridtable.cpp
+	src/soundinggridtable.h
+	src/ProfileWin.cpp
+	src/ProfileWin.h
+	src/Baro_history.cpp
+	src/Baro_history.h
+	src/instrument.cpp
+	src/instrument.h
+	src/libspatialite-amalgamation-3.0.1/spatialite.c
+	src/libspatialite-amalgamation-3.0.1/sqlite3.c
 	)
 
 SET(SRC_TINYXML
-		src/tinyxml.h
-		src/tinyxml.cpp
+	src/tinyxml.h
+	src/tinyxml.cpp
         src/tinyxmlparser.cpp
         src/tinyxmlerror.cpp
 	)

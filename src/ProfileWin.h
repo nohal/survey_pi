@@ -28,6 +28,11 @@
 #ifndef  WX_PRECOMP
   #include "wx/wx.h"
 #endif //precompiled headers
+
+#if !wxUSE_GRAPHICS_CONTEXT
+#define wxGCDC wxDC
+#endif
+
 #include <vector>
 //#include "TideFindergui_impl.h"
 #include <wx/dialog.h>
@@ -36,7 +41,8 @@
 #include <wx/list.h>
 //#include "tcmgr.h"
 #include "wx/event.h"
-
+#include "wx/dcgraph.h"
+#include "surveygui.h";
 class wxCommandEvent;
 class wxCloseEvent;
 class wxTextCtrl;
@@ -53,32 +59,28 @@ class Dlg;
 
 WX_DECLARE_LIST(wxPoint, SplineList);           // for spline curve points
 
-class ProfileWin: public wxDialog
+class ProfileWin: public wxControl
 {
 public:
-      ProfileWin(wxWindow * parent, int x, int y, int PortNo, wxString PortName, int graphday_00_s, wxDateTime graphDayD, wxString myUnits, 
-		  double tcv[3000], double c_soundings, double tcmax, double tcmin, wxString tclist[12]);
+	ProfileWin(wxWindow * parent, wxWindowID id, int x, int y, int c_soundings, double tcv[3000], double tcd[3000], double tcmax, double tcmin);
       ~ProfileWin();
 
-      void OnSize(wxSizeEvent& event);
+      //void OnSize(wxSizeEvent& event);
       void OnPaint(wxPaintEvent& event);
       void MouseEvent(wxMouseEvent& event);
-	  void OnProfileWinPopupTimerEvent(wxTimerEvent& event);
-      void OKEvent(wxCommandEvent& event);
-      void NXEvent(wxCommandEvent& event);
-      void PREvent(wxCommandEvent& event);
       void OnCloseWindow(wxCloseEvent& event);
-
+	  
       void Resize(void);
 
       void RePosition(void);
 	  void Test( );
 	  wxString myTCPortNo;
 	  double       m_tcv[3000];
+	  double       m_tcd[3000];
 	  int         m_t_graphday_00_at_station;
       wxDateTime  m_graphday;
 	  wxString m_tclist[16];
-      double m_soundings;
+      int m_soundings;
 
 private:
 

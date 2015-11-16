@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project>
+    <projection>
+        <grid>3395</grid>
+    </projection>
+    <currentview />
+    <colors />
+    <tides />
+    <layers />
+    <comments />
+    <tracks visible="1">
+        <track>
+            <name>ttt</name>
+            <desc />
+            <visible>1</visible>
+            <lines>1</lines>
+            <values>1</values>
+            <active>1</active>
+            <fixes>1</fixes>
+            <color>0</color>
+            <width>4</width>
+            <textunits>0</textunits>
+            <units>0</units>
+            <textsize>12</textsize>
+            <trackpoints>
+                <trackpoint lat="50.462944" lon="-4.211512" dpt="3.32" tide="0.0" ele="0" time="1447679705" mark="0" />
+                <trackpoint lat="50.462201" lon="-4.212317" dpt="2.78" tide="0.0" ele="0" time="1447679705" mark="0" />
+                <trackpoint lat="50.461381" lon="-4.211679" dpt="2.8" tide="0.0" ele="0" time="1447679705" mark="0" />
+                <trackpoint lat="50.46057" lon="-4.210998" dpt="2.87" tide="0.0" ele="0" time="1447679705" mark="0" />
+                <trackpoint lat="50.459834" lon="-4.210154" dpt="3.06" tide="0.0" ele="0" time="1447679705" mark="0" />
+                <trackpoint lat="50.459224" lon="-4.209067" dpt="3.42" tide="0.0" ele="0" time="1447679705" mark="0" />
+                <trackpoint lat="50.45843" lon="-4.2084" dpt="3.44" tide="0.0" ele="0" time="1447679705" mark="0" />
+                <trackpoint lat="50.457624" lon="-4.207746" dpt="3.32" tide="0.0" ele="0" time="1447679705" mark="0" />
+                <trackpoint lat="50.456809" lon="-4.207115" dpt="3.27" tide="0.0" ele="0" time="1447679705" mark="0" />
+                <trackpoint lat="50.455967" lon="-4.206602" dpt="3.27" tide="0.0" ele="0" time="1447679705" mark="0" />
+            </trackpoints>
+        </track>
+    </tracks>
+    <waypoints />
+    <routes />
+    <areas />
+    <sections />
+    <soundvelocity />
+    <draftcorrections />
+</project>

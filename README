@@ -1,3 +1,31 @@
+Update (16 Nov 2015):
+
+Included are some extra files to make using survey_pi easier to install and enable testing.
+
+In the 'Extras' folder is a Windows compiled version of survey_pi for OpenCPN 4.1.925+
+
+For Windows use: 
+Copy the following DLLs from the 'Extras/dll' folder to the OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll
+
+Also included in 'Extras' are some NMEA files to use for testing survey_pi.
+
+In the 'Extras/GMP' folder is a Hydromagic file to test Import.
+
+Changes (16 Nov 2015):
+Rendering is for the active survey only, even if 'Preferences' set up differently (TODO)
+Stop/Start works when recording NMEA underway or from the VDR plugin
+Trace works, when recording from NMEA (Wait a few seconds to allow build up of data)
+Profile works, but you need more than 3 depth records.
+Zoom To works
+Merge allows copying of soundings to another table
+Properties button works sort of. Not sure what properties are needed. The plugin screen shows number of soundings etc.
+Grid re-drawn when changing surveys
+From 'Preferences' the minimum distance between soundings works
+
+Lots still to do but I hope this version is an improvement.
+
+
+Original notes:
 Survey plugin for OpenCPN
 =========================
 

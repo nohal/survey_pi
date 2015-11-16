@@ -39,6 +39,10 @@
 #include <wx/txtstrm.h>
 #include <wx/numdlg.h> 
 
+#include "baro_history.h"
+#include "survey_profile.h"
+#include "instrument.h"
+
 using namespace std;
 
 class survey_pi;
@@ -55,13 +59,13 @@ class SurveyDlg : public SurveyDlgDef
 public:
       SurveyDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE );
 	  void SurveyDlg::LoadSurvey_0();
+
+	  void SurveyDlg::SetTrace();
 	  void OnSurveySelection( wxCommandEvent& event );
       void LoadFromFile( wxCommandEvent& event );
 	  void OnSurveyRecordToggleNMEA(wxCommandEvent& event);
 	  void RecordNMEA(wxCommandEvent& event) ;
 
-	 // void OnRecordToggleNMEA(wxCommandEvent& event);
-	 // void StopRecordNMEA(wxCommandEvent& event);
 	void OnNewSurvey( wxCommandEvent& event );
 	void OnDeleteSurvey( wxCommandEvent& event );
 	void OnSurveyProperties( wxCommandEvent& event );
@@ -71,12 +75,14 @@ public:
 	void OnExportSurvey( wxCommandEvent& event );
 	void OnSurveyCancelClick( wxCommandEvent& event );
 	void OnSurveyOkClick( wxCommandEvent& event );
-	void IsProfileSelected( wxNotebookEvent& event );
-	void ProfileShown( wxPaintEvent& event );
+	void IsPanelSelected(wxNotebookEvent& event);
+	void SetProfile();
+	wxString getInstrumentCaption(unsigned int id);
     survey_pi *plugin;
 	vector<soundingdata> mysoundings;
 
-	//void SetNMEASentence(wxString &sentence);
+	DashboardInstrument *mySurveyTrace;	
+	ProfileWin* myProfile;
 
 private:
 	wxString          m_ifilename;
@@ -89,3 +95,4 @@ private:
 };
 
 #endif
+

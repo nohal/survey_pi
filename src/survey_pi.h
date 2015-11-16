@@ -80,10 +80,10 @@ public:
 class soundingdata{
 public:
 
-	wxString lat, lon, ele, time, magvar, geoidheight, name, cmt, desc,
+	wxString lat, lon,ele, time, magvar, geoidheight, name, cmt, desc,
 		src, link, sym, type, fix, sat, hdop, vdop, pdop,
 		ageofdgpsdata, dgpsid, xmltag, speed, depth, temp, ZDA;
-
+	double latD, lonD;
 private:
 
 };
@@ -136,28 +136,44 @@ public:
       int               CreateSurvey(wxString name);
       void              DeleteSurvey(int id);
       void              FillSurveyDropdown();
+	  void              FillSurveyGrid();
+	  void              FillSurveyInfo();
+
       int               InsertSounding(double depth, double lat, double lon, double tide = 0.0, time_t timestamp = 0, int projection = PROJECTION);
       wxArrayString     GetSurveyList();
       int               GetSurveyId(wxString survey_name);
-      wxString          GetSurveyName(int survey_id);
+      
+	  wxString          GetSurveyName(int survey_id);
+	  wxString          GetSurveyMaxDepth(int survey_id);
+	  wxString          GetSurveyMinDepth(int survey_id);
+	  wxString			GetSurveyNumSoundings(int survey_id);
+	  wxString			GetSurveyAreaSoundings(int survey_id);
 
       int               GetActiveSurveyId(){ return m_activesurvey; }
       void              SetActiveSurveyId(int id){ m_activesurvey = id; }
       void              SetActiveSurvey(wxString name){ m_activesurveyname = name; m_activesurvey = GetSurveyId(name); }
 	  vector<soundingdata>  SetTable(int i);
 
-	  wxArrayString     SetProfile(int i);
-	  void				ParseNMEASentence(wxString &sentence);
+	  wxArrayString     SetSoundings(int i);
+	  void				ParseNMEASentence(wxString sentence);
 	  void				timeToZDA(wxString myGPXTime);
 	  GPXTimeAndZDA     myTZDA;
 	  wxString			DDMLatToDecimal(wxString myString);
 	  wxString			DDMLonToDecimal(wxString myString);
 	  
 	  bool				b_gotdepth;
+	  bool				b_gotposn;
 	  soundingdata		mydata;
 	  vector<soundingdata> all_soundingdata;
 	  int               numsoundings;
 	  bool				m_recording;
+	  bool              m_survey_trace;
+	  SurveyDlg        *m_pSurveyDialog;
+	  SurveyMergeDlgDef *m_pSurveyMerge;
+	  SurveyPropDlgDef *m_pSurveyProp;
+	  double           viewscale;
+	  bool              dbMergeSurveys(int survey1, int survey2);
+	  double			m_latprev, m_lonprev;
 
 private:
       NMEA0183          m_NMEA0183;                 // Used to parse NMEA Sentences
@@ -175,12 +191,14 @@ private:
 
       void              StoreSounding(double depth);
       double            m_lat, m_lon;
+	 
       wxDateTime        m_lastPosReport;
 
+	  int				m_trimcount;
       bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y);
       void DrawSounding(wxDC &dc, int x, int y, double depth, long sounding_id, long survey_id);
 
-      SurveyDlg        *m_pSurveyDialog;
+     
 
       int               m_survey_dialog_x, m_survey_dialog_y;
       int               m_display_width, m_display_height;
@@ -211,6 +229,7 @@ private:
       short             mPriPosition, mPriDepth;
       int               mLastX, mLastY;
       long              mLastSdgId, mLastSurveyId;
+	  
       bool              dbQuery(wxString sql);
       void              dbGetTable(wxString sql, char ***results, int &n_rows, int &n_columns);
       void              dbFreeResults(char **results);

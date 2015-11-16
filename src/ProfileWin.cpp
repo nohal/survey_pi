@@ -36,44 +36,38 @@ enum
 WX_DEFINE_LIST( SplineList );
 
 BEGIN_EVENT_TABLE ( ProfileWin, wxWindow ) EVT_PAINT ( ProfileWin::OnPaint )
-    EVT_SIZE ( ProfileWin::OnSize )
-    EVT_BUTTON ( wxID_OK, ProfileWin::OKEvent )
-    //EVT_BUTTON ( ID_ProfileWin_NX, ProfileWin::NXEvent )
-    //EVT_BUTTON ( ID_ProfileWin_PR, ProfileWin::PREvent )
     EVT_CLOSE ( ProfileWin::OnCloseWindow )
     
 END_EVENT_TABLE()
 
 // Define a constructor
-ProfileWin::ProfileWin( wxWindow * parent, int x, int y, int PortNo, wxString PortName, int graphday_00_s, wxDateTime graphDayD, wxString myUnits, 
-					double tcv[3000], double c_soundings, double tcmax, double tcmin, wxString tclist[12])
+ProfileWin::ProfileWin(wxWindow * parent, wxWindowID id, int x, int y, int c_soundings, double tcv[3000], double tcd[3000], double tcmax, double tcmin)
+			:wxControl(parent, wxID_ANY, wxDefaultPosition, wxSize(800, 500), wxBORDER_NONE)
 {
-	m_soundings = c_soundings;
-	m_passPort = PortNo;
-	m_passName = PortName;
-    m_passStation = graphday_00_s;
-	m_graphday = graphDayD;
-	m_units = myUnits;
 	
+	m_soundings = c_soundings;
+
 	int i;
-
-
-
+	
 	for (i=0; i<m_soundings; i++){
 		m_tcv[i] = tcv[i];
 	}
 
+	for (i = 0; i<m_soundings; i++){
+		m_tcd[i] = tcd[i];
+	}
+	
 
 	for (i = 0 ; i<12 ; i++){
 		m_tclist[i] = wxEmptyString;
 	}
-
+	/*
 	for (i=0; i<12; i++){
 		if (!tclist[i].empty()){
 			m_tclist[i] = tclist[i];
 		}
 	}
-
+	*/
 	m_tcmax = tcmax;
 	m_tcmin = tcmin;
 
@@ -87,16 +81,12 @@ ProfileWin::ProfileWin( wxWindow * parent, int x, int y, int PortNo, wxString Po
     //    will not detract from night-vision
 	long wstyle = wxCLIP_CHILDREN | wxDEFAULT_DIALOG_STYLE|wxSIMPLE_BORDER ;
 
-   
-    wxDialog::Create( parent, wxID_ANY, wxString( _T ( "test" ) ), wxPoint( x, y ),
-                      wxSize( 550, 480 ), wstyle );
-
 	c_blue = wxColour(220, 220, 220);
 	SetBackgroundColour(c_blue);
     pParent = parent;
 
 
-    SetTitle( wxString( _( "Survey Profile" ) ) );
+   // SetTitle( wxString( _( "Survey Profile" ) ) );
 	 m_plot_type = TIDE_PLOT;
 
 
@@ -122,16 +112,7 @@ ProfileWin::ProfileWin( wxWindow * parent, int x, int y, int PortNo, wxString Po
     Move( r );
 	
 
-	/*
-  	myDlg = new Dlg(pParent, wxID_ANY,  _T("Tide Finder"), wxDefaultPosition, wxSize( -1,-1 ), wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER );
-	
-	myDlg->intPortNo = m_passPort;
-	myDlg->m_graphday = m_graphday;
-	myDlg->m_t_graphday_00_at_station = m_passStation;
-	myDlg->m_graphday = m_passGraphDay;
-	m_t_graphday_00_at_station = m_passStation;
-	m_graphday = m_passGraphDay;
-	*/
+
 //    Figure out this computer timezone minute offset
     wxDateTime this_now = wxDateTime::Now();
     wxDateTime this_gmt = this_now.ToGMT();
@@ -152,33 +133,13 @@ ProfileWin::ProfileWin( wxWindow * parent, int x, int y, int PortNo, wxString Po
 //    Establish the inital drawing day as today
 	
     btc_valid = false;
-
-    wxString* TClist = NULL;
-    m_tList = new wxListBox( this, -1, wxPoint( sx * 65 / 100, 11 ),
-                             wxSize( ( sx * 32 / 100 ), ( sy * 20 / 70 ) ), 0, TClist,
-                             wxLB_SINGLE | wxLB_NEEDED_SB );
-
-    OK_button = new wxButton( this, wxID_OK, _( "OK" ), wxPoint( sx - 100, sy - 32 ),
-                              wxDefaultSize );
-
-    //PR_button = new wxButton( this, ID_ProfileWin_PR, _( "Prev" ), wxPoint( 10, sy - 32 ),
-      //                        wxSize( 60, -1 ) );
-
-    m_ptextctrl = new wxStaticText( this, -1, _T(""), wxPoint( sx * 5 / 100, 30 ),
-                                  wxSize( ( sx * 60 / 100 ), ( sy *29 / 100 ) ) ,
-                                  wxALIGN_CENTRE);
     int bsx, bsy, bpx, bpy;
-    //PR_button->GetSize( &bsx, &bsy );
-    //PR_button->GetPosition( &bpx, &bpy );
-
-    //NX_button = new wxButton( this, ID_ProfileWin_NX, _( "Next" ), wxPoint( bpx + bsx + 5, bpy ),
-    //                          wxSize( 60, -1 ) );
 
     //  establish some graphic element sizes/locations
     int x_graph = sx * 1 / 10;
-    int y_graph = sy * 32 / 100;
-    int x_graph_w = sx * 8 / 10;
-    int y_graph_h = sy * 50 / 100;
+    int y_graph = sy * 1 / 10;
+    int x_graph_w = sx * 5 / 10;
+    int y_graph_h = sy * 70 / 200;
     m_graph_rect = wxRect(x_graph, y_graph, x_graph_w, y_graph_h);
 
 
@@ -211,20 +172,11 @@ ProfileWin::ProfileWin( wxWindow * parent, int x, int y, int PortNo, wxString Po
                                                                           
     pblack_3 = wxThePenList->FindOrCreatePen( c_black1, 1, wxSOLID );
                                                                          
-    pred_2 = wxThePenList->FindOrCreatePen( c_red, 4, wxSOLID );
+    pred_2 = wxThePenList->FindOrCreatePen( c_red, 2, wxSOLID );
                                                                        
     pltgray = wxTheBrushList->FindOrCreateBrush( c_grey,wxSOLID );
                                                                                
     pltgray2 = wxTheBrushList->FindOrCreateBrush( c_grey2, wxSOLID );
-                                                                               
-
-    //  Fill in some static text control information
-    //  Tidal station information
-    // write the first line
-   m_ptextctrl->SetFont( *pVLFont );
-   m_ptextctrl->SetForegroundColour(c_black1);
-   m_ptextctrl->SetBackgroundColour(c_blue);
-   //m_ptextctrl->SetLabel(wxT("DOVER"));
 
 }
 
@@ -233,39 +185,11 @@ ProfileWin::~ProfileWin()
     //Do Nothing;
 }
 
-void ProfileWin::OKEvent( wxCommandEvent& event )
-{
-    wxString m_PortNo = wxString::Format(wxT("%i"),m_passPort);
-
-	DeleteSingleWaypoint(_T("T") + m_PortNo);
-	Hide();
-    delete m_tList;
-    Destroy(); // that hurts
-	
-}
-
 void ProfileWin::OnCloseWindow( wxCloseEvent& event )
 {
-    wxString m_PortNo = wxString::Format(wxT("%i"),m_passPort);
-
-	DeleteSingleWaypoint(_T("T") + m_PortNo);
 	Hide();
-    delete m_tList;
+    //delete m_tList;
     Destroy(); // that hurts
-}
-
-void ProfileWin::Resize( void )
-{
-}
-
-void ProfileWin::RePosition( void )
-{
-//    Position the window
-    double lon = -5;
-    double lat = 50;
-
-    wxPoint r;
-    Move( r );
 }
 
 void ProfileWin::OnPaint( wxPaintEvent& event )
@@ -281,8 +205,8 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
     
     GetClientSize( &x, &y );
 
-    wxPaintDC dc( this );
-
+    wxPaintDC dc( this);
+	dc.Clear();
     {
         int x_textbox = x * 5 / 100;
         int y_textbox = 6;
@@ -294,24 +218,17 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
         dc.SetPen( *pblack_3 );
         dc.SetBrush( *pltgray2 );
 
-		m_ptextctrl->SetFont(*pVLFont);
-		m_ptextctrl->SetForegroundColour(c_black1);
-		m_ptextctrl->SetBackgroundColour(c_blue);
-		if (m_passName == wxT("")){m_passName = wxT("DOVER");}
-		m_ptextctrl->SetLabel( m_passName );
-
-        wxRect tab_rect = m_tList->GetRect();
-        dc.DrawRoundedRectangle( tab_rect.x - 4, y_textbox, tab_rect.width + 8, y_textbox_h, 4 ); //tide-current table box
-
         //    Box the graph
         dc.SetPen( *pblack_1 );
         dc.SetBrush( *pltgray );
         dc.DrawRectangle( m_graph_rect.x, m_graph_rect.y, m_graph_rect.width, m_graph_rect.height );
 
         //    Horizontal axis
+		double ratiow;
         dc.SetFont( *pSFont );
         for( i = 0; i < m_soundings; i++ ) {
-            int xd = m_graph_rect.x + ( ( i ) * m_graph_rect.width / m_soundings );
+			ratiow = m_tcd[i] / m_tcd[m_soundings - 1];
+            int xd = m_graph_rect.x + ( ( ratiow ) * m_graph_rect.width);
             dc.DrawLine( xd, m_graph_rect.y, xd, m_graph_rect.y + m_graph_rect.height + 5 );
 
             char sbuf[5];
@@ -333,10 +250,10 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
         float t_ratio = m_graph_rect.width * ( t_now - m_t_graphday_00_at_station ) / ( m_soundings * 3600 );
 
         //must eliminate line outside the graph (in that case put it outside the window)
-        int xnow = ( t_ratio < 0 || t_ratio > m_graph_rect.width ) ? -1 : m_graph_rect.x + (int) t_ratio;
+        //int xnow = ( t_ratio < 0 || t_ratio > m_graph_rect.width ) ? -1 : m_graph_rect.x + (int) t_ratio;
         dc.SetPen( *pred_2 );
-        dc.DrawLine( xnow, m_graph_rect.y, xnow, m_graph_rect.y + m_graph_rect.height );
-        dc.SetPen( *pblack_1 );
+       // dc.DrawLine( xnow, m_graph_rect.y, xnow, m_graph_rect.y + m_graph_rect.height );
+       // dc.SetPen( *pblack_1 );
 	
         //    Build the array of values, capturing max and min and HW/LW list
 	    btc_valid = false;
@@ -344,17 +261,12 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
 
             float dir;            
             float val;
-            m_tList->Clear();
+           // m_tList->Clear();
             int list_index = 0;
             bool wt;
 			int i;
 			
-			for( i = 0; i<12 ; i++){
-				if (!m_tclist[i].empty()){
-					m_tList->Insert( m_tclist[i], list_index );                       // update table list
-					list_index++;
-				}
-			}
+			
 			
 //    Set up the vertical parameters based on Tide or Current plot
   
@@ -371,9 +283,14 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
             m_sList.DeleteContents( true );
             m_sList.Clear();
 
+			
+			
             for( i = 0; i < m_soundings; i++ ) {
                 wxPoint *pp = new wxPoint;
-                pp->x = m_graph_rect.x + ( ( i ) * m_graph_rect.width /m_soundings );
+
+				ratiow = m_tcd[i] / m_tcd[m_soundings-1];
+
+                pp->x = m_graph_rect.x + ( ( ratiow ) * m_graph_rect.width );
                 pp->y = m_graph_rect.y + ( m_plot_y_offset )
                 - (int) ( ( m_tcv[i] - val_off ) * m_graph_rect.height / im );
 
@@ -416,7 +333,7 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
         wxList *list = (wxList *) &m_sList;
 #endif
 
-        dc.SetPen(  *pblack_2);
+		dc.SetPen(*pred_2);
 #if wxUSE_SPLINES
         dc.DrawSpline( list );
 #else
@@ -426,8 +343,8 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
 
 ///
         int station_offset = 0;
-        int h = station_offset / 60;
-        int m = station_offset - ( h * 60 );
+        int h = station_offset / m_soundings;
+        int m = station_offset - ( h * m_soundings );
         if( m_graphday.IsDST() ) h += 1;
         m_stz.Printf( _T("Z %+03d:%02d"), h, m );
 
@@ -455,31 +372,11 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
             dc.DrawRotatedText(  wxT("meters"), 5,
                                 m_graph_rect.y + m_graph_rect.height / 2 + w / 2, 90. );
   
-
-//    Today or tomorrow
-			/*
-        wxString sday;
-        wxDateTime this_now = wxDateTime::Now();
-
-        int day = m_graphday.GetDayOfYear();
-        if( m_graphday.GetYear() == this_now.GetYear() ) {
-            if( day == this_now.GetDayOfYear() ) sday.Append( _( "Today" ) );
-            else if( day == this_now.GetDayOfYear() + 1 ) sday.Append( _( "Tomorrow" ) );
-            else
-                sday.Append( m_graphday.GetWeekDayName( m_graphday.GetWeekDay() ) );
-        } else if( m_graphday.GetYear() == this_now.GetYear() + 1
-                   && day == this_now.Add( wxTimeSpan::Day() ).GetDayOfYear() ) sday.Append(
-                           _( "Tomorrow" ) );
-
-        dc.SetFont( *pSFont );
-        dc.GetTextExtent( sday, &w, &h );
-        dc.DrawText( sday, 55 - w / 2, y * 88 / 100 );
-*/
     }
 	
 }
 
-
+/*
 void ProfileWin::OnSize( wxSizeEvent& event )
 {
     int width, height;
@@ -487,4 +384,4 @@ void ProfileWin::OnSize( wxSizeEvent& event )
     int x, y;
     GetPosition( &x, &y );
 }
-
+*/
