@@ -33,7 +33,7 @@
 #endif //precompiled headers
 
 #include "instrument.h"
-#include "wx28compat.h"
+//#include "wx28compat.h"
 #include "surveygui.h"
 #include "survey_pi.h"
 #include "surveygui_impl.h"
