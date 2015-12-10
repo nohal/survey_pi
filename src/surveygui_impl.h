@@ -30,7 +30,7 @@
 #define _SURVEYGUI_IMPL_H_
 
 #include "surveygui.h"
-#include "survey_pi.h"
+#include "ocpn_plugin.h"
 #include "ProfileWin.h"
 
 #include <wx/filedlg.h>
@@ -46,7 +46,56 @@
 using namespace std;
 
 class survey_pi;
-class soundingdata;
+
+class SurveyOverlayFactory;
+class PlugIn_ViewPort;
+
+#include <vector>
+
+struct SurveyOverlaySettings
+{
+	int               m_iOpacity;
+	int               m_iUnits;
+	bool              m_bCalcTide;
+	wxString          m_sCorrection;
+	bool              m_bRenderOverlay;
+	bool              m_bRenderAllSurveys;
+	bool              m_bConnectSoundings;
+	bool              m_bRenderSoundingText;
+	bool              m_bRenderWithTide;
+	int               m_iSoundingShape;
+	bool              m_bUseSymbol;
+	bool              m_bUseDepthColours;
+	wxString          m_sSoundingColor;
+	wxString          m_sConnectorColor;
+	wxString          m_sFont;
+	wxString          m_sFontColor;
+
+	bool              m_activesurvey;
+
+	double            m_fLOA;
+	double            m_fBeam;
+	double            m_fSounderBow;
+	double            m_fWaterlineOffset;
+	double            m_fGPSBow;
+	double            m_fGPSPort;
+	double            m_fMinDistance;
+	double            m_fAutoNewDistance;
+
+	int               mLastX, mLastY;
+	long              mLastSdgId, mLastSurveyId;
+}
+;
+class soundingdata{
+public:
+
+	wxString lat, lon, ele, time, magvar, geoidheight, name, cmt, desc,
+		src, link, sym, type, fix, sat, hdop, vdop, pdop,
+		ageofdgpsdata, dgpsid, xmltag, speed, depth, temp, ZDA, tide, cog;
+	int sdgid, surid;
+	double latD, lonD;
+private:
+};
 
 class SurveyCfgDlg : public SurveyCfgDlgDef
 {
@@ -58,7 +107,12 @@ class SurveyDlg : public SurveyDlgDef
 {
 public:
       SurveyDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE );
+	  
+	  void SetViewPort(PlugIn_ViewPort *vp);
+	  PlugIn_ViewPort *vp;
 	  void SurveyDlg::LoadSurvey_0();
+
+	  void SetFactoryOptions(bool set_val = false);
 
 	  void SurveyDlg::SetTrace();
 	  void OnSurveySelection( wxCommandEvent& event );
@@ -69,7 +123,7 @@ public:
 	void OnNewSurvey( wxCommandEvent& event );
 	void OnDeleteSurvey( wxCommandEvent& event );
 	void OnSurveyProperties( wxCommandEvent& event );
-	void OnZoomToSurvey( wxCommandEvent& event );
+	void OnZoomTSurvey( wxCommandEvent& event );
 	void OnMergeSurvey( wxCommandEvent& event );
 	void OnImportSurvey( wxCommandEvent& event );
 	void OnExportSurvey( wxCommandEvent& event );
@@ -77,12 +131,19 @@ public:
 	void OnSurveyOkClick( wxCommandEvent& event );
 	void IsPanelSelected(wxNotebookEvent& event);
 	void SetProfile();
+	void OnItemAdd(wxCommandEvent& event);
+	void OnItemDelete(wxCommandEvent& event);
+
 	wxString getInstrumentCaption(unsigned int id);
+
+	wxString myString;
+
     survey_pi *plugin;
 	vector<soundingdata> mysoundings;
 
 	DashboardInstrument *mySurveyTrace;	
 	ProfileWin* myProfile;
+	SurveyOverlaySettings mySettings;
 
 private:
 	wxString          m_ifilename;
@@ -91,6 +152,7 @@ private:
 	wxTextFile        m_istream;
 	wxFile            m_ostream;
 
+	PlugIn_ViewPort  *m_vp;
 
 };
 

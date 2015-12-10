@@ -38,8 +38,19 @@
 
 #include <wx/fileconf.h>
 #include <wx/hashmap.h>
-
+#include <wx/glcanvas.h>
+#include	<wx/dc.h>
+#include <map>
 #include "tinyxml.h"
+#include <wx/imaglist.h>
+#include <wx/withimages.h>
+#include <wx/listctrl.h>
+#include "cross.xpm"
+#include "circle.xpm"
+#include "square.xpm"
+#include <sstream>
+
+//#include "SurveyOverlayFactory.h"
 
 #define     PLUGIN_VERSION_MAJOR    1
 #define     PLUGIN_VERSION_MINOR    0
@@ -54,22 +65,31 @@
 //World Mercator
 #define PROJECTION 3395
 
+
 #include "ocpn_plugin.h"
+#include "surveygui_impl.h"
+#include "SurveyOverlayFactory.h"
+
 #include "nmea0183/nmea0183.h"
 #include <wx/tokenzr.h>
-#include <vector>
+#include <wx/textfile.h>
+
 #include <algorithm>
 
-#include "surveygui_impl.h"
 #include "libspatialite-amalgamation-3.0.1/headers/spatialite/sqlite3.h"
 #include "libspatialite-amalgamation-3.0.1/headers/spatialite.h"
 #include "libspatialite-amalgamation-3.0.1/headers/spatialite/gaiageo.h"
 
+#include "tcmgr.h"
+#include <vector>
+#include <locale>
+
+
 using namespace std;
 
-class SurveyDlg;
 class GPXTimeAndZDA;
 class soundingdata;
+
 
 class GPXTimeAndZDA{
 public:
@@ -77,16 +97,9 @@ public:
 
 };
 
-class soundingdata{
-public:
 
-	wxString lat, lon,ele, time, magvar, geoidheight, name, cmt, desc,
-		src, link, sym, type, fix, sat, hdop, vdop, pdop,
-		ageofdgpsdata, dgpsid, xmltag, speed, depth, temp, ZDA;
-	double latD, lonD;
-private:
 
-};
+
 //----------------------------------------------------------------------------------------------------------
 //    The PlugIn Class Definition
 //----------------------------------------------------------------------------------------------------------
@@ -116,6 +129,7 @@ public:
       void ShowPreferencesDialog( wxWindow* parent );
 
       void OnToolbarToolCallback(int id);
+	  void SetSettings();
 
 //    Optional plugin overrides
       void SetColorScheme(PI_ColorScheme cs);
@@ -123,7 +137,9 @@ public:
 
 //    The override PlugIn Methods
       bool RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp);
-      //bool RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
+      bool RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
+	 // bool RenderGLSurveyOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
+	  bool GetSurveySoundings(int as);
 
 //    Other public methods
       void SetSurveyDialogX    (int x){ m_survey_dialog_x = x;};
@@ -132,9 +148,14 @@ public:
       void OnSurveyDialogClose();
 
       bool              ImportHydromagic(wxString filename);
+	  bool              ImportXYZ(wxString filename);
+	  bool              ImportCSV(wxString filename);
       void              ExportHydromagic(int survey_id, wxString filename);
+	  void              ExportXYZ(int survey_id, wxString filename);
+	  void              ExportCSV(int survey_id, wxString filename);
       int               CreateSurvey(wxString name);
       void              DeleteSurvey(int id);
+	  void              DeleteSounding(int id);
       void              FillSurveyDropdown();
 	  void              FillSurveyGrid();
 	  void              FillSurveyInfo();
@@ -168,16 +189,36 @@ public:
 	  int               numsoundings;
 	  bool				m_recording;
 	  bool              m_survey_trace;
-	  SurveyDlg        *m_pSurveyDialog;
+	  //SurveyDlg        *m_pSurveyDialog;
 	  SurveyMergeDlgDef *m_pSurveyMerge;
 	  SurveyPropDlgDef *m_pSurveyProp;
 	  double           viewscale;
 	  bool              dbMergeSurveys(int survey1, int survey2);
-	  double			m_latprev, m_lonprev;
+	  double			m_latprev;
+	  double       	  m_lonprev;
+
+	  vector<soundingdata>mySurveySoundings;
+	  
+	  //SurveyOverlayFactory *GetSurveyOverlayFactory(){ return m_pSurveyOverlayFactory; }
+	  //SurveyOverlayFactory *m_pSurveyOverlayFactory;
+	  //SurveyOverlayFactory *GetSurveyOverlayFactory(){ return m_pSurveyOverlayFactory; };
+	  //SurveyOverlayFactory *m_pSurveyOverlayFactory;
+	  
+	  SurveyOverlayFactory *GetSurveyOverlayFactory(){ return m_pSurveyOverlayFactory; }
+	 
 
 private:
-      NMEA0183          m_NMEA0183;                 // Used to parse NMEA Sentences
 
+	
+	  SurveyOverlayFactory *m_pSurveyOverlayFactory;
+	  SurveyDlg *m_pSurveyDialog;
+	  
+	 // wxDC *m_pdc;
+	 // wxGraphicsContext *m_gdc;
+      
+
+	  NMEA0183          m_NMEA0183;                 // Used to parse NMEA Sentences
+	 // survey_pi         *dlg;
       sqlite3          *m_database;
       //sqlite3_stmt     *m_stmt;
       int               ret;
@@ -190,12 +231,12 @@ private:
       bool              SaveConfig(void);
 
       void              StoreSounding(double depth);
-      double            m_lat, m_lon;
+      double            m_lat, m_lon, m_cog;
 	 
       wxDateTime        m_lastPosReport;
 
 	  int				m_trimcount;
-      bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y);
+      //bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y);
       void DrawSounding(wxDC &dc, int x, int y, double depth, long sounding_id, long survey_id);
 
      
@@ -203,22 +244,33 @@ private:
       int               m_survey_dialog_x, m_survey_dialog_y;
       int               m_display_width, m_display_height;
       bool              m_bRenderOverlay;
-      int               m_iOpacity;
-      int               m_iUnits;
-      bool              m_bRenderAllSurveys;
-      bool              m_bConnectSoundings;
-      wxString          m_sSoundingColor;
-      wxString          m_sConnectorColor;
-      wxString          m_sFont;
-      wxString          m_sFontColor;
-      double            m_fLOA;
-      double            m_fBeam;
-      double            m_fSounderBow;
-      double            m_fWaterlineOffset;
-      double            m_fGPSBow;
-      double            m_fGPSPort;
-      double            m_fMinDistance;
-      double            m_fAutoNewDistance;
+	  int               m_iOpacity;
+	  int               m_iUnits;
+
+	  bool              m_bCalcTide;
+	  wxString          m_sCorrection;
+	  bool              m_bRenderAllSurveys;
+	  bool              m_bConnectSoundings;
+	  bool				m_bRenderSoundingText;
+	  bool              m_bRenderWithTide;
+	  int               m_iSoundingShape;
+	  bool              m_bUseSymbol;
+	  bool              m_bUseDepthColours;
+	  wxString          m_sSoundingColor;
+	  wxString          m_sConnectorColor;
+	  wxString          m_sFont;
+	  wxString          m_sFontColor;
+	  double            m_fLOA;
+	  double            m_fBeam;
+	  double            m_fSounderBow;
+	  double            m_fWaterlineOffset;
+	  double            m_fGPSBow;
+	  double            m_fGPSPort;
+	  double            m_fMinDistance;
+	  double            m_fAutoNewDistance;
+
+	  int               mLastX, mLastY;
+	  long              mLastSdgId, mLastSurveyId;
 
       int               m_leftclick_tool_id;
 
@@ -227,8 +279,8 @@ private:
       int               m_projection;
 
       short             mPriPosition, mPriDepth;
-      int               mLastX, mLastY;
-      long              mLastSdgId, mLastSurveyId;
+     // int               mLastX, mLastY;
+     // long              mLastSdgId, mLastSurveyId;
 	  
       bool              dbQuery(wxString sql);
       void              dbGetTable(wxString sql, char ***results, int &n_rows, int &n_columns);
@@ -236,6 +288,16 @@ private:
       int               dbGetIntNotNullValue(wxString sql);
       wxString          dbGetStringValue(wxString sql);
       void              ImportHydromagicTrack(TiXmlElement *track);
+
+	  // Tide parts
+	  void LoadHarmonics();
+	  double GetPortTideInfo(double lat, double lon, wxDateTime inTime);
+	  TCMgr           *ptcmgr;
+	  wxString         g_SData_Locn;
+	  wxString        *pTC_Dir;
+
+	  std::map < double, wxImage > m_labelCache;
+	  std::map < wxString, wxImage > m_labelCacheText;
 };
 
 #endif

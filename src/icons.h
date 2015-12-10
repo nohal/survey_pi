@@ -13,5 +13,8 @@ extern wxBitmap *_img_survey;
 extern wxBitmap *_img_survey_pi;
 extern wxBitmap *_img_survey_recording;
 extern wxBitmap *_img_survey_paused;
+extern wxBitmap *_img_minus;
+extern wxBitmap *_img_plus;
+
 
 #endif /* ICONS_H */

@@ -7,9 +7,11 @@
 
     SoundingGridTable::~SoundingGridTable()
     {
-       for(int i =0; i < data.size(); ++i)
-          delete[] data[i];
-       data.clear();
+		for (int i = 0; i < 2 /*data.size()*/; ++i)
+			// delete[] data[i];
+			// data.clear();
+		{
+		}
     }
 
     SoundingGridTable::SoundingGridTable(const SoundingGridTable& copy)
@@ -25,7 +27,7 @@
     bool SoundingGridTable::AppendRows(size_t nrows)
     {
        for(size_t i =0; i < nrows; ++i)
-          data.push_back(new int[cols]);
+         // data.push_back(new int[cols]);
        
        return myGridTableBase::AppendRows(nrows);
     }
@@ -37,15 +39,15 @@
        {
           if(x < rows && x > -1 && y < cols && y > -1)
           {
-             data[y][x]=(int)value;
+            // data[y][x]=(int)value;
           }
        }
     }
 
     wxString SoundingGridTable::GetValue(int x, int y)
     {
-       if(x > -1 && x < rows && y > -1 && y < cols)
-          return wxString::Format(_T("%i"),data[y][x]);
+		if (x > -1 && x < rows && y > -1 && y < cols)
+			return wxString::Format(_T("%i"), 1); // data[y][x]);
        return wxEmptyString;
     }
 

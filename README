@@ -1,4 +1,10 @@
-SORRY: OPENGL OFF ONLY AT THE MOMENT
+Update (10 Dec 2015)
+
+For compiling standalone:
+Copy the following DLLs from the 'Extras/dll' folder to the 'build' folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll. You also need opencpn.lib (4.1.x) in the 'build' folder.
+I used CMake_gui to help find wxWidgets 3.02.
+
+In the 'Extras' folder is a new Windows compiled version of survey_pi for OpenCPN 4.1.925+
 
 Update (16 Nov 2015):
 

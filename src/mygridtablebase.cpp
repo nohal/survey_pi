@@ -43,9 +43,10 @@
     {
        if(numcol < column_labels.size())
           column_labels[numcol] = label;
+	   
        else
        {
-          column_labels.push_back(label);
+         column_labels.push_back(label);
           wxGridTableMessage msg( this,wxGRIDTABLE_NOTIFY_COLS_APPENDED,numcol );
           GetView()->ProcessTableMessage( msg );
           cols++;
@@ -54,7 +55,7 @@
 
     wxString myGridTableBase::GetColLabelValue(int numcol)
     {
-       return column_labels[numcol];
+		return column_labels[numcol];
     }
 
     bool myGridTableBase::AppendRows(size_t nrows)
@@ -80,7 +81,7 @@
     bool myGridTableBase::AppendCols(size_t numcol)
     {
        for(int i =0; i < numcol; i++)
-          column_labels.push_back(wxEmptyString);
+         column_labels.push_back(wxEmptyString);
        cols+= numcol;
        wxGridTableMessage msg( this,wxGRIDTABLE_NOTIFY_COLS_APPENDED,numcol );
        return GetView()->ProcessTableMessage( msg );
@@ -91,7 +92,7 @@
     {
        std::vector<wxString>::iterator it = column_labels.begin();
        for(size_t i =0; i < pos;++i)
-          it++;
+         it++;
        cols += numcol;
        column_labels.insert(it,numcol,wxEmptyString);
        wxGridTableMessage msg( this,wxGRIDTABLE_NOTIFY_COLS_INSERTED,pos,numcol );

@@ -40,6 +40,8 @@
 
 class soundingdata;
 
+#include <vector>
+
 //  Missing from MSW include files
 #ifdef _MSC_VER
 typedef __int32 int32_t;
@@ -95,6 +97,7 @@ survey_pi::survey_pi(void *ppimgr)
 
 void survey_pi::ImportHydromagicTrack(TiXmlElement *track)
 {
+	  
       TiXmlElement *parameter = track->FirstChildElement();
       while (parameter)
       {
@@ -158,8 +161,8 @@ void survey_pi::ImportHydromagicTrack(TiXmlElement *track)
                         float lon = atof(trackpoint->Attribute("lon"));
                         float dpt = atof(trackpoint->Attribute("dpt"));
                         float tide = atof(trackpoint->Attribute("tide"));
-                        float ele = atof(trackpoint->Attribute("ele"));
-                        long time = atol(trackpoint->Attribute("time"));
+                        float ele = atof(trackpoint->Attribute("ele"));					
+                        long time = atol(trackpoint->Attribute("time"));						
                         int mark = atoi(trackpoint->Attribute("mark"));
 						
 						
@@ -253,7 +256,8 @@ void survey_pi::ExportHydromagic(int survey_id, wxString filename)
       track->LinkEndChild(textsize);
 
       TiXmlElement * trackpoints = new TiXmlElement("trackpoints");
-      wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), tide, strftime('%%s', measured) FROM sounding WHERE survey_id=%i"), survey_id);
+	  
+      wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), tide, measured FROM sounding WHERE survey_id=%i"), survey_id);
       char **results;
       int n_rows;
       int n_columns;
@@ -289,15 +293,21 @@ void survey_pi::ExportHydromagic(int survey_id, wxString filename)
 			latl = s.Mid(6, f - 6); 
 			lonl = s.Mid(f + 1, l - f - 2);
 
-            //lonl = s.SubString(6, s.First(_T(" ")));
-            //latl = s.SubString(s.First(_T(" ")), s.Length() - 1);
+			wxString t(tim, wxConvUTF8);
+			
+			wxDateTime ttt;
+			ttt.ParseDateTime(t);
+						
+			time_t t32 = ttt.GetTicks();
+			int64_t i64 = *((int64_t*)&t32); // To avoid using strftime(), keep everything UTC
+			
             TiXmlElement * trackpoint = new TiXmlElement("trackpoint");
             trackpoint->SetAttribute("lat", latl.ToUTF8());
             trackpoint->SetAttribute("lon", lonl.ToUTF8());
             trackpoint->SetAttribute("dpt", dpt);
             trackpoint->SetAttribute("tide", tid);
             trackpoint->SetAttribute("ele", 0);
-            trackpoint->SetAttribute("time", tim);
+            trackpoint->SetAttribute("time", i64);
             trackpoint->SetAttribute("mark", 0);
             trackpoints->LinkEndChild(trackpoint);
       }
@@ -332,7 +342,153 @@ void survey_pi::ExportHydromagic(int survey_id, wxString filename)
       delete doc;
 }
 
+void survey_pi::ExportXYZ(int survey_id, wxString filename)
+{
+	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), tide, measured FROM sounding WHERE survey_id=%i"), survey_id);
+	char **results;
+	int n_rows;
+	int n_columns;
+	char *dpt;
+	char *pos;
+	char *tid;
+	char *tim;
 
+	ret = sqlite3_get_table(m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
+	if (ret != SQLITE_OK)
+	{
+		/* some error occurred */
+		wxLogMessage(_T("Spatialite SQL error: %s\n"), err_msg);
+		sqlite3_free(err_msg);
+		return;
+	}
+
+	wxTextFile file(filename);
+	file.Open();
+	file.Clear();
+
+	wxString sFinal;
+	wxString sSpace = _T(" ");
+
+	for (int i = 1; i <= n_rows; i++)
+	{
+		dpt = results[(i * n_columns) + 0];
+		pos = results[(i * n_columns) + 1];
+		tid = results[(i * n_columns) + 2];
+		tim = results[(i * n_columns) + 3];
+		double tide = atof(tid);
+		wxString s(pos, wxConvUTF8);
+
+		int f = s.First(_T(" "));
+		int l = s.Len();
+
+		wxString latl;
+		wxString lonl;
+		wxString depth(dpt,wxConvUTF8);
+
+		wxDateTime dt;
+		wxString time(tim, wxConvUTF8);
+		dt.ParseDateTime(time);
+
+		wxString str = dt.Format(wxT("%Y-%m-%dT%H:%M:%SZ"));
+		
+		latl = s.Mid(6, f - 6);
+		lonl = s.Mid(f + 1, l - f - 2);
+
+		sFinal = latl + sSpace + lonl + sSpace + depth + sSpace + str;
+
+		file.AddLine(sFinal);
+
+		/*
+		TiXmlElement * trackpoint = new TiXmlElement("trackpoint");
+		trackpoint->SetAttribute("lat", latl.ToUTF8());
+		trackpoint->SetAttribute("lon", lonl.ToUTF8());
+		trackpoint->SetAttribute("dpt", dpt);
+		trackpoint->SetAttribute("tide", tid);
+		trackpoint->SetAttribute("ele", 0);
+		trackpoint->SetAttribute("time", tim);
+		trackpoint->SetAttribute("mark", 0);
+		trackpoints->LinkEndChild(trackpoint);
+		*/
+	}
+	
+	file.Write();
+	file.Close();
+
+}
+
+
+void survey_pi::ExportCSV(int survey_id, wxString filename)
+{
+	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), tide, measured FROM sounding WHERE survey_id=%i"), survey_id);
+	char **results;
+	int n_rows;
+	int n_columns;
+	char *dpt;
+	char *pos;
+	char *tid;
+	char *tim;
+
+	ret = sqlite3_get_table(m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
+	if (ret != SQLITE_OK)
+	{
+		/* some error occurred */
+		wxLogMessage(_T("Spatialite SQL error: %s\n"), err_msg);
+		sqlite3_free(err_msg);
+		return;
+	}
+
+	wxTextFile file(filename);
+	file.Open();
+	file.Clear();
+
+	wxString sFinal;
+	wxString sComma = _T(",");
+
+	for (int i = 1; i <= n_rows; i++)
+	{
+		dpt = results[(i * n_columns) + 0];
+		pos = results[(i * n_columns) + 1];
+		tid = results[(i * n_columns) + 2];
+		tim = results[(i * n_columns) + 3];
+		double tide = atof(tid);
+		wxString s(pos, wxConvUTF8);
+
+		int f = s.First(_T(" "));
+		int l = s.Len();
+
+		wxString latl;
+		wxString lonl;
+		wxString depth(dpt, wxConvUTF8);
+
+		wxDateTime dt;
+		wxString time(tim, wxConvUTF8);
+		dt.ParseDateTime(time);
+
+		wxString str = dt.Format(wxT("%Y-%m-%dT%H:%M:%SZ"));
+
+		latl = s.Mid(6, f - 6);
+		lonl = s.Mid(f + 1, l - f - 2);
+
+		sFinal = latl + sComma + lonl + sComma + depth + sComma + str;
+
+		file.AddLine(sFinal);
+
+		/*
+		TiXmlElement * trackpoint = new TiXmlElement("trackpoint");
+		trackpoint->SetAttribute("lat", latl.ToUTF8());
+		trackpoint->SetAttribute("lon", lonl.ToUTF8());
+		trackpoint->SetAttribute("dpt", dpt);
+		trackpoint->SetAttribute("tide", tid);
+		trackpoint->SetAttribute("ele", 0);
+		trackpoint->SetAttribute("time", tim);
+		trackpoint->SetAttribute("mark", 0);
+		trackpoints->LinkEndChild(trackpoint);
+		*/
+	}
+	file.Write();
+	file.Close();
+
+}
 bool survey_pi::ImportHydromagic(wxString filename)
 {
       TiXmlDocument *doc = new TiXmlDocument();
@@ -451,6 +607,99 @@ bool survey_pi::ImportHydromagic(wxString filename)
       return true;
 }
 
+bool survey_pi::ImportXYZ(wxString filename)
+{
+
+	wxString		str;
+	wxTextFile      m_istream;
+	wxString token[40];
+	wxString s0, s1, m_sDT;
+    wxDateTime dt;
+	double lat;
+	double lon;
+	double depth;
+
+	int l = 0;
+	
+
+	m_istream.Open(filename);
+
+
+	for (str = m_istream.GetFirstLine(); !m_istream.Eof(); str = m_istream.GetNextLine())
+	{
+		wxStringTokenizer tokenizer(str, wxT(" "));
+	    int i = 0;
+		while (tokenizer.HasMoreTokens())	{
+				token[i] = tokenizer.GetNextToken();
+				i++;
+		}
+
+		token[0].ToDouble(&lat);
+		token[1].ToDouble(&lon);
+		token[2].ToDouble(&depth);
+
+		s0 = token[3].Mid(0, 10);
+		s1 = token[3].Mid(11, 8);
+		m_sDT = s0 + _T(" ") + s1;
+
+		dt.ParseDateTime(m_sDT);  // When not testing
+
+		time_t t = dt.GetTicks();
+		int64_t tim = *((int64_t*)&t);
+
+		InsertSounding(depth, lat, lon, 0.0, t, 3395);
+	}
+	
+	m_istream.Close();
+	return true;
+}
+
+bool survey_pi::ImportCSV(wxString filename)
+{
+
+	wxString		str;
+	wxTextFile      m_istream;
+	wxString token[4];
+	wxString s0, s1, m_sDT;
+	wxDateTime dt;
+	double lat;
+	double lon;
+	double depth;
+
+	int l = 0;
+	
+
+	m_istream.Open(filename);
+
+	for (str = m_istream.GetFirstLine(); !m_istream.Eof(); str = m_istream.GetNextLine())
+	{
+
+		wxStringTokenizer tokenizer(str, wxT(","));
+		int i = 0;
+		while (tokenizer.HasMoreTokens())	{
+			token[i] = tokenizer.GetNextToken();
+			i++;
+		}
+
+		token[0].ToDouble(&lat);
+		token[1].ToDouble(&lon);
+		token[2].ToDouble(&depth);
+
+		s0 = token[3].Mid(0, 10);
+		s1 = token[3].Mid(11, 8);
+		m_sDT = s0 + _T(" ") + s1;
+
+		dt.ParseDateTime(m_sDT);  // When not testing
+
+		time_t t = dt.GetTicks();
+		int64_t tim = *((int64_t*)&t);
+
+		InsertSounding(depth, lat, lon, 0.0, t, 3395);
+	}
+	m_istream.Close();
+	return true;
+}
+
 bool survey_pi::dbMergeSurveys(int survey1, int survey2){
 
 	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), tide, strftime('%%s', measured) FROM sounding WHERE survey_id=%i"), survey1);
@@ -473,7 +722,6 @@ bool survey_pi::dbMergeSurveys(int survey1, int survey2){
 	int i = 0;
 	double lat, lon;
 	wxString s0, s1;
-	//wxString depth;
 	double depth;
 	double tide;
 
@@ -557,61 +805,74 @@ wxArrayString survey_pi::GetSurveyList()
 
 vector<soundingdata> survey_pi::SetTable(int i)
 {
-      char **result;
-      int n_rows;
-      int n_columns;
-	  soundingdata mysounding;
+	char **result;
+	int n_rows = 0;
+	int n_columns;
+	soundingdata mysounding;
 
-	  all_soundingdata.clear();
+	all_soundingdata.clear();
 
-	  wxString myInt = wxString::Format(wxT("%i"),i);
-	  
-	  wxString myString = _T("SELECT sounding_id, depth, measured, AsText(geom) FROM sounding WHERE survey_id = '") + myInt + _T("'");
-      dbGetTable(myString, &result, n_rows, n_columns);
-      wxArrayString soundings;
-	  
-	  wxString s0, s1;
-	  double lat, lon;
+	//wxString myInt = wxString::Format(wxT("%i"), i);
 
-      for (int i = 1; i <= n_rows; i++)
-	{
-		    char *id = result[(i * n_columns) + 0];
-            char *depth = result[(i * n_columns) + 1];
-			
-			
-            int survey_id = atoi(id);
-            wxString sounding(depth, wxConvUTF8);
-            soundings.Add(sounding);
-			mysounding.depth = sounding;
-
-			char *measured = result[(i * n_columns) + 2];
-			wxString time_measured(measured, wxConvUTF8);
-			mysounding.time = time_measured;
-
-			char *geom = result[(i * n_columns) + 3];
-			wxString point(geom, wxConvUTF8);
-			//wxMessageBox(point);
-
-			int f = point.Find(_T(" ")); 
-			int l = point.Len();
-			
-			s0 = point.Mid(6, f - 6);
-			mysounding.lat = s0;
-			
-			s0.ToDouble(&lat);
-			mysounding.latD = lat;
-
-			s1 = point.Mid(f + 1, l - f -2);
-			mysounding.lon = s1;
-			
-			s1.ToDouble(&lon);
-			mysounding.lonD = lon;
-
-			all_soundingdata.push_back(mysounding);
+	wxString myString = wxString::Format(_T("SELECT sounding_id, depth, measured, AsText(geom), tide FROM sounding WHERE survey_id = %i"), i);
+	dbGetTable(myString, &result, n_rows, n_columns);
+	wxArrayString soundings;
+	wxString s0, s1;
+	double lat, lon;
+	if (n_rows == 0){
+		return all_soundingdata;
 	}
-      dbFreeResults(result);
-      return all_soundingdata;
+	for (int i = 1; i <= n_rows; i++){
+		
+		char *id = result[(i * n_columns) + 0];
+		
+		int sounding_id = atoi(id);
+		mysounding.sdgid = sounding_id;
+
+		char *depth = result[(i * n_columns) + 1];
+
+		wxString sounding(depth, wxConvUTF8);
+		soundings.Add(sounding);
+		mysounding.depth = sounding;
+
+		char *measured = result[(i * n_columns) + 2];
+		
+		wxString time_measured(measured, wxConvUTF8);
+		mysounding.time = time_measured;
+
+		char *geom = result[(i * n_columns) + 3];
+
+		char *tide = result[(i * n_columns) + 4];
+		wxString mt(tide, wxConvUTF8);
+
+		mysounding.tide = mt;
+		
+		wxString point(geom, wxConvUTF8);
+		//wxMessageBox(point);
+
+		int f = point.Find(_T(" "));
+		int l = point.Len();
+
+		s0 = point.Mid(6, f - 6);
+		mysounding.lat = s0;
+
+		s0.ToDouble(&lat);
+		mysounding.latD = lat;
+
+		s1 = point.Mid(f + 1, l - f - 2);
+		mysounding.lon = s1;
+
+		s1.ToDouble(&lon);
+		mysounding.lonD = lon;
+
+		all_soundingdata.push_back(mysounding);
+	}
+	// dbFreeResults(result);
+	return all_soundingdata;
+
 }
+
+
 
 wxArrayString survey_pi::SetSoundings(int i)
 {
@@ -619,8 +880,8 @@ wxArrayString survey_pi::SetSoundings(int i)
       int n_rows;
       int n_columns;
 
-	  wxString myInt = wxString::Format(wxT("%i"),i);
-	  wxString myString = _T("SELECT * FROM sounding WHERE survey_id = '") + myInt + _T("'");
+	  //wxString myInt = wxString::Format(wxT("%i"),i);
+	  wxString myString = wxString::Format(_T("SELECT * FROM sounding WHERE survey_id = %i"), i);
       dbGetTable(myString, &result, n_rows, n_columns);
       wxArrayString soundings;
       for (int i = 1; i <= n_rows; i++)
@@ -716,10 +977,17 @@ void survey_pi::DeleteSurvey(int id)
       sql = wxString::Format(_T("DELETE FROM survey WHERE survey_id=%i"), id);
       dbQuery(sql);
       m_activesurvey = 0;
-      m_activesurveyname = wxEmptyString;	 
+      m_activesurveyname = wxEmptyString;	
+	  m_pSurveyDialog->mysoundings.clear();
 	  FillSurveyDropdown();
 	  FillSurveyGrid();
 	  FillSurveyInfo();	  
+}
+
+void survey_pi::DeleteSounding(int id)
+{
+	wxString sql = wxString::Format(_T("DELETE FROM sounding WHERE sounding_id=%i"), id);
+	dbQuery(sql);
 }
 
 int survey_pi::InsertSounding(double depth, double lat, double lon, double tide, time_t timestamp, int projection)
@@ -734,16 +1002,22 @@ int survey_pi::InsertSounding(double depth, double lat, double lon, double tide,
 	}
       wxString s = m_pSurveyDialog->m_chSurvey->GetStringSelection();
 	  int i = GetSurveyId(s);
-	  wxString time = _T("current_timestamp");
-      if (timestamp > 0)
-            time = _T("'") + wxDateTime(timestamp).FormatISODate().Append(_T(" ")).Append(wxDateTime(timestamp).FormatISOTime()) +  _T("'"); 
-      // wxString myTime = _T("'2015-09-14 15:00:00'");
+	  wxString time; // = _T("current_timestamp");
+	  wxDateTime dt = wxDateTime::Now();
+	  
+	  dt.MakeGMT();
+      dt.ParseDateTime(time);
+
+	  time = _T("'") + dt.Format(wxT("%Y-%m-%d %H:%M:%S")) + _T("'");	  
+	  
+	  if (timestamp > 0){
+		  time = _T("'") + wxDateTime(timestamp).FormatISODate().Append(_T(" ")).Append(wxDateTime(timestamp).FormatISOTime()) + _T("'");
+	  }
+
 	  wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\") VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time, i, lat, lon, projection, tide);
-	  numsoundings++;
-	 // wxMessageBox(sql);
+	  numsoundings++; // For loading NMEA file
 	  dbQuery (sql);
       return sqlite3_last_insert_rowid(m_database);	  
-
 }
 
 int survey_pi::Init(void)
@@ -922,6 +1196,10 @@ int survey_pi::Init(void)
              SURVEY_TOOL_POSITION, 0, this);
 
       m_pSurveyDialog = NULL;
+	  m_pSurveyOverlayFactory = NULL;
+	  LoadHarmonics();
+	 
+	  //DoRenderSurveyOverlay();
 
       return (WANTS_TOOLBAR_CALLBACK    |
               INSTALLS_TOOLBAR_TOOL     |
@@ -930,11 +1208,12 @@ int survey_pi::Init(void)
               WANTS_NMEA_EVENTS         |
               WANTS_OVERLAY_CALLBACK    |
               WANTS_ONPAINT_VIEWPORT    |
-              //WANTS_OPENGL_OVERLAY_CALLBACK |
-              //WANTS_DYNAMIC_OPENGL_OVERLAY_CALLBACK |
+              WANTS_OPENGL_OVERLAY_CALLBACK |
+              WANTS_DYNAMIC_OPENGL_OVERLAY_CALLBACK |
               WANTS_CONFIG
            );
 
+	  
 	
 
 }
@@ -952,7 +1231,9 @@ bool survey_pi::DeInit(void)
 
             m_pSurveyDialog->Close();
             delete m_pSurveyDialog;
+			delete m_pSurveyOverlayFactory;
             m_pSurveyDialog = NULL;
+			m_pSurveyOverlayFactory = NULL;
 			
       }
       SaveConfig();	  
@@ -1047,21 +1328,29 @@ void survey_pi::FillSurveyGrid(){
 
 		int t = m_pSurveyDialog->m_chSurvey->GetSelection();
 		wxString s = m_pSurveyDialog->m_chSurvey->GetString(t);
-
+		
 		
 		int id = GetSurveyId(s);
 		SetActiveSurveyId(id);
-		m_pSurveyDialog->mysoundings.clear();		
+	
 		m_pSurveyDialog->mysoundings = SetTable(id);
 
 		int i = 0;
 		
-		for (std::vector<soundingdata>::iterator it = m_pSurveyDialog->mysoundings.begin(); it != m_pSurveyDialog->mysoundings.end(); it++)
+		for (std::vector<soundingdata>::iterator it = all_soundingdata.begin(); it != all_soundingdata.end(); it++)
 		{
+			wxDateTime dt;			
+			dt.ParseDateTime(it->time);			
+			wxString str = dt.Format(wxT("%Y-%m-%dT%H:%M:%SZ"));
+			
 			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 0, it->depth);
-			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 1, it->time);
+			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 1, str);
 			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 2, it->lat);
 			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 3, it->lon);
+
+			wxString sid = wxString::Format(wxT("%i"), it->sdgid);
+			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 4, sid);
+			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 5, it->tide);
 
 			m_pSurveyDialog->m_gdSoundings->AppendRows(1);
 			i++;
@@ -1089,14 +1378,50 @@ void survey_pi::OnToolbarToolCallback(int id)
       if(NULL == m_pSurveyDialog)
       {
             m_pSurveyDialog = new SurveyDlg(m_parent_window);
+			m_pSurveyOverlayFactory = new SurveyOverlayFactory(*m_pSurveyDialog);
             m_pSurveyDialog->plugin = this;
             m_pSurveyDialog->Move(wxPoint(m_survey_dialog_x, m_survey_dialog_y));
             FillSurveyDropdown();
 			FillSurveyInfo();
-			FillSurveyGrid();			
+			FillSurveyGrid();
+			SetSettings();
       }
 
       m_pSurveyDialog->Show(!m_pSurveyDialog->IsShown());
+}
+
+void survey_pi::SetSettings(){
+
+	m_pSurveyDialog->mySettings.m_iOpacity = m_iOpacity;
+	m_pSurveyDialog->mySettings.m_iUnits = m_iUnits;
+	m_pSurveyDialog->mySettings.m_bCalcTide = m_bCalcTide;
+	m_pSurveyDialog->mySettings.m_sCorrection = m_sCorrection;
+	m_pSurveyDialog->mySettings.m_bRenderAllSurveys = m_bRenderAllSurveys;
+	m_pSurveyDialog->mySettings.m_bConnectSoundings = m_bConnectSoundings;
+	m_pSurveyDialog->mySettings.m_bRenderSoundingText = m_bRenderSoundingText;
+	m_pSurveyDialog->mySettings.m_bRenderWithTide = m_bRenderWithTide;
+	m_pSurveyDialog->mySettings.m_iSoundingShape = m_iSoundingShape;
+	m_pSurveyDialog->mySettings.m_bUseSymbol = m_bUseSymbol;
+	m_pSurveyDialog->mySettings.m_bUseDepthColours = m_bUseDepthColours;
+	m_pSurveyDialog->mySettings.m_sSoundingColor = m_sSoundingColor;
+	m_pSurveyDialog->mySettings.m_sConnectorColor = m_sConnectorColor;
+	m_pSurveyDialog->mySettings.m_sFont = m_sFont;
+	m_pSurveyDialog->mySettings.m_sFontColor = m_sFontColor;
+	m_pSurveyDialog->mySettings.m_fLOA = m_fLOA;
+	m_pSurveyDialog->mySettings.m_fBeam = m_fBeam;
+	m_pSurveyDialog->mySettings.m_fSounderBow = m_fSounderBow;
+	m_pSurveyDialog->mySettings.m_fWaterlineOffset = m_fWaterlineOffset;
+	m_pSurveyDialog->mySettings.m_fGPSBow = m_fGPSBow;
+	m_pSurveyDialog->mySettings.m_fGPSPort = m_fGPSPort;
+	m_pSurveyDialog->mySettings.m_fMinDistance = m_fMinDistance;
+	m_pSurveyDialog->mySettings.m_fAutoNewDistance = m_fAutoNewDistance;
+
+	m_pSurveyDialog->mySettings.mLastSdgId = mLastSdgId;
+	m_pSurveyDialog->mySettings.mLastSurveyId = mLastSurveyId;
+
+	m_pSurveyDialog->mySettings.mLastX = mLastX;
+	m_pSurveyDialog->mySettings.mLastY = mLastY;
+
 }
 
 bool survey_pi::LoadConfig(void)
@@ -1109,13 +1434,23 @@ bool survey_pi::LoadConfig(void)
 
             pConf->Read ( _T ( "Opacity" ),  &m_iOpacity, 255 );
             pConf->Read ( _T ( "Units" ),  &m_iUnits, METERS );
+			pConf->Read ( _T ( "CalculateTide" ), &m_bCalcTide, false);
+			pConf->Read ( _T ( "Correction" ), &m_sCorrection);
+
             pConf->Read ( _T ( "RenderOverlay" ), &m_bRenderOverlay, true );
             pConf->Read ( _T ( "RenderAll" ), &m_bRenderAllSurveys, true );
             pConf->Read ( _T ( "ConnectSoundings" ), &m_bConnectSoundings, true );
+			pConf->Read ( _T ( "RenderSoundingText" ), &m_bRenderSoundingText, true);
+			pConf->Read ( _T ( "RenderWithTide" ), &m_bRenderWithTide, false);
+
             pConf->Read ( _T ( "SoundingColor" ), &m_sSoundingColor );
             pConf->Read ( _T ( "ConnectorColor" ), &m_sConnectorColor );
             pConf->Read ( _T ( "SoundingFont" ), &m_sFont );
             pConf->Read ( _T ( "SoundingFontColor" ), &m_sFontColor );
+			pConf->Read ( _T ( "SoundingSymbol" ), &m_iSoundingShape, 0);
+			pConf->Read ( _T ( "UseSymbol" ), &m_bUseSymbol, false);
+			pConf->Read ( _T ( "UseDepthColours"), &m_bUseDepthColours, false);
+
             pConf->Read ( _T ( "ActiveSurvey" ), &m_activesurvey, 0 );
 
             pConf->Read ( _T ( "LOA" ), &m_fLOA, 0.0 );
@@ -1149,13 +1484,21 @@ bool survey_pi::SaveConfig(void)
             pConf->SetPath ( _T ( "/Settings/Survey" ) );
             pConf->Write ( _T ( "Opacity" ), m_iOpacity );
             pConf->Write ( _T ( "Units" ), m_iUnits );
+			pConf->Write ( _T ( "CalculateTide"), m_bCalcTide );
+			pConf->Write ( _T ( "Correction"), m_sCorrection );
             pConf->Write ( _T ( "RenderOverlay" ), m_bRenderOverlay );
             pConf->Write ( _T ( "RenderAll" ), m_bRenderAllSurveys );
             pConf->Write ( _T ( "ConnectSoundings" ), m_bConnectSoundings );
+			pConf->Write ( _T ( "RenderSoundingText"), m_bRenderSoundingText );
+			pConf->Write ( _T ( "RenderWithTide"), m_bRenderWithTide );
             pConf->Write ( _T ( "SoundingColor" ), m_sSoundingColor );
             pConf->Write ( _T ( "ConnectorColor" ), m_sConnectorColor );
             pConf->Write ( _T ( "SoundingFont" ), m_sFont );
             pConf->Write ( _T ( "SoundingFontColor" ), m_sFontColor );
+			pConf->Write ( _T ( "SoundingSymbol" ), m_iSoundingShape);
+			pConf->Write ( _T ( "UseSymbol" ), m_bUseSymbol);
+			pConf->Write ( _T ( "UseDepthColours"), m_bUseDepthColours);
+
             pConf->Write ( _T ( "ActiveSurvey" ), m_activesurvey );
 
             pConf->Write ( _T ( "LOA" ), m_fLOA );
@@ -1179,10 +1522,12 @@ bool survey_pi::SaveConfig(void)
 
 void survey_pi::ShowPreferencesDialog( wxWindow* parent )
 {
-      SurveyCfgDlg *dialog = new SurveyCfgDlg( parent, wxID_ANY, _("Survey Preferences"), wxPoint( m_survey_dialog_x, m_survey_dialog_y), wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
+	SurveyCfgDlg *dialog = new SurveyCfgDlg(parent, wxID_ANY, _("Survey Preferences"), wxPoint(m_survey_dialog_x, m_survey_dialog_y), wxSize(650, 650), wxDEFAULT_DIALOG_STYLE);
       dialog->Fit();
       wxColour cl;
+
       DimeWindow(dialog);
+
       dialog->m_cbRenderOverlay->SetValue(m_bRenderOverlay);
       dialog->m_sOpacity->SetValue(m_iOpacity);
       switch(m_iUnits)
@@ -1197,10 +1542,27 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
             dialog->m_rbFathoms->SetValue(true);
             break;
       }
+
+	  // Tide/Correction
+	  dialog->m_cbCalcTide->SetValue(m_bCalcTide);
+	  dialog->m_tCorrection->SetValue(m_sCorrection);
+
+
       dialog->m_rbRendedAllSurveys->SetValue(m_bRenderAllSurveys);
       dialog->m_rbRenderActiveSurvey->SetValue(!m_bRenderAllSurveys);
       dialog->m_cbConnectSoundings->SetValue(m_bConnectSoundings);
-      dialog->m_cpSoundingColor->SetColour(m_sSoundingColor);
+	  
+	  // Render text
+	  dialog->m_cbRenderDepthValues->SetValue(m_bRenderSoundingText);
+	  dialog->m_cbSdgsPlusTide->SetValue(m_bRenderWithTide);
+	  
+	  // Symbols
+	  dialog->m_lSymbolList->SetSelection(m_iSoundingShape);
+	  dialog->m_cbSelectedSymbol->SetValue(m_bUseSymbol);
+	  dialog->m_cbUseDepthColours->SetValue(m_bUseDepthColours);
+      
+	  
+	  dialog->m_cpSoundingColor->SetColour(m_sSoundingColor);
       dialog->m_cpConnectorColor->SetColour(m_sConnectorColor);
       dialog->m_fpFont->SetSelectedFont(wxFont(m_sFont));
       dialog->m_cpFontColor->SetColour(m_sFontColor);
@@ -1223,8 +1585,23 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
                   m_iUnits = FEET;
             else
                   m_iUnits = FATHOMS;
+			// Tide/Correction
+			m_bCalcTide = dialog->m_cbCalcTide->GetValue();
+			m_sCorrection = dialog->m_tCorrection->GetValue();
+
+
             m_bRenderAllSurveys = dialog->m_rbRendedAllSurveys->GetValue();
             m_bConnectSoundings = dialog->m_cbConnectSoundings->GetValue();
+
+			// Render Text
+			m_bRenderSoundingText = dialog->m_cbRenderDepthValues->GetValue();
+			m_bRenderWithTide = dialog->m_cbSdgsPlusTide->GetValue();
+
+			// Symbols
+			m_iSoundingShape = dialog->m_lSymbolList->GetSelection();
+			m_bUseSymbol = dialog->m_cbSelectedSymbol->GetValue();
+			m_bUseDepthColours = dialog->m_cbUseDepthColours->GetValue();
+
             m_sSoundingColor = dialog->m_cpSoundingColor->GetColour().GetAsString();
             m_sConnectorColor = dialog->m_cpConnectorColor->GetColour().GetAsString();
             m_sFont = dialog->m_fpFont->GetSelectedFont().GetNativeFontInfoDesc();
@@ -1248,51 +1625,58 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
             m_fAutoNewDistance = value;
 
             SaveConfig();
+			SetSettings();
+			RequestRefresh(m_parent_window); // refresh main window
       }
       delete dialog;
 }
 
-void survey_pi::DrawSounding(wxDC &dc, int x, int y, double depth, long sounding_id, long survey_id)
-{
-      double coef = 1.0;
-      if (m_iUnits == FATHOMS)
-            coef = 1.8288;
-      else if (m_iUnits == FEET)
-            coef = 0.3048;
-      wxPen p (wxColour(m_sSoundingColor), 2);
-      dc.SetPen(p);
-      dc.DrawLine(x - 5, y - 5, x + 5, y + 5);
-      dc.DrawLine(x - 5, y + 5, x + 5, y - 5);
-      dc.SetFont(wxFont(m_sFont));
-      dc.SetTextForeground(wxColour(m_sFontColor));
-      dc.DrawText(wxString::Format(wxT("%.1f"), depth / coef), x, y);
-      if (m_bConnectSoundings)
-      {
-            if (mLastX != -1 && mLastY != -1 && mLastSdgId == sounding_id -1 && mLastSurveyId == survey_id)
-            {
-                  wxPen p (wxColour(m_sConnectorColor), 1);
-                  dc.SetPen(p);
-                  dc.DrawLine(x, y, mLastX, mLastY);
-            }
-            mLastX = x;
-            mLastY = y;
-            mLastSdgId = sounding_id;
-            mLastSurveyId = survey_id;
-      }
+
+bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp){
+	
+	if (!m_pSurveyDialog ||
+		!m_pSurveyDialog->IsShown() ||
+		!m_pSurveyOverlayFactory){
+		return false;
+	}
+	
+	m_pSurveyDialog->SetViewPort(vp);
+	viewscale = vp->view_scale_ppm;
+	GetSurveySoundings(m_activesurvey);
+	m_pSurveyOverlayFactory->RenderSurveyOverlay(dc, vp);
+	return true;
 }
 
-bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
+bool survey_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 {
-      
-	viewscale = vp->view_scale_ppm;
-	if (!b_dbUsable || !m_bRenderOverlay)
-            return false;
+	if (!m_pSurveyDialog ||
+		!m_pSurveyDialog->IsShown() ||
+		!m_pSurveyOverlayFactory)
+		return false;
 
-	  
+	m_pSurveyDialog->SetViewPort(vp);
+	viewscale = vp->view_scale_ppm;
+    GetSurveySoundings(m_activesurvey);
+	m_pSurveyOverlayFactory->RenderGLSurveyOverlay(pcontext, vp);
+	return true;
+}
+
+
+
+bool survey_pi::GetSurveySoundings(int as)
+{    
+	soundingdata mySounding;
+	mySurveySoundings.clear();
+	
+	if (!b_dbUsable || !m_bRenderOverlay)
+            return false;  
 
       //wxString sql = wxString::Format(_T("SELECT depth, AsText(geom) FROM sounding WHERE Within(geom, PolygonFromText('POLYGON((%f %f, %f %f, %f %f, %f %f))'))"), vp->lat_min, vp->lon_min, vp->lat_min, vp->lon_max, vp->lat_max, vp->lon_max, vp->lat_max, vp->lon_min);
-	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id FROM sounding WHERE MbrWithin(geom,BuildMbr(%f, %f, %f, %f)) AND survey_id = %i"), vp->lat_max, vp->lon_min, vp->lat_min, vp->lon_max, m_activesurvey);
- 
+	  wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide FROM sounding"));
+	  if (as > 0 && !m_bRenderAllSurveys){
+		  sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide FROM sounding WHERE survey_id = %i"), as);
+	  }
+
 	  char **results;
       int n_rows;
       int n_columns;
@@ -1300,6 +1684,9 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
       char *pos;
       char *sdgid;
       char *surid;
+	  char *measured;
+	  char *tide;
+
 	  wxString s0, s1;
       ret = sqlite3_get_table (m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
 	if (ret != SQLITE_OK)
@@ -1316,12 +1703,18 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
             pos = results[(i * n_columns) + 1];
             sdgid = results[(i * n_columns) + 2];
             surid = results[(i * n_columns) + 3];
+			measured = results[(i * n_columns) + 4];
+			tide = results[(i * n_columns) + 5];
             double depth = atof(dpt);
             wxString s(pos, wxConvUTF8);
+
+			wxString d(dpt, wxConvUTF8);
 			
 			double latl;
             double lonl;
 			
+
+
 			int f = s.First(_T(" "));
 			int l = s.Len();
 
@@ -1330,37 +1723,29 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
 		
 			s1 = s.Mid(f + 1, l - f - 2);
 			s1.ToDouble(&lonl);
+			
+			mySounding.latD = latl;
+			mySounding.lonD = lonl;
 
-            wxPoint pl;
-            GetCanvasPixLL(vp, &pl, latl, lonl);
-            if(dc.IsOk())
-            {
-                  DrawSounding(dc, pl.x, pl.y, depth, atoi(sdgid), atoi(surid));
-            }
+			wxString ms(tide, wxConvUTF8 );
+			mySounding.tide = ms;
+
+			wxString dt(dpt, wxConvUTF8);
+			mySounding.depth = dt;
+			mySounding.surid = atoi(surid);
+			mySounding.sdgid = atoi(sdgid);
+			mySurveySoundings.push_back(mySounding);			
 	}
       
-      mLastX = -1;
+	  m_pSurveyDialog->mysoundings = mySurveySoundings;
+
+	  mLastX = -1;
       mLastY = -1;
       
-      //if(PointInLLBox(vp, lon, lat) || PointInLLBox(vp, lon-360., lat))
       sqlite3_free_table (results);
+
+	  
       return true;
-}
-
-//bool survey_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
-//{
-//      return false;
-//}
-
-// Is the given point in the vp ??
-bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y)
-{
-
-
-    if (  x >= (vp->lon_min) && x <= (vp->lon_max) &&
-            y >= (vp->lat_min) && y <= (vp->lat_max) )
-            return TRUE;
-    return FALSE;
 }
 
 void survey_pi::StoreSounding(double depth)
@@ -1371,15 +1756,26 @@ void survey_pi::StoreSounding(double depth)
 	  sprintf(number, "%.2f", depth);
 	  depth = atof(number);
 	  double brg, dist;
+	  double tide;
+	  wxDateTime dt = wxDateTime::Now();
+
 	  dist = 0;
 	  if (m_latprev == 0){
-		  InsertSounding(depth, m_lat, m_lon, 00.0, 00.0, 3395);
+		  if (m_bCalcTide){
+			  tide = GetPortTideInfo(m_lat, m_lon, dt);
+		  }
+		  else{ tide = 0; }
+		  InsertSounding(depth, m_lat, m_lon, tide, 00.0, 3395);
 		  m_pSurveyDialog->mySurveyTrace->SetData(OCPN_DBP_STC_MDA, depth, _("meters"));
 	  }
 	  if (!m_latprev == 0){
 		  DistanceBearingMercator_Plugin(m_latprev, m_lonprev, m_lat, m_lon, &brg, &dist);
 		  if (dist * 1852 >= m_fMinDistance){
-			  InsertSounding(depth, m_lat, m_lon, 00.0, 00.0, 3395);
+			  if (m_bCalcTide){
+				  tide = GetPortTideInfo(m_lat, m_lon, dt);
+			  }
+			  else{ tide = 0; }
+			  InsertSounding(depth, m_lat, m_lon, tide, 00.0, 3395);
 			  m_pSurveyDialog->mySurveyTrace->SetData(OCPN_DBP_STC_MDA, depth, _("meters"));
 			  m_latprev = m_lat;
 			  m_lonprev = m_lon;
@@ -1518,6 +1914,8 @@ void survey_pi::SetNMEASentence(wxString &sentence)
 							m_lon = lon_deg + (lon_min / 60.);
 							if (m_NMEA0183.Rmc.Position.Longitude.Easting == West)
 								m_lon = -m_lon;
+
+							m_cog = m_NMEA0183.Rmc.TrackMadeGoodDegreesTrue;
 							m_lastPosReport = wxDateTime::Now();
 						}
 					}
@@ -1530,7 +1928,7 @@ void survey_pi::SetNMEASentence(wxString &sentence)
 
 void survey_pi::ParseNMEASentence(wxString sentence)
 {
-
+	
 	wxString m_depth;
 	wxString token[40];
 	wxString s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11;
@@ -1549,6 +1947,7 @@ void survey_pi::ParseNMEASentence(wxString sentence)
 		s1 = token[3] + token[4];
 		mydata.lat = DDMLatToDecimal(s0);
 		mydata.lon = DDMLonToDecimal(s1);
+
 	}
 	else{
 		if (token[0].Right(3) == _T("ZDA")){
@@ -1562,21 +1961,21 @@ void survey_pi::ParseNMEASentence(wxString sentence)
 			s6 = token[3];
 			s7 = token[4];
 			s9 = s7 + _T("-") + s6 + _T("-") + s5 + _T(" ") + s4;
-			//wxMessageBox(s8,_T("ZDA"));
+
 			mydata.time = s9;// _T("$IIZDA,055842,15,09,2012,,*5D");  // 
 		}
 		else{
 			if (token[0].Right(3) == _T("RMC")){
 				//$GPRMC, 110858.989, A, 4549.9135, N, 00612.2671, E, 003.7, 207.5, 050513, , , A * 60
 				b_gotdepth = false;
-				//wxMessageBox(sentence);
+
 				s10 = token[3] + token[4];
 				s11 = token[5] + token[6];
 				mydata.lat = DDMLatToDecimal(s10);
 				mydata.lon = DDMLonToDecimal(s11);
 
-				//wxMessageBox(mydata.lat);
-				//wxMessageBox(mydata.lon);
+				s10 = token[8];
+				mydata.cog = s10;
 
 				s0 = token[1];
 				s1 = s0.Mid(0, 2);
@@ -1589,8 +1988,8 @@ void survey_pi::ParseNMEASentence(wxString sentence)
 				s8 = _T("20") + s5.Mid(4, 2);
 
 				s9 = s8 + _T("-") + s7 + _T("-") + s6 + _T(" ") + s4;
-				//wxMessageBox(s9 + s10 + s11, _T("RMC"));
-				mydata.time = s9;// _T("$IIZDA,055842,15,09,2012,,*5D");  // 										
+
+				mydata.time = s9;							
 			}
 			else{
 				if (token[0].Right(3) == _T("DBT")){
@@ -1616,12 +2015,17 @@ void survey_pi::ParseNMEASentence(wxString sentence)
 		mydata.depth.ToDouble(&value);
 		double depth2 = value;
 		mydata.lat.ToDouble(&valuela);
+		//wxMessageBox(mydata.lat);
+
 		double m_mlat = valuela;
 		mydata.lon.ToDouble(&valuelo);
 		double m_mlon = valuelo;
 
-		wxDateTime dt;
-		dt.ParseDateTime(mydata.time);
+		wxDateTime dt; 
+		
+		//dt = wxDateTime::Now();		// For testing using nmea without time
+
+		dt.ParseDateTime(mydata.time);  // When not testing
 
 		time_t t = dt.GetTicks();
 		int64_t i = *((int64_t*)&t);
@@ -1630,20 +2034,31 @@ void survey_pi::ParseNMEASentence(wxString sentence)
 		sprintf(number, "%.2f", depth2);
 		depth2 = atof(number);
 		double brg, dist;
+		double tide;
 
 		if (m_latprev == 0){
-			InsertSounding(depth2, m_mlat, m_mlon, 00.0, t, 3395);
+			if (m_bCalcTide){
+				tide = GetPortTideInfo(m_mlat, m_mlon, dt);
+			}
+			else{ tide = 0; }
+			InsertSounding(depth2, m_mlat, m_mlon, tide, t, 3395);
 			m_latprev = m_mlat;
 			m_lonprev = m_mlon;
 			b_gotposn = true;
 			return;
 		}
+
 		if (b_gotposn){
 			DistanceBearingMercator_Plugin(m_latprev, m_lonprev, m_mlat, m_mlon, &brg, &dist);
 			wxString str = wxString::Format(wxT("%6.6f"), (double)dist * 1852);
 			//wxMessageBox(str);
+			
 			if (dist * 1852 >= m_fMinDistance){
-				InsertSounding(depth2, m_mlat, m_mlon, 00.0, t, 3395);	
+				if (m_bCalcTide){
+					tide = GetPortTideInfo(m_mlat, m_mlon, dt);
+				}
+				else{ tide = 0; }
+				InsertSounding(depth2, m_mlat, m_mlon, tide, t, 3395);	
 				m_latprev = m_mlat;
 				m_lonprev = m_mlon;
 			}
@@ -1711,7 +2126,8 @@ wxString survey_pi::DDMLatToDecimal(wxString myString){
 	return _T("");
 }
 
-wxString survey_pi::DDMLonToDecimal(wxString myString){
+wxString survey_pi::DDMLonToDecimal(wxString myString)
+{
 
 	wxString s0,s1,s2,s3; 
 	double d0,d1,d2;
@@ -1741,4 +2157,101 @@ wxString survey_pi::DDMLonToDecimal(wxString myString){
 		return _T("-") + s3;
 	}
 	return _T("");
+}
+
+void survey_pi::LoadHarmonics()
+{
+	//  Establish a "home" location
+	g_SData_Locn = *GetpSharedDataLocation();
+
+	// Establish location of Tide and Current data
+	pTC_Dir = new wxString(_T("tcdata"));
+	pTC_Dir->Prepend(g_SData_Locn);
+	pTC_Dir->Append(wxFileName::GetPathSeparator());
+
+	wxString TCDir;
+	TCDir = *pTC_Dir;
+
+	wxLogMessage(_T("Using Tide/Current data from:  ") + TCDir);
+	wxString cache_locn = TCDir;
+
+	wxString harm2test = TCDir;
+	harm2test.Append(_T("HARMONIC"));
+
+	ptcmgr = new TCMgr(TCDir, cache_locn);
+}
+
+double survey_pi::GetPortTideInfo(double lat, double lon, wxDateTime inTime)
+{
+	
+	wxString m_PortName, m_PortNo;
+	int i;
+	//double lat, lon;
+	double m_lat;
+	double m_lon;
+
+	float m_tideheight;
+	float m_dir;
+
+	double dist, brg;
+
+	bool foundPort = false;
+	double radius = 0.1;
+	
+	int intPortNo;
+	IDX_entry *pIDX;
+
+	while (!foundPort){
+		for (i = 1; i < ptcmgr->Get_max_IDX() + 1; i++){
+
+			pIDX = ptcmgr->GetIDX_entry(i);
+
+			char type = pIDX->IDX_type;             // Entry "TCtcIUu" identifier
+			if ((type == 't') || (type == 'T'))  // only Tides
+			{
+
+				m_lat = pIDX->IDX_lat;
+				m_lon = pIDX->IDX_lon;
+
+
+				DistanceBearingMercator_Plugin(lat, lon, m_lat, m_lon, &brg, &dist);
+				if (dist < radius){
+					foundPort = true;
+					wxString myInt = wxString::Format(wxT("%5.2f"), (double)dist);
+					wxString locn(pIDX->IDX_station_name, wxConvUTF8);
+					wxString locna, locnb;
+					if (locn.Contains(wxString(_T(",")))) {
+						locna = locn.BeforeFirst(',');
+						locnb = locn.AfterFirst(',');
+					}
+					else {
+						locna = locn;
+						locnb.Empty();
+					}
+
+					m_PortName = locna;					
+					intPortNo = pIDX->IDX_rec_num;
+					m_PortNo = wxString::Format(wxT("%i"), intPortNo);
+
+				}
+			}
+
+		}
+		
+		radius = radius + 5;
+		if (radius > 15.1){
+			m_tideheight = 0; // We do not calculate tide if too far away from the standard port
+			return m_tideheight;
+		}
+		i = 1;
+	}
+
+	wxDateTime dt = inTime; // This is GMT Time                   
+	time_t t = dt.GetTicks();
+
+	ptcmgr->GetTideOrCurrent(t, intPortNo, m_tideheight, m_dir);
+	wxString myTide = wxString::Format(wxT("%5.2f"), (float) m_tideheight);
+	wxMessageBox(myTide, _T("tide"));
+	return m_tideheight;
+
 }

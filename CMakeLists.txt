@@ -15,12 +15,43 @@ SET(TITLE_NAME survey_pi)
 SET(CPACK_PACKAGE_CONTACT "Mike Rossiter")
 #SET(CMAKE_BUILD_TYPE Debug)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src C:/OSGeo4W/include ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers/spatialite)
+SET(geos_c ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib) 
+SET(geos_c "${PARENT}.lib")
+SET(freexl ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib) 
+SET(freexl "${PARENT}.lib")
+SET(proj ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib) 
+SET(proj "${PARENT}.lib")
+SET(iconv ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib) 
+SET(iconv "${PARENT}.lib")
+
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers/spatialite)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Extras/splite-msvc)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Extras/splite-msvc/include)
+
 
 SET(VERSION_MAJOR "0")
 SET(VERSION_MINOR "1")
 
 #SET(CMAKE_BUILD_TYPE Debug)
+
+IF( NOT CMAKE_BUILD_TYPE )
+  SET( CMAKE_BUILD_TYPE Release CACHE STRING
+       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+       FORCE )
+ENDIF( NOT CMAKE_BUILD_TYPE )
+
+
+
+#  Search for wxWidgets 2.9 or newer
+STRING(REGEX MATCHALL "-2.9|-3." wx_Version_2.9+ "${wxWidgets_INCLUDE_DIRS}")
+IF(wx_Version_2.9+)
+ELSE(wx_Version_2.9+)
+#  
+#  
+ENDIF(wx_Version_2.9+)
+
 SET( wxWidgets_USE_DEBUG OFF)
 SET( wxWidgets_USE_UNICODE ON)
 SET( wxWidgets_USE_UNIVERSAL OFF)
@@ -110,6 +141,16 @@ SET(SRC_SURVEY
 	src/Baro_history.h
 	src/instrument.cpp
 	src/instrument.h
+	src/tcmgr.cpp
+	src/tcmgr.h
+	src/circle.xpm
+	src/cross.xpm
+	src/square.xpm
+        src/bbox.cpp
+	src/bbox.h
+	src/SurveyOverlayFactory.cpp
+	src/SurveyOverlayFactory.h
+	src/dychart.h
 	src/libspatialite-amalgamation-3.0.1/spatialite.c
 	src/libspatialite-amalgamation-3.0.1/sqlite3.c
 	)
@@ -135,7 +176,12 @@ ADD_DEFINITIONS(-D SQLITE_ENABLE_RTREE)
 
 ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_SURVEY} ${SRC_NMEA0183})
 
+TARGET_LINK_LIBRARIES(${PACKAGE_NAME} geos_c)
+TARGET_LINK_LIBRARIES(${PACKAGE_NAME} freexl)
+TARGET_LINK_LIBRARIES(${PACKAGE_NAME} proj)
+TARGET_LINK_LIBRARIES(${PACKAGE_NAME} iconv)
+
+
 INCLUDE("cmake/PluginInstall.cmake")
 INCLUDE("cmake/PluginLocalization.cmake")
 INCLUDE("cmake/PluginPackage.cmake")
-

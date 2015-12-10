@@ -33,7 +33,7 @@
 #define wxGCDC wxDC
 #endif
 
-#include <vector>
+//#include <vector>
 //#include "TideFindergui_impl.h"
 #include <wx/dialog.h>
 #include <wx/datetime.h>
@@ -42,7 +42,7 @@
 //#include "tcmgr.h"
 #include "wx/event.h"
 #include "wx/dcgraph.h"
-#include "surveygui.h";
+#include "surveygui.h"
 class wxCommandEvent;
 class wxCloseEvent;
 class wxTextCtrl;

@@ -55,86 +55,119 @@ SurveyCfgDlgDef::SurveyCfgDlgDef( wxWindow* parent, wxWindowID id, const wxStrin
 	m_rbFathoms = new wxRadioButton( this, wxID_ANY, _("Fathoms"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer5->Add( m_rbFathoms, 0, wxALL, 5 );
 	
-	
+	m_cbCalcTide = new wxCheckBox(sbSizer4->GetStaticBox(), wxID_ANY, _("Calculate tide"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer5->Add(m_cbCalcTide, 0, wxALL, 5);
+
+	m_tCorrection = new wxTextCtrl(sbSizer4->GetStaticBox(), wxID_ANY, _T("00.0"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer5->Add(m_tCorrection, 0, wxALL, 5);
+
+	m_manualCorrection = new wxStaticText(sbSizer4->GetStaticBox(), wxID_ANY, _("Correction \n"), wxDefaultPosition, wxDefaultSize, 0);
+	m_manualCorrection->Wrap(-1);
+	bSizer5->Add(m_manualCorrection, 0, wxALL, 5);
+
 	sbSizer4->Add( bSizer5, 1, wxEXPAND, 5 );
-	
-	
+		
 	bSizer2->Add( sbSizer4, 0, wxALL|wxEXPAND, 5 );
 	
 	wxStaticBoxSizer* sbSizer3;
-	sbSizer3 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Overlay settings") ), wxVERTICAL );
-	
+	sbSizer3 = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Overlay settings")), wxVERTICAL);
+
 	wxFlexGridSizer* fgSizer4;
-	fgSizer4 = new wxFlexGridSizer( 0, 2, 0, 0 );
-	fgSizer4->SetFlexibleDirection( wxBOTH );
-	fgSizer4->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
-	
+	fgSizer4 = new wxFlexGridSizer(0, 3, 0, 0);
+	fgSizer4->SetFlexibleDirection(wxBOTH);
+	fgSizer4->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+
 	wxBoxSizer* bSizer3;
-	bSizer3 = new wxBoxSizer( wxVERTICAL );
-	
-	m_cbRenderOverlay = new wxCheckBox( this, wxID_ANY, _("Render overlay"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer3->Add( m_cbRenderOverlay, 0, wxALL, 5 );
-	
-	m_rbRendedAllSurveys = new wxRadioButton( this, wxID_ANY, _("Render all data"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
-	m_rbRendedAllSurveys->SetValue( true ); 
-	bSizer3->Add( m_rbRendedAllSurveys, 0, wxALL, 5 );
-	
-	m_rbRenderActiveSurvey = new wxRadioButton( this, wxID_ANY, _("Render just active survey data"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer3->Add( m_rbRenderActiveSurvey, 0, wxALL, 5 );
-	
-	m_cbConnectSoundings = new wxCheckBox( this, wxID_ANY, _("Connect soundings"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer3->Add( m_cbConnectSoundings, 0, wxALL, 5 );
-	
-	
-	fgSizer4->Add( bSizer3, 1, wxEXPAND, 5 );
-	
+	bSizer3 = new wxBoxSizer(wxVERTICAL);
+
+	m_cbRenderOverlay = new wxCheckBox(sbSizer3->GetStaticBox(), wxID_ANY, _("Render overlay"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer3->Add(m_cbRenderOverlay, 0, wxALL, 5);
+
+	m_rbRendedAllSurveys = new wxRadioButton(sbSizer3->GetStaticBox(), wxID_ANY, _("Render all data"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+	m_rbRendedAllSurveys->SetValue(true);
+	bSizer3->Add(m_rbRendedAllSurveys, 0, wxALL, 5);
+
+	m_rbRenderActiveSurvey = new wxRadioButton(sbSizer3->GetStaticBox(), wxID_ANY, _("Render just active survey data"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer3->Add(m_rbRenderActiveSurvey, 0, wxALL, 5);
+
+	m_cbConnectSoundings = new wxCheckBox(sbSizer3->GetStaticBox(), wxID_ANY, _("Connect soundings"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer3->Add(m_cbConnectSoundings, 0, wxALL, 5);
+
+	m_cbRenderDepthValues = new wxCheckBox(sbSizer3->GetStaticBox(), wxID_ANY, _("Render depth values"), wxDefaultPosition, wxDefaultSize, 0);
+	m_cbRenderDepthValues->SetValue(true);
+	bSizer3->Add(m_cbRenderDepthValues, 0, wxALL, 5);
+
+	m_cbSdgsPlusTide = new wxCheckBox(sbSizer3->GetStaticBox(), wxID_ANY, _("Render sndgs plus tide/correction"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer3->Add(m_cbSdgsPlusTide, 0, wxALL, 5);
+
+
+	fgSizer4->Add(bSizer3, 1, wxEXPAND, 5);
+
 	wxBoxSizer* bSizer4;
-	bSizer4 = new wxBoxSizer( wxVERTICAL );
-	
+	bSizer4 = new wxBoxSizer(wxVERTICAL);
+
 	wxGridSizer* gSizer2;
-	gSizer2 = new wxGridSizer( 0, 2, 0, 0 );
-	
-	m_staticText18 = new wxStaticText( this, wxID_ANY, _("Sounding color"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText18->Wrap( -1 );
-	gSizer2->Add( m_staticText18, 0, wxALL, 5 );
-	
-	m_cpSoundingColor = new wxColourPickerCtrl( this, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
-	gSizer2->Add( m_cpSoundingColor, 0, wxALL, 5 );
-	
-	m_staticText19 = new wxStaticText( this, wxID_ANY, _("Connector color"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText19->Wrap( -1 );
-	gSizer2->Add( m_staticText19, 0, wxALL, 5 );
-	
-	m_cpConnectorColor = new wxColourPickerCtrl( this, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
-	gSizer2->Add( m_cpConnectorColor, 0, wxALL, 5 );
-	
-	m_staticText23 = new wxStaticText( this, wxID_ANY, _("Text color"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText23->Wrap( -1 );
-	gSizer2->Add( m_staticText23, 0, wxALL, 5 );
-	
-	m_cpFontColor = new wxColourPickerCtrl( this, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
-	gSizer2->Add( m_cpFontColor, 0, wxALL, 5 );
-	
-	m_staticText21 = new wxStaticText( this, wxID_ANY, _("Font"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText21->Wrap( -1 );
-	gSizer2->Add( m_staticText21, 0, wxALL, 5 );
-	
-	m_fpFont = new wxFontPickerCtrl( this, wxID_ANY, wxNullFont, wxDefaultPosition, wxDefaultSize, wxFNTP_DEFAULT_STYLE );
-	m_fpFont->SetMaxPointSize( 100 ); 
-	gSizer2->Add( m_fpFont, 0, wxALL, 5 );
-	
-	
-	bSizer4->Add( gSizer2, 1, wxEXPAND, 5 );
-	
-	
-	fgSizer4->Add( bSizer4, 1, wxEXPAND, 5 );
-	
-	
-	sbSizer3->Add( fgSizer4, 1, wxEXPAND, 5 );
-	
-	
-	bSizer2->Add( sbSizer3, 0, wxALL|wxEXPAND, 5 );
-	
+	gSizer2 = new wxGridSizer(0, 2, 0, 0);
+
+	m_staticText18 = new wxStaticText(sbSizer3->GetStaticBox(), wxID_ANY, _("Sounding color"), wxDefaultPosition, wxDefaultSize, 0);
+	m_staticText18->Wrap(-1);
+	gSizer2->Add(m_staticText18, 0, wxALL, 5);
+
+	m_cpSoundingColor = new wxColourPickerCtrl(sbSizer3->GetStaticBox(), wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE);
+	gSizer2->Add(m_cpSoundingColor, 0, wxALL, 5);
+
+	m_staticText19 = new wxStaticText(sbSizer3->GetStaticBox(), wxID_ANY, _("Connector color"), wxDefaultPosition, wxDefaultSize, 0);
+	m_staticText19->Wrap(-1);
+	gSizer2->Add(m_staticText19, 0, wxALL, 5);
+
+	m_cpConnectorColor = new wxColourPickerCtrl(sbSizer3->GetStaticBox(), wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE);
+	gSizer2->Add(m_cpConnectorColor, 0, wxALL, 5);
+
+	m_staticText23 = new wxStaticText(sbSizer3->GetStaticBox(), wxID_ANY, _("Text color"), wxDefaultPosition, wxDefaultSize, 0);
+	m_staticText23->Wrap(-1);
+	gSizer2->Add(m_staticText23, 0, wxALL, 5);
+
+	m_cpFontColor = new wxColourPickerCtrl(sbSizer3->GetStaticBox(), wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE);
+	gSizer2->Add(m_cpFontColor, 0, wxALL, 5);
+
+	m_staticText21 = new wxStaticText(sbSizer3->GetStaticBox(), wxID_ANY, _("Font"), wxDefaultPosition, wxDefaultSize, 0);
+	m_staticText21->Wrap(-1);
+	gSizer2->Add(m_staticText21, 0, wxALL, 5);
+
+	m_fpFont = new wxFontPickerCtrl(sbSizer3->GetStaticBox(), wxID_ANY, wxNullFont, wxDefaultPosition, wxDefaultSize, wxFNTP_DEFAULT_STYLE);
+	m_fpFont->SetMaxPointSize(100);
+	gSizer2->Add(m_fpFont, 0, wxALL, 5);
+
+
+	bSizer4->Add(gSizer2, 1, wxEXPAND, 5);
+
+
+	fgSizer4->Add(bSizer4, 1, wxEXPAND, 5);
+
+	wxBoxSizer* bSizer15;
+	bSizer15 = new wxBoxSizer(wxVERTICAL);
+
+	m_lSymbolList = new wxListBox(sbSizer3->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0);
+	m_lSymbolList->Append(_("Cross"));
+	m_lSymbolList->Append(_("Circle"));
+	m_lSymbolList->Append(_("Square"));
+	bSizer15->Add(m_lSymbolList, 0, wxALL, 5);
+
+	m_cbSelectedSymbol = new wxCheckBox(sbSizer3->GetStaticBox(), wxID_ANY, _("Use this symbol"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer15->Add(m_cbSelectedSymbol, 0, wxALL, 5);
+
+	m_cbUseDepthColours = new wxCheckBox(sbSizer3->GetStaticBox(), wxID_ANY, _("Use variable depth colours"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer15->Add(m_cbUseDepthColours, 0, wxALL, 5);
+
+
+	fgSizer4->Add(bSizer15, 1, wxEXPAND, 5);
+
+
+	sbSizer3->Add(fgSizer4, 1, wxEXPAND, 5);
+
+
+	bSizer2->Add(sbSizer3, 0, wxALL | wxEXPAND, 5);
+
 	wxStaticBoxSizer* sbSizer1;
 	sbSizer1 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Boat size / sensor position") ), wxVERTICAL );
 	
@@ -334,6 +367,13 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 
 	bSizer12->Add(0, 0, 1, wxEXPAND, 5);
 
+	m_pButtonAdd = new wxBitmapButton(this, wxID_ANY, *_img_plus, wxDefaultPosition, wxDefaultSize);
+	bSizer12->Add(m_pButtonAdd, 0, wxALIGN_CENTER, 2);
+
+	m_pButtonDelete = new wxBitmapButton(this, wxID_ANY, *_img_minus, wxDefaultPosition, wxDefaultSize);
+	bSizer12->Add(m_pButtonDelete, 0, wxALIGN_CENTER, 2);
+
+
 	m_btnLoadFromFile = new wxButton( this, wxID_ANY, _("Load NMEA File"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer12->Add( m_btnLoadFromFile, 0, wxALL, 5 );
 
@@ -353,11 +393,12 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_gdSoundings = new wxGrid( m_panel1, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	
 	// Grid
-	m_gdSoundings->CreateGrid( 1, 5 );
+	m_gdSoundings->CreateGrid( 1, 6 );
 	m_gdSoundings->EnableEditing( false );
 	m_gdSoundings->EnableGridLines( true );
 	m_gdSoundings->EnableDragGridSize( false );
 	m_gdSoundings->SetMargins( 0, 0 );
+	m_gdSoundings->EnableScrolling(true, true);
 	
 	// Columns
 	m_gdSoundings->EnableDragColMove( false );
@@ -371,7 +412,13 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_gdSoundings->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
 	// Label Appearance
-	
+	m_gdSoundings->SetColLabelValue(0, _T("Depth"));
+	m_gdSoundings->SetColLabelValue(1, _T("Measured"));
+	m_gdSoundings->SetColLabelValue(2, _T("Lat"));
+	m_gdSoundings->SetColLabelValue(3, _T("Lon"));
+	m_gdSoundings->SetColLabelValue(4, _T("Survey_id"));
+	m_gdSoundings->SetColLabelValue(5, _T("Tide"));
+
 	// Cell Defaults
 	m_gdSoundings->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
 	bSizer10->Add( m_gdSoundings, 1, wxALL, 5 );
@@ -474,13 +521,17 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_btnNew->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnNewSurvey ), NULL, this );
 	m_btnDelete->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnDeleteSurvey ), NULL, this );
 	m_btnProperties->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyProperties ), NULL, this );
-	m_btnZoomTo->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnZoomToSurvey ), NULL, this );
+	m_btnZoomTo->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnZoomTSurvey ), NULL, this );
 	m_btnMerge->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnMergeSurvey ), NULL, this );
 	m_btnImport->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnImportSurvey ), NULL, this );
 	m_btnExport->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnExportSurvey ), NULL, this );
 	m_sdbSizer2Cancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyCancelClick ), NULL, this );
 	m_sdbSizer2OK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyOkClick ), NULL, this );
 	m_notebook1->Connect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( SurveyDlgDef::IsPanelSelected ), NULL, this );
+
+	m_pButtonAdd->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::OnItemAdd), NULL, this);
+	m_pButtonDelete->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::OnItemDelete), NULL, this);
+
 }
 
 SurveyDlgDef::~SurveyDlgDef()
@@ -493,13 +544,17 @@ SurveyDlgDef::~SurveyDlgDef()
 	m_btnNew->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnNewSurvey ), NULL, this );
 	m_btnDelete->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnDeleteSurvey ), NULL, this );
 	m_btnProperties->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyProperties ), NULL, this );
-	m_btnZoomTo->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnZoomToSurvey ), NULL, this );
+	m_btnZoomTo->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnZoomTSurvey ), NULL, this );
 	m_btnMerge->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnMergeSurvey ), NULL, this );
 	m_btnImport->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnImportSurvey ), NULL, this );
 	m_btnExport->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnExportSurvey ), NULL, this );
 	m_sdbSizer2Cancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyCancelClick ), NULL, this );
 	m_sdbSizer2OK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::OnSurveyOkClick ), NULL, this );
 	m_notebook1->Disconnect(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler(SurveyDlgDef::IsPanelSelected), NULL, this);
+
+	m_pButtonAdd->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::OnItemAdd), NULL, this);
+	m_pButtonDelete->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::OnItemDelete), NULL, this);
+
 }
 
 SurveyMergeDlgDef::SurveyMergeDlgDef( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )

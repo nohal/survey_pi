@@ -37,6 +37,8 @@
 #include <wx/icon.h>
 #include <wx/statbmp.h>
 #include <wx/notebook.h>
+#include <wx/listctrl.h>
+#include <wx/listbox.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -75,20 +77,30 @@ class SurveyCfgDlgDef : public wxDialog
 		wxStdDialogButtonSizer* m_sdbSizer1;
 		wxButton* m_sdbSizer1OK;
 		wxButton* m_sdbSizer1Cancel;
+		wxStaticText* m_manualCorrection;
 	
 	public:
+		//wxListCtrl* m_listCtrl1;
+		
 		wxSlider* m_sOpacity;
 		wxRadioButton* m_rbMeters;
 		wxRadioButton* m_rbFeet;
 		wxRadioButton* m_rbFathoms;
+		wxCheckBox* m_cbCalcTide;
+		wxTextCtrl* m_tCorrection;		
 		wxCheckBox* m_cbRenderOverlay;
 		wxRadioButton* m_rbRendedAllSurveys;
 		wxRadioButton* m_rbRenderActiveSurvey;
 		wxCheckBox* m_cbConnectSoundings;
+		wxCheckBox* m_cbRenderDepthValues;
+		wxCheckBox* m_cbSdgsPlusTide;
 		wxColourPickerCtrl* m_cpSoundingColor;
 		wxColourPickerCtrl* m_cpConnectorColor;
 		wxColourPickerCtrl* m_cpFontColor;
 		wxFontPickerCtrl* m_fpFont;
+		wxListBox *m_lSymbolList;
+		wxCheckBox* m_cbSelectedSymbol;
+		wxCheckBox* m_cbUseDepthColours;
 		wxTextCtrl* m_tLOA;
 		wxTextCtrl* m_tBeam;
 		wxTextCtrl* m_tSounderBow;
@@ -98,7 +110,7 @@ class SurveyCfgDlgDef : public wxDialog
 		wxTextCtrl* m_tMinDistance;
 		wxTextCtrl* m_tAutoNewDistance;
 		
-		SurveyCfgDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey preferences"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 496,587 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		SurveyCfgDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey preferences"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 658,680 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~SurveyCfgDlgDef();
 	
 };
@@ -131,8 +143,9 @@ class SurveyDlgDef : public wxDialog
 		wxStdDialogButtonSizer* m_sdbSizer2;
 		wxButton* m_sdbSizer2OK;
 		wxButton* m_sdbSizer2Cancel;
-
-
+		wxButton* m_pButtonDelete;
+		wxButton* m_pButtonAdd;
+		wxListCtrl* m_listCtrl1;
 		
 		
 		// Virtual event handlers, overide them in your derived class
@@ -143,16 +156,18 @@ class SurveyDlgDef : public wxDialog
 		virtual void OnNewSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnDeleteSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSurveyProperties( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnZoomToSurvey( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnZoomTSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMergeSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnImportSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnExportSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSurveyCancelClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSurveyOkClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void IsPanelSelected( wxNotebookEvent& event ) { event.Skip(); }
+		virtual void OnItemAdd(wxCommandEvent& event) { event.Skip(); }
+		virtual void OnItemDelete( wxCommandEvent& event ) { event.Skip(); }
 	
 	public:
-
+		
 		wxStaticText* m_tNrSoundings;
 		wxStaticText* m_tMinDepth;
 		wxStaticText* m_tMaxDepth;

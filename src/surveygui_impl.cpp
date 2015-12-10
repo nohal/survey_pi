@@ -26,9 +26,11 @@
  ***************************************************************************
  */
 
-#include "surveygui_impl.h"
+//#include "surveygui_impl.h"
+#include "survey_pi.h"
 #include "NavFunc.h"
 #include "icons.h"
+//#include <vector>
 
 SurveyCfgDlg::SurveyCfgDlg( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : SurveyCfgDlgDef( parent, id, title, pos, size, style )
 {
@@ -36,6 +38,17 @@ SurveyCfgDlg::SurveyCfgDlg( wxWindow* parent, wxWindowID id, const wxString& tit
 
 SurveyDlg::SurveyDlg( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : SurveyDlgDef( parent, id, title, pos, size, style )
 {
+	soundingdata first;
+	first.latD = 50;
+	first.lonD = -4;	
+	mysoundings.push_back(first);	
+}
+
+void SurveyDlg::SetViewPort(PlugIn_ViewPort *vp)
+{
+	if (m_vp == vp)  return;
+
+	m_vp = new PlugIn_ViewPort(*vp);
 }
 
 void SurveyDlg::OnSurveyRecordToggleNMEA(wxCommandEvent& event)
@@ -104,7 +117,7 @@ void SurveyDlg::RecordNMEA(wxCommandEvent& event){
 		plugin->m_recording = false;
 		plugin->FillSurveyGrid();
 		plugin->FillSurveyInfo();
-		RequestRefresh(plugin->m_pSurveyDialog->m_parent);
+		//RequestRefresh(plugin->m_pSurveyDialog->m_parent);
 	}
 	
 	/*
@@ -136,8 +149,10 @@ void SurveyDlg::LoadFromFile( wxCommandEvent& event )
 	plugin->m_latprev = 0;
 	plugin->m_lonprev = 0;
 	plugin->numsoundings = 0;
+	
 	plugin->mydata.lat = _T("999");
 	plugin->mydata.lon = _T("999");
+	//plugin->mydata.time = _T("999");
 
 	wxString s; 
 	wxFileDialog dlg(this, _("Select survey data file"), wxEmptyString, wxEmptyString, _T("NMEA Files (*.txt)|*.txt|CSV files (*.csv)|*.csv|All Files (*.*)|*.*"), wxFD_OPEN);
@@ -168,7 +183,7 @@ void SurveyDlg::LoadFromFile( wxCommandEvent& event )
           m_istream.Close();
 		  plugin->FillSurveyGrid();
 		  plugin->FillSurveyInfo();
-		  RequestRefresh(plugin->m_pSurveyDialog->m_parent);
+		  //RequestRefresh(plugin->m_pSurveyDialog->m_parent);
 	   }
 	   else {
 		   str = m_istream.GetNextLine();		  
@@ -258,7 +273,7 @@ void SurveyDlg::OnSurveySelection( wxCommandEvent& event )
 	} 
 	*/
 
-	  RequestRefresh(plugin->m_pSurveyDialog->m_parent);
+	 // RequestRefresh(plugin->m_pSurveyDialog->m_parent);
       event.Skip(); 
 }
 
@@ -280,7 +295,7 @@ void SurveyDlg::OnNewSurvey( wxCommandEvent& event )
 		  plugin->FillSurveyGrid();
 		  plugin->FillSurveyInfo();
       }
-	  RequestRefresh(plugin->m_pSurveyDialog->m_parent);
+	  //RequestRefresh(plugin->m_pSurveyDialog->m_parent);
       event.Skip(); 
 }
 
@@ -305,7 +320,7 @@ void SurveyDlg::OnDeleteSurvey( wxCommandEvent& event )
 		  plugin->FillSurveyDropdown();
 		  plugin->FillSurveyGrid();
 		  plugin->FillSurveyInfo();
-		  RequestRefresh(plugin->m_pSurveyDialog->m_parent);
+		  //RequestRefresh(plugin->m_pSurveyDialog->m_parent);
       }
 	 
       event.Skip(); 
@@ -332,7 +347,7 @@ void SurveyDlg::OnSurveyProperties( wxCommandEvent& event )
       event.Skip(); 
 }
 
-void SurveyDlg::OnZoomToSurvey( wxCommandEvent& event )
+void SurveyDlg::OnZoomTSurvey( wxCommandEvent& event )
 {
 	double mla, mlo;
 	wxString la = m_gdSoundings->GetCellValue(0, 2);
@@ -388,13 +403,22 @@ void SurveyDlg::OnImportSurvey( wxCommandEvent& event )
 		return;
 	}
 
-	wxFileDialog dlg(this, _("Select survey data file"), wxEmptyString, wxEmptyString, _T("HydroMagic files (*.gmp)|*.gmp|CSV files (*.csv)|*.csv"), wxFD_OPEN);
+	wxFileDialog dlg(this, _("Select survey data file"), wxEmptyString, wxEmptyString, _T("HydroMagic files (*.gmp)|*.gmp|XYZ files (*.xyz)|*.xyz| CSV files(*.csv) | *.csv"), wxFD_OPEN);
       dlg.ShowModal();
 	  if (dlg.GetPath() != wxEmptyString){
-		  plugin->ImportHydromagic(dlg.GetPath());
-		  plugin->FillSurveyGrid();
-		  plugin->FillSurveyInfo();
-		  RequestRefresh(plugin->m_pSurveyDialog->m_parent);
+		  if (dlg.GetPath().Right(3) == _T("gmp")){
+			  plugin->ImportHydromagic(dlg.GetPath());
+		  }
+		  else {
+			  if (dlg.GetPath().Right(3) == _T("xyz")){
+				  plugin->ImportXYZ(dlg.GetPath());
+			  }
+			  else {
+				  if (dlg.GetPath().Right(3) == _T("csv")){
+					  plugin->ImportCSV(dlg.GetPath());
+				  }
+			  }
+		  }
 	  }
 	  else wxMessageBox(_T("No file entered"));
       event.Skip();
@@ -402,10 +426,23 @@ void SurveyDlg::OnImportSurvey( wxCommandEvent& event )
 
 void SurveyDlg::OnExportSurvey( wxCommandEvent& event )
 {
-      wxFileDialog dlg(this, _("Export survey as"), wxEmptyString, wxEmptyString, _T("HydroMagic files (*.gmp)|*.gmp|CSV files (*.csv)|*.csv"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+      wxFileDialog dlg(this, _("Export survey as"), wxEmptyString, wxEmptyString, _T("HydroMagic files (*.gmp)|*.gmp|XYZ files (*.xyz)|*.xyz|CSV files (*.csv)|*.csv"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
       dlg.ShowModal();
-      if (dlg.GetPath() != wxEmptyString)
-            plugin->ExportHydromagic(plugin->GetActiveSurveyId(), dlg.GetPath());
+	  if (dlg.GetPath() != wxEmptyString){
+		  if (dlg.GetPath().Right(3) == _T("gmp")){
+			  plugin->ExportHydromagic(plugin->GetActiveSurveyId(), dlg.GetPath());
+		  }
+		  else {
+			  if (dlg.GetPath().Right(3) == _T("xyz")){
+				  plugin->ExportXYZ(plugin->GetActiveSurveyId(), dlg.GetPath());
+			  }
+			  else {
+				  if (dlg.GetPath().Right(3) == _T("csv")){
+					  plugin->ExportCSV(plugin->GetActiveSurveyId(), dlg.GetPath());
+				  }
+			  }
+		  }
+	  }
 	  else wxMessageBox(_T("No file entered"));
       event.Skip(); 
 }
@@ -471,6 +508,7 @@ void SurveyDlg::SetProfile(){
 	
 	double tdist = 0;
 	
+	
 	for(std::vector<soundingdata>::iterator it = mysoundings.begin();  it != mysoundings.end(); it++){ 
 		it->depth.ToDouble(&value);
 		tcv[i] = value;
@@ -520,6 +558,36 @@ void SurveyDlg::SetProfile(){
 
 }
 
+void SurveyDlg::OnItemAdd(wxCommandEvent& event){
+
+
+
+}
+
+void SurveyDlg::OnItemDelete(wxCommandEvent& event){
+
+	wxArrayInt myRows;
+	myRows = m_gdSoundings->GetSelectedRows();
+	
+	int c = myRows.Count();
+	if (c == 0){ return; }
+
+	int i = 0;
+	int d = 0;
+	int sid = 0;
+	wxString sel;
+	//wxString sel = wxString::Format(wxT("%i"), myRows[i]);
+	//wxMessageBox(sel);
+	for (i = 0; i < c; i++){
+		sel = m_gdSoundings->GetCellValue(myRows[i],4);
+		d = wxAtoi(sel);
+		plugin->DeleteSounding(d);
+	}
+	
+	
+	m_gdSoundings->DeleteRows(myRows[0],c,true);
+	
+}
 
 wxString SurveyDlg::getInstrumentCaption(unsigned int id)
 {
@@ -529,3 +597,4 @@ wxString SurveyDlg::getInstrumentCaption(unsigned int id)
 	}
 	return _T("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
 }
+
