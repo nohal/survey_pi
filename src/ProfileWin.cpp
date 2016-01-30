@@ -11,6 +11,7 @@
 #include <wx/graphics.h>
 #include <wx/wxchar.h>
 
+
 enum
 {
       ID_ProfileWin_NX,
@@ -37,18 +38,18 @@ WX_DEFINE_LIST( SplineList );
 
 BEGIN_EVENT_TABLE ( ProfileWin, wxWindow ) EVT_PAINT ( ProfileWin::OnPaint )
     EVT_CLOSE ( ProfileWin::OnCloseWindow )
-    
+
 END_EVENT_TABLE()
 
 // Define a constructor
 ProfileWin::ProfileWin(wxWindow * parent, wxWindowID id, int x, int y, int c_soundings, double tcv[3000], double tcd[3000], double tcmax, double tcmin)
 			:wxControl(parent, wxID_ANY, wxDefaultPosition, wxSize(800, 500), wxBORDER_NONE)
 {
-	
+
 	m_soundings = c_soundings;
 
 	int i;
-	
+
 	for (i=0; i<m_soundings; i++){
 		m_tcv[i] = tcv[i];
 	}
@@ -56,7 +57,7 @@ ProfileWin::ProfileWin(wxWindow * parent, wxWindowID id, int x, int y, int c_sou
 	for (i = 0; i<m_soundings; i++){
 		m_tcd[i] = tcd[i];
 	}
-	
+
 
 	for (i = 0 ; i<12 ; i++){
 		m_tclist[i] = wxEmptyString;
@@ -110,7 +111,7 @@ ProfileWin::ProfileWin(wxWindow * parent, wxWindowID id, int x, int y, int c_sou
 
     wxPoint r( xc, yc );
     Move( r );
-	
+
 
 
 //    Figure out this computer timezone minute offset
@@ -131,7 +132,7 @@ ProfileWin::ProfileWin(wxWindow * parent, wxWindowID id, int x, int y, int c_sou
     if( this_now.IsDST() ) m_corr_mins += 60;
 
 //    Establish the inital drawing day as today
-	
+
     btc_valid = false;
     int bsx, bsy, bpx, bpy;
 
@@ -160,22 +161,22 @@ ProfileWin::ProfileWin(wxWindow * parent, wxWindowID id, int x, int y, int c_sou
 	wxColour c_green = wxColour(0, 166, 80);
 	wxColour c_yellow_orange = wxColour(253, 184, 19);
 	wxColour c_orange = wxColour(248, 128, 64);
-	
+
 	c_black1 = wxColour(0, 0, 0);
 	wxColour c_red = wxColour(248, 0, 0);
     c_grey = wxColour(236,233,216);
 	c_grey2 = wxColour(212,208,200);
 
     pblack_1 = wxThePenList->FindOrCreatePen( c_black1, 1, wxSOLID );
-                                                                         
+
     pblack_2 = wxThePenList->FindOrCreatePen( c_black1, 2,wxSOLID );
-                                                                          
+
     pblack_3 = wxThePenList->FindOrCreatePen( c_black1, 1, wxSOLID );
-                                                                         
+
     pred_2 = wxThePenList->FindOrCreatePen( c_red, 2, wxSOLID );
-                                                                       
+
     pltgray = wxTheBrushList->FindOrCreateBrush( c_grey,wxSOLID );
-                                                                               
+
     pltgray2 = wxTheBrushList->FindOrCreateBrush( c_grey2, wxSOLID );
 
 }
@@ -202,7 +203,7 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
     int i;
     char sbuf[100];
     int w;
-    
+
     GetClientSize( &x, &y );
 
     wxPaintDC dc( this);
@@ -254,22 +255,22 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
         dc.SetPen( *pred_2 );
        // dc.DrawLine( xnow, m_graph_rect.y, xnow, m_graph_rect.y + m_graph_rect.height );
        // dc.SetPen( *pblack_1 );
-	
+
         //    Build the array of values, capturing max and min and HW/LW list
 	    btc_valid = false;
         if( !btc_valid ) {
 
-            float dir;            
+            float dir;
             float val;
            // m_tList->Clear();
             int list_index = 0;
             bool wt;
 			int i;
-			
-			
-			
+
+
+
 //    Set up the vertical parameters based on Tide or Current plot
-  
+
                 ib = (int) m_tcmin;
                 if( m_tcmin < 0 ) ib -= 1;
                 it = (int) m_tcmax + 1;
@@ -283,8 +284,8 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
             m_sList.DeleteContents( true );
             m_sList.Clear();
 
-			
-			
+
+
             for( i = 0; i < m_soundings; i++ ) {
                 wxPoint *pp = new wxPoint;
 
@@ -319,9 +320,9 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
             else
                 dc.SetPen( *pblack_1 );
 
-            dc.DrawLine( m_graph_rect.x, yd, m_graph_rect.x + m_graph_rect.width, yd );
-            _snprintf( sbuf, 99, "%d", i );
-            dc.DrawText( wxString( sbuf, wxConvUTF8 ), m_graph_rect.x - 20, yd - 5 );
+            //dc.DrawLine( m_graph_rect.x, yd, m_graph_rect.x + m_graph_rect.width, yd );
+            //snprintf( sbuf, 99, "%d", i );
+            //dc.DrawText( wxString( sbuf, wxConvUTF8 ), m_graph_rect.x - 20, yd - 5 );
             i += i_skip;
 
         }
@@ -367,13 +368,13 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
         dc.DrawText( sdate, x / 2 - w / 2, y * 92 / 100 );
 
         ///
-       
+
             dc.GetTextExtent(  wxT("meters"), &w, &h );
             dc.DrawRotatedText(  wxT("meters"), 5,
                                 m_graph_rect.y + m_graph_rect.height / 2 + w / 2, 90. );
-  
+
     }
-	
+
 }
 
 /*

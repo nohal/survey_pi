@@ -114,7 +114,7 @@ public:
 //    The required PlugIn Methods
       int Init(void);
       bool DeInit(void);
-      
+
       int GetAPIVersionMajor();
       int GetAPIVersionMinor();
       int GetPlugInVersionMajor();
@@ -136,7 +136,7 @@ public:
       void SetNMEASentence(wxString &sentence);
 
 //    The override PlugIn Methods
-      bool RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp);
+      bool RenderOverlay(wxDC &pmdc, PlugIn_ViewPort *vp);
       bool RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
 	 // bool RenderGLSurveyOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
 	  bool GetSurveySoundings(int as);
@@ -163,7 +163,7 @@ public:
       int               InsertSounding(double depth, double lat, double lon, double tide = 0.0, time_t timestamp = 0, int projection = PROJECTION);
       wxArrayString     GetSurveyList();
       int               GetSurveyId(wxString survey_name);
-      
+
 	  wxString          GetSurveyName(int survey_id);
 	  wxString          GetSurveyMaxDepth(int survey_id);
 	  wxString          GetSurveyMinDepth(int survey_id);
@@ -181,7 +181,7 @@ public:
 	  GPXTimeAndZDA     myTZDA;
 	  wxString			DDMLatToDecimal(wxString myString);
 	  wxString			DDMLonToDecimal(wxString myString);
-	  
+
 	  bool				b_gotdepth;
 	  bool				b_gotposn;
 	  soundingdata		mydata;
@@ -198,24 +198,24 @@ public:
 	  double       	  m_lonprev;
 
 	  vector<soundingdata>mySurveySoundings;
-	  
+
 	  //SurveyOverlayFactory *GetSurveyOverlayFactory(){ return m_pSurveyOverlayFactory; }
 	  //SurveyOverlayFactory *m_pSurveyOverlayFactory;
 	  //SurveyOverlayFactory *GetSurveyOverlayFactory(){ return m_pSurveyOverlayFactory; };
 	  //SurveyOverlayFactory *m_pSurveyOverlayFactory;
-	  
+
 	  SurveyOverlayFactory *GetSurveyOverlayFactory(){ return m_pSurveyOverlayFactory; }
-	 
+
 
 private:
 
-	
+
 	  SurveyOverlayFactory *m_pSurveyOverlayFactory;
 	  SurveyDlg *m_pSurveyDialog;
-	  
+
 	 // wxDC *m_pdc;
 	 // wxGraphicsContext *m_gdc;
-      
+
 
 	  NMEA0183          m_NMEA0183;                 // Used to parse NMEA Sentences
 	 // survey_pi         *dlg;
@@ -232,14 +232,14 @@ private:
 
       void              StoreSounding(double depth);
       double            m_lat, m_lon, m_cog;
-	 
+
       wxDateTime        m_lastPosReport;
 
 	  int				m_trimcount;
       //bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y);
       void DrawSounding(wxDC &dc, int x, int y, double depth, long sounding_id, long survey_id);
 
-     
+
 
       int               m_survey_dialog_x, m_survey_dialog_y;
       int               m_display_width, m_display_height;
@@ -281,7 +281,7 @@ private:
       short             mPriPosition, mPriDepth;
      // int               mLastX, mLastY;
      // long              mLastSdgId, mLastSurveyId;
-	  
+
       bool              dbQuery(wxString sql);
       void              dbGetTable(wxString sql, char ***results, int &n_rows, int &n_columns);
       void              dbFreeResults(char **results);

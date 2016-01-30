@@ -43,6 +43,15 @@
 #include "wx/event.h"
 #include "wx/dcgraph.h"
 #include "surveygui.h"
+#include <stdio.h>
+#include <cstdio>
+#include <assert.h>
+
+#define snprintf _snprintf
+#define _sprintf _sprintf_s
+#define _snprintf _snprintf_s
+
+
 class wxCommandEvent;
 class wxCloseEvent;
 class wxTextCtrl;
@@ -55,7 +64,8 @@ class wxListBox;
 
 class Dlg;
 
-//using namespace std;
+using namespace std;
+
 
 WX_DECLARE_LIST(wxPoint, SplineList);           // for spline curve points
 
@@ -69,7 +79,7 @@ public:
       void OnPaint(wxPaintEvent& event);
       void MouseEvent(wxMouseEvent& event);
       void OnCloseWindow(wxCloseEvent& event);
-	  
+
       void Resize(void);
 
       void RePosition(void);
@@ -115,7 +125,7 @@ private:
       wxRect    m_graph_rect;
 
 
-      
+
 	  wxListBox  *m_tList ;
       bool        btc_valid;
       wxWindow *pParent;

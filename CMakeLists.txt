@@ -1,9 +1,9 @@
 ##---------------------------------------------------------------------------
 ## Author:      nohal aka. Pavel Kalian
-## Copyright:   
+## Copyright:
 ## License:     wxWidgets License
 ##---------------------------------------------------------------------------
- 
+
 # define minimum cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2)
 
@@ -15,13 +15,13 @@ SET(TITLE_NAME survey_pi)
 SET(CPACK_PACKAGE_CONTACT "Mike Rossiter")
 #SET(CMAKE_BUILD_TYPE Debug)
 
-SET(geos_c ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib) 
+SET(geos_c ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib)
 SET(geos_c "${PARENT}.lib")
-SET(freexl ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib) 
+SET(freexl ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib)
 SET(freexl "${PARENT}.lib")
-SET(proj ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib) 
+SET(proj ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib)
 SET(proj "${PARENT}.lib")
-SET(iconv ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib) 
+SET(iconv ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib)
 SET(iconv "${PARENT}.lib")
 
 
@@ -48,8 +48,8 @@ ENDIF( NOT CMAKE_BUILD_TYPE )
 STRING(REGEX MATCHALL "-2.9|-3." wx_Version_2.9+ "${wxWidgets_INCLUDE_DIRS}")
 IF(wx_Version_2.9+)
 ELSE(wx_Version_2.9+)
-#  
-#  
+#
+#
 ENDIF(wx_Version_2.9+)
 
 SET( wxWidgets_USE_DEBUG OFF)
@@ -59,7 +59,7 @@ SET( wxWidgets_USE_STATIC OFF)
 
 INCLUDE("cmake/PluginConfigure.cmake")
 
-# For convenience we define the sources as a variable. You can add 
+# For convenience we define the sources as a variable. You can add
 # header files and cpp/c files and CMake will sort them out
 
 SET(SRC_NMEA0183
@@ -137,8 +137,8 @@ SET(SRC_SURVEY
 	src/soundinggridtable.h
 	src/ProfileWin.cpp
 	src/ProfileWin.h
-	src/Baro_history.cpp
-	src/Baro_history.h
+	src/baro_history.cpp
+	src/baro_history.h
 	src/instrument.cpp
 	src/instrument.h
 	src/tcmgr.cpp

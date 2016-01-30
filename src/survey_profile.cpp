@@ -26,7 +26,7 @@
  */
 
 #include "survey_profile.h"
-#include "wx28compat.h"
+//#include "wx28compat.h"
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include <wx/wxprec.h>
@@ -64,7 +64,7 @@ survey_profile::survey_profile( wxWindow *parent, wxWindowID id, wxString title)
       m_SampleCount=3000;
       m_LeftLegend=3;
       m_RightLegend=3;
-	 
+
 	  for (int idx = 0; idx < BARO_RECORD_COUNT; idx++) {
 		  m_ArrayPressHistory[idx] = -1;
 		  m_ExpSmoothArrayPressure[idx] = -1;
@@ -159,8 +159,8 @@ void  survey_profile::DrawWindSpeedScale(wxGCDC* dc)
   cl=wxColour(61,61,204,255);
   dc->SetTextForeground(cl);
   dc->SetFont(*g_pFontSmall);
-  
- // m_TotalMaxPress=20; 
+
+ // m_TotalMaxPress=20;
  // m_TotalMinPress=0;
 
 
@@ -238,10 +238,10 @@ void survey_profile::DrawBackground(wxGCDC* dc)
   dc->SetPen(pen);
   dc->DrawLine(m_LeftLegend+3, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.25), m_WindowRect.width-3-m_RightLegend, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.25));
   dc->DrawLine(m_LeftLegend+3, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.75), m_WindowRect.width-3-m_RightLegend, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.75));
-#ifdef __WXMSW__  
+#ifdef __WXMSW__
   pen.SetStyle(wxPENSTYLE_SHORT_DASH);
   dc->SetPen(pen);
-#endif  
+#endif
   dc->DrawLine(m_LeftLegend+3, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.5), m_WindowRect.width-3-m_RightLegend, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.5));
 
   dc->DrawLine(m_LeftLegend + 3, (int)(m_TopLineHeight), m_LeftLegend + 3, (int)(m_TopLineHeight + m_DrawAreaRect.height));
@@ -276,10 +276,10 @@ void survey_profile::DrawForeground(wxGCDC* dc)
   dc->SetFont(*g_pFontLabel);
   //determine the time range of the available data (=oldest data value)
   int i=0;
-  
+
     min=m_ArrayRecTime[i].GetMinute();
     hour=m_ArrayRecTime[i].GetHour();
-  
+
   m_ratioW = double(m_DrawAreaRect.width) / (BARO_RECORD_COUNT-1);
  // dc->DrawText(wxString::Format(_(" Max %.1f Min %.1f since %02d:%02d  Overall Max %.1f Min %.1f "),m_MaxPress,m_MinPress,hour,min,m_TotalMaxPress,m_TotalMinPress), m_LeftLegend+3+2+degw, m_TopLineHeight-degh+5);
  // Cant get the min sice to work...

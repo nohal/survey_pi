@@ -37,7 +37,7 @@
 #include <wx/textfile.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
-#include <wx/numdlg.h> 
+#include <wx/numdlg.h>
 
 #include "baro_history.h"
 #include "survey_profile.h"
@@ -107,14 +107,14 @@ class SurveyDlg : public SurveyDlgDef
 {
 public:
       SurveyDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE );
-	  
+
 	  void SetViewPort(PlugIn_ViewPort *vp);
 	  PlugIn_ViewPort *vp;
-	  void SurveyDlg::LoadSurvey_0();
+	  void LoadSurvey_0();
 
 	  void SetFactoryOptions(bool set_val = false);
 
-	  void SurveyDlg::SetTrace();
+	  void SetTrace();
 	  void OnSurveySelection( wxCommandEvent& event );
       void LoadFromFile( wxCommandEvent& event );
 	  void OnSurveyRecordToggleNMEA(wxCommandEvent& event);
@@ -141,7 +141,7 @@ public:
     survey_pi *plugin;
 	vector<soundingdata> mysoundings;
 
-	DashboardInstrument *mySurveyTrace;	
+	DashboardInstrument *mySurveyTrace;
 	ProfileWin* myProfile;
 	SurveyOverlaySettings mySettings;
 
