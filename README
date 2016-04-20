@@ -1,23 +1,23 @@
 Update (10 Dec 2015)
 
 For compiling standalone:
-Copy the following DLLs from the 'Extras/dll' folder to the 'build' folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll. You also need opencpn.lib (4.1.x) in the 'build' folder.
+Copy the following DLLs from 'Releases' to the 'build' folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll. You also need opencpn.lib (4.1.x) in the 'build' folder.
 I used CMake_gui to help find wxWidgets 3.02.
 
-In the 'Extras' folder is a new Windows compiled version of survey_pi for OpenCPN 4.1.925+
+In 'Releases' is a new Windows compiled version of survey_pi for OpenCPN 4.2/4.2.1
 
-Update (16 Nov 2015):
+Update (20 Apr 2016):
 
 Included are some extra files to make using survey_pi easier to install and enable testing.
 
-In the 'Extras' folder is a Windows compiled version of survey_pi for OpenCPN 4.1.925+
+In 'Releases' is a Windows compiled version of survey_pi for OpenCPN 4.2/4.2.1
 
 For Windows use: 
-Copy the following DLLs from the 'Extras/dll' folder to the OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll
+Copy the following DLLs from 'Releases' to the OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll
 
-Also included in 'Extras' are some NMEA files to use for testing survey_pi.
+Also included are some NMEA files to use for testing survey_pi.
 
-In the 'Extras/GMP' folder is a Hydromagic file to test Import.
+In 'Releases' is a Hydromagic file to test Import.
 
 I have included the 'splite-msvc' folder for those people working with Windows.
 
