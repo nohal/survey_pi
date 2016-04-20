@@ -1,7 +1,8 @@
 Update (20 Apr 2016)
 
 For compiling standalone:
-Copy the following DLLs from 'Releases' to the 'build' folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll. You also need opencpn.lib (4.1.x) in the 'build' folder.
+Copy the following DLLs from 'Releases' to the 'build' folder: freexl.dll, geos_c.dll, proj.dll.(iconv.dll should no longer be needed
+as it is part of the OpenCPN 4.2/4.2.1 installation). You also need opencpn.lib (4.2/4.2.1) in the 'build' folder.
 I used CMake_gui to help find wxWidgets 3.02.
 
 In 'Releases' is a new Windows compiled version of survey_pi for OpenCPN 4.2/4.2.1
@@ -13,7 +14,7 @@ Included are some extra files to make using survey_pi easier to install and enab
 In 'Releases' is a Windows compiled version of survey_pi for OpenCPN 4.2/4.2.1
 
 For Windows use: 
-Copy the following DLLs from 'Releases' to the OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll
+Copy the following DLLs from 'Releases' to the OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll.
 
 Also included are some NMEA files to use for testing survey_pi.
 
@@ -59,8 +60,10 @@ Get OSGeo4Win: http://trac.osgeo.org/osgeo4w/
 Install the following libraries: proj.4, freexl, geos, iconv
 If you don't like the default location C:\OSGeo4W, you will have to modify CMakeLists.txt
 
+(20 Apri 2016 - splite-msvc folder contains files which can be used to replace those installed by OSGeo4Win)
+
 Usage on Windows
-Copy the following DLLs to the OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll - They can be found in the bin subfolder of your OSGeo4W instalation
+Copy the following DLLs to the OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll - They can be found in the bin subfolder of your OSGeo4W instalation
 
 License
 =======
