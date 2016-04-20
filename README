@@ -1,4 +1,4 @@
-Update (10 Dec 2015)
+Update (20 Apr 2016)
 
 For compiling standalone:
 Copy the following DLLs from 'Releases' to the 'build' folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll. You also need opencpn.lib (4.1.x) in the 'build' folder.
