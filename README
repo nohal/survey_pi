@@ -1,8 +1,7 @@
 Update (20 Apr 2016)
 
 For compiling standalone:
-Copy the following DLLs from 'Releases' to the 'build' folder: freexl.dll, geos_c.dll, proj.dll.(iconv.dll should no longer be needed
-as it is part of the OpenCPN 4.2/4.2.1 installation). You also need opencpn.lib (4.2/4.2.1) in the 'build' folder.
+Copy the following DLLs from 'Releases' to the 'build' folder: freexl.dll, geos_c.dll, proj.dll, iconv.dll. You also need opencpn.lib (4.2/4.2.1) in the 'build' folder.
 I used CMake_gui to help find wxWidgets 3.02.
 
 In 'Releases' is a new Windows compiled version of survey_pi for OpenCPN 4.2/4.2.1
