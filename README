@@ -1,3 +1,8 @@
+Update (17 Mar 2017)
+
+freexl.lib, geos_c.lib, proj.lib, iconv.lib are now found in 'splite-msvc'. CMake links in these libraries. No need for Windows users to copy the .dll files.
+
+
 Update (20 Apr 2016)
 
 For compiling standalone:
