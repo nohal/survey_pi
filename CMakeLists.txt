@@ -15,21 +15,19 @@ SET(TITLE_NAME survey_pi)
 SET(CPACK_PACKAGE_CONTACT "Mike Rossiter")
 #SET(CMAKE_BUILD_TYPE Debug)
 
-SET(geos_c ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib)
+SET(geos_c ${CMAKE_SOURCE_DIR}/splite-msvc/lib)
 SET(geos_c "${PARENT}.lib")
-SET(freexl ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib)
+SET(freexl ${CMAKE_SOURCE_DIR}/splite-msvc/lib)
 SET(freexl "${PARENT}.lib")
-SET(proj ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib)
+SET(proj ${CMAKE_SOURCE_DIR}/splite-msvc/lib)
 SET(proj "${PARENT}.lib")
-SET(iconv ${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib)
+SET(iconv ${CMAKE_SOURCE_DIR}/splite-msvc/lib)
 SET(iconv "${PARENT}.lib")
 
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers/spatialite)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Extras/splite-msvc)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Extras/splite-msvc/lib)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Extras/splite-msvc/include)
-
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/splite-msvc/include)
+LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/splite-msvc/lib)
 
 SET(VERSION_MAJOR "0")
 SET(VERSION_MINOR "1")
