@@ -27,9 +27,10 @@ SET(iconv "${PARENT}.lib")
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers/spatialite)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/splite-msvc/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/splite-msvc/include/spatialite)
 LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/splite-msvc/lib)
 
-SET(VERSION_MAJOR "0")
+SET(VERSION_MAJOR "1")
 SET(VERSION_MINOR "1")
 
 #SET(CMAKE_BUILD_TYPE Debug)
@@ -151,6 +152,7 @@ SET(SRC_SURVEY
 	src/dychart.h
 	src/libspatialite-amalgamation-3.0.1/spatialite.c
 	src/libspatialite-amalgamation-3.0.1/sqlite3.c
+	
 	)
 
 SET(SRC_TINYXML

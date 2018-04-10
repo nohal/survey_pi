@@ -40,6 +40,7 @@
 #include <wx/hashmap.h>
 #include <wx/glcanvas.h>
 #include	<wx/dc.h>
+#include <wx/dcmemory.h>
 #include <map>
 #include "tinyxml.h"
 #include <wx/imaglist.h>
@@ -53,7 +54,7 @@
 //#include "SurveyOverlayFactory.h"
 
 #define     PLUGIN_VERSION_MAJOR    1
-#define     PLUGIN_VERSION_MINOR    0
+#define     PLUGIN_VERSION_MINOR    1
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8

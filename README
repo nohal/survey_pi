@@ -1,7 +1,9 @@
-Update (17 Mar 2017)
+Update (10 Mar 2018)
 
-freexl.lib, geos_c.lib, proj.lib, iconv.lib are now found in 'splite-msvc'. CMake links in these libraries. No need for Windows users to copy the .dll files.
+To run the v1.1 plugin copy the following DLLs from 'Releases' to the main OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll.
 
+In 'Releases' is a Hydromagic file (tamar.gmp) to test Import.
+In 'Releases' is a NMEA file (tamar.txt) to test Import from a NMEA file or to run using VDR_pi to make an NMEA stream.
 
 Update (20 Apr 2016)
 
