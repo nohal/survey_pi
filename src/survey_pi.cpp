@@ -89,7 +89,7 @@ void appendOSDirSlash(wxString* pString)
 //---------------------------------------------------------------------------------------------------------
 
 survey_pi::survey_pi(void *ppimgr)
-      :opencpn_plugin_18(ppimgr)
+      :opencpn_plugin_116(ppimgr)
 {
       // Create the PlugIn icons
       initialize_images();

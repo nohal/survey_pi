@@ -53,7 +53,7 @@
 
 //#include "SurveyOverlayFactory.h"
 
-#define     PLUGIN_VERSION_MAJOR    1
+#define     PLUGIN_VERSION_MAJOR    2
 #define     PLUGIN_VERSION_MINOR    1
 
 #define     MY_API_VERSION_MAJOR    1
@@ -107,7 +107,7 @@ public:
 
 #define SURVEY_TOOL_POSITION    -1          // Request default positioning of toolbar tool
 
-class survey_pi : public opencpn_plugin_18
+class survey_pi : public opencpn_plugin_116
 {
 public:
       survey_pi(void *ppimgr);
