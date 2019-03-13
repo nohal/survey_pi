@@ -93,6 +93,18 @@ survey_pi::survey_pi(void *ppimgr)
 {
       // Create the PlugIn icons
       initialize_images();
+
+	  wxString shareLocn = *GetpSharedDataLocation() +
+		  _T("plugins") + wxFileName::GetPathSeparator() +
+		  _T("survey_pi") + wxFileName::GetPathSeparator()
+		  + _T("data") + wxFileName::GetPathSeparator();
+	  wxImage panelIcon(shareLocn + _T("survey_panel_icon.png"));
+	  if (panelIcon.IsOk())
+		  m_panelBitmap = wxBitmap(panelIcon);
+	  else
+		  wxLogMessage(_T("    Survey panel icon NOT loaded"));
+
+	  m_bShowSurvey = false;
 }
 
 void survey_pi::ImportHydromagicTrack(TiXmlElement *track)
@@ -290,8 +302,8 @@ void survey_pi::ExportHydromagic(int survey_id, wxString filename)
             wxString latl;
             wxString lonl;
 
-			latl = s.Mid(6, f - 6);
-			lonl = s.Mid(f + 1, l - f - 2);
+			lonl = s.Mid(6, f - 6);
+			latl = s.Mid(f + 1, l - f - 2);
 
 			wxString t(tim, wxConvUTF8);
 
@@ -391,10 +403,10 @@ void survey_pi::ExportXYZ(int survey_id, wxString filename)
 
 		wxString str = dt.Format(wxT("%Y-%m-%dT%H:%M:%SZ"));
 
-		latl = s.Mid(6, f - 6);
-		lonl = s.Mid(f + 1, l - f - 2);
+		lonl = s.Mid(6, f - 6);
+		latl = s.Mid(f + 1, l - f - 2);
 
-		sFinal = latl + sSpace + lonl + sSpace + depth + sSpace + str;
+		sFinal = lonl + sSpace + latl + sSpace + depth + sSpace + str;
 
 		file.AddLine(sFinal);
 
@@ -634,8 +646,8 @@ bool survey_pi::ImportXYZ(wxString filename)
 				i++;
 		}
 
-		token[0].ToDouble(&lat);
-		token[1].ToDouble(&lon);
+		token[0].ToDouble(&lon);
+		token[1].ToDouble(&lat);
 		token[2].ToDouble(&depth);
 
 		s0 = token[3].Mid(0, 10);
@@ -681,8 +693,8 @@ bool survey_pi::ImportCSV(wxString filename)
 			i++;
 		}
 
-		token[0].ToDouble(&lat);
-		token[1].ToDouble(&lon);
+		token[0].ToDouble(&lon);
+		token[1].ToDouble(&lat);
 		token[2].ToDouble(&depth);
 
 		s0 = token[3].Mid(0, 10);
@@ -750,7 +762,7 @@ bool survey_pi::dbMergeSurveys(int survey1, int survey2){
 		wxString ti(tid, wxConvUTF8);
 		ti.ToDouble(&tide);
 
-		wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\") VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time, survey2, lat, lon, projection, tide);
+		wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\") VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time, survey2, lon, lat, projection, tide);
 		dbQuery(sql);
 	}
 	return true;
@@ -763,10 +775,10 @@ bool survey_pi::dbQuery(wxString sql)
       ret = sqlite3_exec (m_database, sql.mb_str(), NULL, NULL, &err_msg);
       if (ret != SQLITE_OK)
       {
-            // some error occurred
-            wxLogMessage (_T("Database error: %s in query: %s\n"), *err_msg, sql.c_str());
+          // some error occurred
+          wxLogMessage (_T("Database error: %s in query: %s\n"), *err_msg, sql.c_str());
 	      sqlite3_free (err_msg);
-            b_dbUsable = false;
+          b_dbUsable = false;
       }
       return b_dbUsable;
 }
@@ -854,16 +866,16 @@ vector<soundingdata> survey_pi::SetTable(int i)
 		int l = point.Len();
 
 		s0 = point.Mid(6, f - 6);
-		mysounding.lat = s0;
+		mysounding.lon = s0;
 
-		s0.ToDouble(&lat);
-		mysounding.latD = lat;
+		s0.ToDouble(&lon);
+		mysounding.lonD = lon;
 
 		s1 = point.Mid(f + 1, l - f - 2);
-		mysounding.lon = s1;
+		mysounding.lat = s1;
 
-		s1.ToDouble(&lon);
-		mysounding.lonD = lon;
+		s1.ToDouble(&lat);
+		mysounding.latD = lat;
 
 		all_soundingdata.push_back(mysounding);
 	}
@@ -1014,10 +1026,19 @@ int survey_pi::InsertSounding(double depth, double lat, double lon, double tide,
 		  time = _T("'") + wxDateTime(timestamp).FormatISODate().Append(_T(" ")).Append(wxDateTime(timestamp).FormatISOTime()) + _T("'");
 	  }
 
-	  wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\") VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time, i, lat, lon, projection, tide);
+	  wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\") VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time, i, lon, lat, projection, tide);
 	  numsoundings++; // For loading NMEA file
 	  dbQuery (sql);
       return sqlite3_last_insert_rowid(m_database);
+}
+
+static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
+	int i;
+	for (i = 0; i < argc; i++) {
+		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+	}
+	printf("\n");
+	return 0;
 }
 
 int survey_pi::Init(void)
@@ -1035,7 +1056,8 @@ int survey_pi::Init(void)
       mLastSurveyId = -1;
       m_lastPosReport = wxDateTime::Now();
       AddLocaleCatalog( _T("opencpn-survey_pi") );
-      spatialite_init(0);
+
+      //spatialite_init(0);
       err_msg = NULL;
       wxString sql;
 	  m_recording = false;
@@ -1065,135 +1087,133 @@ int survey_pi::Init(void)
       //    And load the configuration items
       LoadConfig();
 
-      //      Establish the location of the config file
+      //      Establish the location of the database file
       wxString dbpath;
-
-//      Establish a "home" location
-      wxStandardPathsBase& std_path = wxStandardPaths::Get();
-
-      wxString pHome_Locn;
-#ifdef __WXMSW__
-      pHome_Locn.Append(std_path.GetConfigDir());          // on w98, produces "/windows/Application Data"
-#else
-      pHome_Locn.Append(std_path.GetUserConfigDir());
-#endif
-      appendOSDirSlash(&pHome_Locn) ;
-#ifdef __WXMSW__
-      dbpath = _T(DATABASE_NAME);
-      dbpath.Prepend(pHome_Locn);
-
-#elif defined __WXOSX__
-      dbpath = std_path.GetUserConfigDir(); // should be ~/Library/Preferences
-      appendOSDirSlash(&dbpath) ;
-      dbpath.Append(_T(DATABASE_NAME));
-#else
-      dbpath = std_path.GetUserDataDir(); // should be ~/.opencpn
-      appendOSDirSlash(&dbpath) ;
-      dbpath.Append(_T(DATABASE_NAME));
-#endif
+	  dbpath = survey_pi::StandardPath() + _T(DATABASE_NAME);
 
       bool newDB = !wxFileExists(dbpath);
       b_dbUsable = true;
 
-      ret = sqlite3_open_v2 (dbpath.mb_str(), &m_database, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+	  void* cache; // SOLUTION
+
+      ret = sqlite3_open_v2(dbpath.mb_str(), &m_database, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
       if (ret != SQLITE_OK)
       {
-            wxLogMessage (_T("SURVEY_PI: cannot open '%s': %s\n"), DATABASE_NAME, sqlite3_errmsg (m_database));
+          wxLogMessage (_T("SURVEY_PI: cannot open '%s': %s\n"), DATABASE_NAME, sqlite3_errmsg (m_database));
 	      sqlite3_close (m_database);
 	      b_dbUsable = false;
       }
 
-      if (newDB && b_dbUsable)
-      {
-            //create empty db
-            dbQuery(_T("SELECT InitSpatialMetadata()"));
-            //dbQuery(_T("INSERT INTO spatial_ref_sys (srid, auth_name, auth_srid, ref_sys_name, proj4text) VALUES(32632, 'epsg', 32632, 'WGS 84 / UTM zone 32N', '+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ')"));
-            //CREATE OUR TABLES
-            sql = _T("CREATE TABLE survey (")
-                  _T("survey_id INTEGER PRIMARY KEY AUTOINCREMENT,")
-                  _T("survey_name TEXT,")
-                  _T("created INTEGER,")
-                  _T("submitted INTEGER)");
-            dbQuery(sql);
+	  
+		char* spatialiteDll = "mod_spatialite";
+		sqlite3_enable_load_extension(m_database, 1);
+		sqlite3_load_extension(m_database, spatialiteDll, 0, &err_msg);
+		
 
-            sql = _T("CREATE TABLE sounding (")
-                  _T("sounding_id INTEGER PRIMARY KEY AUTOINCREMENT,")
-                  _T("depth REAL NOT NULL,")
-                  _T("measured INTEGER NOT NULL,")
-                  _T("survey_id INTEGER NOT NULL,")
-                  _T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
-            dbQuery(sql);
-            dbQuery(_T("SELECT AddGeometryColumn('sounding', 'geom', 32632, 'POINT', 2)"));
-      }
+		if (newDB && b_dbUsable)
+		{
+			//create empty db
+			dbQuery(_T("SELECT InitSpatialMetadata(1)"));
+			//dbQuery(_T("INSERT INTO spatial_ref_sys (srid, auth_name, auth_srid, ref_sys_name, proj4text) VALUES(32632, 'epsg', 32632, 'WGS 84 / UTM zone 32N', '+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ')"));
+			//CREATE OUR TABLES
+			sql = _T("CREATE TABLE survey (")
+				_T("survey_id INTEGER PRIMARY KEY AUTOINCREMENT,")
+				_T("survey_name TEXT,")
+				_T("created INTEGER,")
+				_T("submitted INTEGER)");
+			dbQuery(sql);
 
-      //Update DB structure and contents
-      if (b_dbUsable)
-      {
-            char **results;
-            int n_rows;
-            int n_columns;
-            sql = _T("SELECT value FROM settings WHERE key = 'DBVersion'");
-            ret = sqlite3_get_table (m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
-            if (ret != SQLITE_OK)
-            {
-                  sqlite3_free (err_msg);
-                  sql = _T("CREATE TABLE settings (")
-                  _T("key TEXT NOT NULL UNIQUE,")
-                  _T("value TEXT)");
-                  dbQuery(sql);
-                  dbQuery(_T("INSERT INTO settings (key, value) VALUES ('DBVersion', '2')"));
-                  db_ver = 2;
-            }
-            else
-            {
-                  db_ver = atoi(results[1]);
-            }
-            sqlite3_free_table (results);
-            wxLogMessage (_T("SURVEY_PI: Database version: %i\n"), db_ver);
-      }
+			sql = _T("CREATE TABLE sounding (")
+				_T("sounding_id INTEGER PRIMARY KEY AUTOINCREMENT,")
+				_T("depth REAL NOT NULL,")
+				_T("measured INTEGER NOT NULL,")
+				_T("survey_id INTEGER NOT NULL,")
+				_T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
+			dbQuery(sql);
+			dbQuery(_T("SELECT AddGeometryColumn('sounding', 'geom', 32632, 'POINT', 2)"));
+		}
 
-      if (b_dbUsable && db_ver == 2)
-      {
-            sql = _T("ALTER TABLE sounding ")
-                  _T("ADD COLUMN tide REAL NOT NULL DEFAULT 0.0");
-            dbQuery(sql);
-            dbQuery(_T("UPDATE settings SET value = 3 WHERE key = 'DBVersion'"));
-            db_ver = 3;
-      }
-      if (b_dbUsable && db_ver == 3)
-      {
-            sql = _T("CREATE TABLE new_sounding (")
-                  _T("sounding_id INTEGER PRIMARY KEY AUTOINCREMENT,")
-                  _T("depth REAL NOT NULL,")
-                  _T("measured INTEGER NOT NULL,")
-                  _T("survey_id INTEGER NOT NULL,")
-                  _T("tide REAL NOT NULL DEFAULT 0.0,")
-                  _T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
-            dbQuery(sql);
-            dbQuery(_T("SELECT AddGeometryColumn('new_sounding', 'geom', 3395, 'POINT', 2)"));
-            dbQuery(_T("INSERT INTO new_sounding SELECT sounding_id, depth, measured, survey_id, tide, SetSRID('geom', 3395) FROM sounding"));
-            dbQuery(_T("DROP TABLE sounding"));
-            dbQuery(_T("SELECT DiscardGeometryColumn('sounding', 'geom')"));
-            sql = _T("CREATE TABLE sounding (")
-                  _T("sounding_id INTEGER PRIMARY KEY AUTOINCREMENT,")
-                  _T("depth REAL NOT NULL,")
-                  _T("measured INTEGER NOT NULL,")
-                  _T("survey_id INTEGER NOT NULL,")
-                  _T("tide REAL NOT NULL DEFAULT 0.0,")
-                  _T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
-            dbQuery(sql);
-            dbQuery(_T("SELECT AddGeometryColumn('sounding', 'geom', 3395, 'POINT', 2)"));
-            dbQuery(_T("INSERT INTO sounding SELECT sounding_id, depth, measured, survey_id, tide, SetSRID('geom', 3395) FROM new_sounding"));
-            dbQuery(_T("DROP TABLE new_sounding"));
-            dbQuery(_T("SELECT DiscardGeometryColumn('new_sounding', 'geom')"));
-            dbQuery(_T("UPDATE settings SET value = 4 WHERE key = 'DBVersion'"));
-            db_ver = 4;
-      }
+		//Update DB structure and contents
+		if (b_dbUsable)
+		{
+			char **results;
+			int n_rows;
+			int n_columns;
+			sql = _T("SELECT value FROM settings WHERE key = 'DBVersion'");
+			ret = sqlite3_get_table(m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
+			if (ret != SQLITE_OK)
+			{
+				sqlite3_free(err_msg);
+				sql = _T("CREATE TABLE settings (")
+					_T("key TEXT NOT NULL UNIQUE,")
+					_T("value TEXT)");
+				dbQuery(sql);
+				dbQuery(_T("INSERT INTO settings (key, value) VALUES ('DBVersion', '2')"));
+				db_ver = 2;
+			}
+			else
+			{
+				db_ver = atoi(results[1]);
+			}
+			sqlite3_free_table(results);
+			wxLogMessage(_T("SURVEY_PI: Database version: %i\n"), db_ver);
+		}
 
-      //    This PlugIn needs a toolbar icon, so request its insertion
-      m_leftclick_tool_id  = InsertPlugInTool(_T(""), _img_survey, _img_survey, wxITEM_NORMAL,
-            _("Survey"), _T(""), NULL,
-             SURVEY_TOOL_POSITION, 0, this);
+		if (b_dbUsable && db_ver == 2)
+		{
+			sql = _T("ALTER TABLE sounding ")
+				_T("ADD COLUMN tide REAL NOT NULL DEFAULT 0.0");
+			dbQuery(sql);
+			dbQuery(_T("UPDATE settings SET value = 3 WHERE key = 'DBVersion'"));
+			db_ver = 3;
+		}
+		if (b_dbUsable && db_ver == 3)
+		{
+			sql = _T("CREATE TABLE new_sounding (")
+				_T("sounding_id INTEGER PRIMARY KEY AUTOINCREMENT,")
+				_T("depth REAL NOT NULL,")
+				_T("measured INTEGER NOT NULL,")
+				_T("survey_id INTEGER NOT NULL,")
+				_T("tide REAL NOT NULL DEFAULT 0.0,")
+				_T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
+			dbQuery(sql);
+			dbQuery(_T("SELECT AddGeometryColumn('new_sounding', 'geom', 3395, 'POINT', 2)"));
+			dbQuery(_T("INSERT INTO new_sounding SELECT sounding_id, depth, measured, survey_id, tide, SetSRID('geom', 3395) FROM sounding"));
+			dbQuery(_T("DROP TABLE sounding"));
+			dbQuery(_T("SELECT DiscardGeometryColumn('sounding', 'geom')"));
+			sql = _T("CREATE TABLE sounding (")
+				_T("sounding_id INTEGER PRIMARY KEY AUTOINCREMENT,")
+				_T("depth REAL NOT NULL,")
+				_T("measured INTEGER NOT NULL,")
+				_T("survey_id INTEGER NOT NULL,")
+				_T("tide REAL NOT NULL DEFAULT 0.0,")
+				_T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
+			dbQuery(sql);
+			dbQuery(_T("SELECT AddGeometryColumn('sounding', 'geom', 3395, 'POINT', 2)"));
+			dbQuery(_T("INSERT INTO sounding SELECT sounding_id, depth, measured, survey_id, tide, SetSRID('geom', 3395) FROM new_sounding"));
+			dbQuery(_T("DROP TABLE new_sounding"));
+			dbQuery(_T("SELECT DiscardGeometryColumn('new_sounding', 'geom')"));
+			dbQuery(_T("UPDATE settings SET value = 4 WHERE key = 'DBVersion'"));
+			db_ver = 4;
+		}
+
+	  wxMenu dummy_menu;
+	  m_delete_menu_id = AddCanvasContextMenuItem
+
+	  (new wxMenuItem(&dummy_menu, -1, _("Delete this Sounding")), this);
+	  SetCanvasContextMenuItemViz(m_delete_menu_id, true);
+
+	  //    This PlugIn needs a toolbar icon, so request its insertion
+	  if (m_bSurveyShowIcon)
+
+#ifdef SURVEY_USE_SVG
+		  m_leftclick_tool_id = InsertPlugInToolSVG(_T("Survey"), _svg_survey, _svg_survey, _svg_survey_toggled,
+			  wxITEM_CHECK, _("Survey"), _T(""), NULL, SURVEY_TOOL_POSITION, 0, this);
+#else
+		  m_leftclick_tool_id = InsertPlugInTool(_T(""), _img_survey, _img_survey, wxITEM_CHECK,
+			  _("Survey"), _T(""), NULL,
+			  SURVEY_TOOL_POSITION, 0, this);
+#endif
 
       m_pSurveyDialog = NULL;
 	  m_pSurveyOverlayFactory = NULL;
@@ -1203,13 +1223,13 @@ int survey_pi::Init(void)
 
       return (WANTS_TOOLBAR_CALLBACK    |
               INSTALLS_TOOLBAR_TOOL     |
+			  WANTS_CURSOR_LATLON |
               WANTS_PREFERENCES         |
               WANTS_NMEA_SENTENCES      |
               WANTS_NMEA_EVENTS         |
               WANTS_OVERLAY_CALLBACK    |
               WANTS_ONPAINT_VIEWPORT    |
-              WANTS_OPENGL_OVERLAY_CALLBACK |
-              WANTS_DYNAMIC_OPENGL_OVERLAY_CALLBACK |
+              WANTS_OPENGL_OVERLAY_CALLBACK |             
               WANTS_CONFIG
            );
 
@@ -1237,7 +1257,7 @@ bool survey_pi::DeInit(void)
 
       }
       SaveConfig();
-	  spatialite_cleanup();
+	  //spatialite_cleanup();
       int m = sqlite3_close(m_database);
 
 	  wxLogMessage (_T("SURVEY_PI: Close Msg: %i\n"), m);
@@ -1266,7 +1286,7 @@ int survey_pi::GetPlugInVersionMinor()
 
 wxBitmap *survey_pi::GetPlugInBitmap()
 {
-      return _img_survey_pi;
+	return &m_panelBitmap;
 }
 
 wxString survey_pi::GetCommonName()
@@ -1387,11 +1407,36 @@ void survey_pi::OnToolbarToolCallback(int id)
 			SetSettings();
       }
 
-      m_pSurveyDialog->Show(!m_pSurveyDialog->IsShown());
+	  //Toggle otcurrent overlay display
+	  m_bShowSurvey = !m_bShowSurvey;
+
+	  //    Toggle dialog?
+	  if (m_bShowSurvey) {
+		  m_pSurveyDialog->Show();
+	  }
+	  else {
+		  m_pSurveyDialog->Hide();
+	  }
+
+	  // Toggle is handled by the toolbar but we must keep plugin manager b_toggle updated
+	  // to actual status to ensure correct status upon toolbar rebuild
+	  SetToolbarItemState(m_leftclick_tool_id, m_bShowSurvey);
+	  RequestRefresh(m_parent_window); // refresh main window
 }
 
 void survey_pi::SetSettings(){
 
+	if (NULL == m_pSurveyDialog)
+	{
+		m_pSurveyDialog = new SurveyDlg(m_parent_window);
+		m_pSurveyOverlayFactory = new SurveyOverlayFactory(*m_pSurveyDialog);
+		m_pSurveyDialog->plugin = this;
+		m_pSurveyDialog->Move(wxPoint(m_survey_dialog_x, m_survey_dialog_y));
+		FillSurveyDropdown();
+		FillSurveyInfo();
+		FillSurveyGrid();		
+	}
+	
 	m_pSurveyDialog->mySettings.m_iOpacity = m_iOpacity;
 	m_pSurveyDialog->mySettings.m_iUnits = m_iUnits;
 	m_pSurveyDialog->mySettings.m_bCalcTide = m_bCalcTide;
@@ -1420,7 +1465,13 @@ void survey_pi::SetSettings(){
 	m_pSurveyDialog->mySettings.mLastSurveyId = mLastSurveyId;
 
 	m_pSurveyDialog->mySettings.mLastX = mLastX;
-	m_pSurveyDialog->mySettings.mLastY = mLastY;
+	m_pSurveyDialog->mySettings.mLastY = mLastY;	
+
+	int gl = wxUSE_GLCANVAS;
+	
+	if (!m_bUseSymbol && (gl==0)) {
+		wxMessageBox(_T("WITHOUT OpenGL the display must still use a symbol"));
+	}
 
 }
 
@@ -1461,6 +1512,8 @@ bool survey_pi::LoadConfig(void)
             pConf->Read ( _T ( "GPSPort" ), &m_fGPSPort, 0.0 );
             pConf->Read ( _T ( "MinSoundingDist" ), &m_fMinDistance, 0.0 );
             pConf->Read ( _T ( "AutoNewDistance" ), &m_fAutoNewDistance, 0.0 );
+			
+			pConf->Read(_T("ShowSurveyIcon"), &m_bSurveyShowIcon, 1);
 
             m_survey_dialog_x =  pConf->Read ( _T ( "DialogPosX" ), 20L );
             m_survey_dialog_y =  pConf->Read ( _T ( "DialogPosY" ), 20L );
@@ -1510,6 +1563,7 @@ bool survey_pi::SaveConfig(void)
             pConf->Write ( _T ( "MinSoundingDist" ), m_fMinDistance );
             pConf->Write ( _T ( "AutoNewDistance" ), m_fAutoNewDistance );
 
+			pConf->Write (_T("ShowSurveyIcon"), m_bSurveyShowIcon);
 
             pConf->Write ( _T ( "DialogPosX" ),   m_survey_dialog_x );
             pConf->Write ( _T ( "DialogPosY" ),   m_survey_dialog_y );
@@ -1719,10 +1773,10 @@ bool survey_pi::GetSurveySoundings(int as)
 			int l = s.Len();
 
 			s0 = s.Mid(6, f - 6);
-			s0.ToDouble(&latl);
+			s0.ToDouble(&lonl);
 
 			s1 = s.Mid(f + 1, l - f - 2);
-			s1.ToDouble(&lonl);
+			s1.ToDouble(&latl);
 
 			mySounding.latD = latl;
 			mySounding.lonD = lonl;
@@ -2254,4 +2308,182 @@ double survey_pi::GetPortTideInfo(double lat, double lon, wxDateTime inTime)
 	wxMessageBox(myTide, _T("tide"));
 	return m_tideheight;
 
+}
+
+int survey_pi::GetSoundingID(wxString lat, wxString lon)
+{
+	/*
+	SELECT geonameid, name, country,
+	Min(ST_Distance(MakePoint(10, 43), geom, 1)) / 1000.0 AS dist_km
+FROM airports;
+
+	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide,	Min(ST_Distance(MakePoint(-4.2, 50.5), geom, 1))/ 1000 AS dist_km	FROM sounding"));
+
+
+
+	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide FROM sounding"));
+
+	SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide,
+	((X(Geometry)-X(loc))*(X(Geometry)-X(loc))) + ((Y(Geometry)-Y(loc))*(Y(Geometry)-Y(loc))) as distance
+	FROM
+	sounding,
+	(SELECT MakePoint(-4.2, 50.5) as loc)
+
+	select distance(makePOINT(-4.2, 50.5), geom,1)/1852 from sounding ... correct!
+	//wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide,	ST_Distance(MakePoint(-4.2, 50.5), geom)*60 AS dist_nM	FROM sounding"));
+
+	*/
+
+	//wxMessageBox(lat);
+
+	string sLat = lat.mb_str();
+	string sLon = lon.mb_str();
+
+	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide,	Min(ST_Distance(MakePoint(%s, %s), geom))*60 AS dist_nM FROM sounding"), sLon, sLat);
+	//wxMessageBox(sql);
+
+	dbQuery(sql);
+
+	char **results;
+	int n_rows;
+	int n_columns;
+	char *dpt;
+	char *pos;
+	char *sdgid;
+	char *surid;
+	char *measured;
+	char *tide;
+	char *distance;
+
+	wxString s0, s1;
+	ret = sqlite3_get_table(m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
+	if (ret != SQLITE_OK)
+	{
+		/* some error occurred */
+		wxLogMessage(_T("Spatialite SQL error: %s\n"), err_msg);
+		sqlite3_free(err_msg);
+		return false;
+	}
+       //wxString soundid = wxString::Format(wxT("%i"), n_rows);
+	   //wxMessageBox(soundid);
+	for (int i = 1; i <= n_rows; i++)
+	{
+		dpt = results[(i * n_columns) + 0];
+		pos = results[(i * n_columns) + 1];
+		sdgid = results[(i * n_columns) + 2];
+		surid = results[(i * n_columns) + 3];
+		measured = results[(i * n_columns) + 4];
+		tide = results[(i * n_columns) + 5];
+		distance = results[(i * n_columns) + 6];
+
+		double depth = atof(dpt);
+		int sounding_id = atoi(sdgid);
+
+		
+
+		double distance_calc = atof(distance);
+
+		wxString s(pos, wxConvUTF8);
+
+		wxString d(dpt, wxConvUTF8);
+
+		double latl;
+		double lonl;
+
+
+
+		int f = s.First(_T(" "));
+		int l = s.Len();
+
+		s0 = s.Mid(6, f - 6);
+		s0.ToDouble(&lonl);
+
+		wxString slat = wxString::Format(wxT("%f"), latl);
+		//wxMessageBox(slat);
+
+		s1 = s.Mid(f + 1, l - f - 2);
+		s1.ToDouble(&latl);
+
+		wxString slon = wxString::Format(wxT("%f"), lonl);
+		//wxMessageBox(slon);
+
+		wxString sid = wxString::Format(wxT("%f"), distance_calc);
+		//wxMessageBox(sid);
+
+		sqlite3_free(err_msg);
+		DeleteSounding(sounding_id);
+
+	}
+	return 1;
+}
+
+
+void survey_pi::OnContextMenuItemCallback(int id)
+{
+	if (!m_pSurveyDialog)
+		return;
+
+	if (id == m_delete_menu_id) {
+		m_cursor_lat = GetCursorLat();
+		m_cursor_lon = GetCursorLon();
+
+		wxString wLat, wLon;
+		wLat = wxString::Format(wxT("%f"), m_cursor_lat);
+		wLon = wxString::Format(wxT("%f"), m_cursor_lon);
+
+		GetSoundingID(wLat, wLon);
+	}
+}
+
+void survey_pi::SetCursorLatLon(double lat, double lon)
+{
+	m_cursor_lat = lat;
+	m_cursor_lon = lon;
+}
+
+void survey_pi::OnSurveyDialogClose()
+{
+	m_bShowSurvey = false;
+	SetToolbarItemState(m_leftclick_tool_id, m_bShowSurvey);
+	m_pSurveyDialog->Hide();
+	SaveConfig();
+
+	RequestRefresh(m_parent_window); // refresh main window
+
+}
+
+wxString survey_pi::StandardPath()
+{
+	wxStandardPathsBase& std_path = wxStandardPathsBase::Get();
+	wxString s = wxFileName::GetPathSeparator();
+
+#if defined(__WXMSW__)
+	wxString stdPath = std_path.GetConfigDir();
+#elif defined(__WXGTK__) || defined(__WXQT__)
+	wxString stdPath = std_path.GetUserDataDir();
+#elif defined(__WXOSX__)
+	wxString stdPath = (std_path.GetUserConfigDir() + s + "opencpn");
+#endif
+
+	stdPath += s + "plugins";
+	if (!wxDirExists(stdPath))
+		wxMkdir(stdPath);
+
+	stdPath += s + "survey";
+
+#ifdef __WXOSX__
+	// Compatibility with pre-OCPN-4.2; move config dir to
+	// ~/Library/Preferences/opencpn if it exists
+	wxString oldPath = (std_path.GetUserConfigDir() + s + "plugins" + s + "survey");
+	if (wxDirExists(oldPath) && !wxDirExists(stdPath)) {
+		wxLogMessage("survey_pi: moving config dir %s to %s", oldPath, stdPath);
+		wxRenameFile(oldPath, stdPath);
+	}
+#endif
+
+	if (!wxDirExists(stdPath))
+		wxMkdir(stdPath);
+
+	stdPath += s; // is this necessary?
+	return stdPath;
 }

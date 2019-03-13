@@ -5,6 +5,7 @@
 #endif
 #include <wx/mstream.h>
 #include "icons.h"
+#include <wx/filename.h>
 
 wxBitmap *_img_survey;
 wxBitmap *_img_survey_pi;
@@ -13,6 +14,11 @@ wxBitmap *_img_survey_paused;
 wxBitmap *_img_minus;
 wxBitmap *_img_plus;
 
+#ifdef SURVEY_USE_SVG
+#include "ocpn_plugin.h"
+wxString _svg_survey;
+wxString _svg_survey_toggled;
+#endif
 
 void initialize_images(void)
 {
@@ -40,6 +46,18 @@ void initialize_images(void)
 		wxMemoryInputStream sm("\211PNG\r\n\032\n\000\000\000\rIHDR\000\000\000\024\000\000\000\024\b\006\000\000\000\215\211\035\r\000\000\000\004sBIT\b\b\b\b|\bd\210\000\000\000\011pHYs\000\000\000x\000\000\000x\001\352\362j\366\000\000\000\031tEXtSoftware\000www.inkscape.org\233\356<\032\000\000\001^IDAT8\215\255\224=N\303@\020\205\2777\011\242\200\002\214\004\312\021\\\030!!!JD\0207\340\016\034\213+\320#\250)h@\242\241\005$(\222\324^\326C\301&\230\037\333@\030i5\205w>\275\035\277\031\271;M\221\017\363\303\347\265\347\0237\257\200hXX\177Z?\276\275\270=k\252\3517\322\000I\331he\224a\224\210\022\0216F\033\253m5\326\366\021\360\004\013\263\323\021\255@I\236@Sh\251J\315=\372\201B\352\260\224\347\006~P\330u\275\035(\374\213\302\216\350\347\303\374PR\006\270T\353\217p\275h\367\263B\213\266S\014\213\nR\217\247Q\341\210\261\262\243\354\261f\215\360M\317\276f\b\364R\026%=\002N9x\030,\233\313\253\377\200\321#\270\373\213\001\361?`@\000b\337d\277\207Y:u\230Q\232[T\276\227\037hA\253\000\252\344u\237Y\264\235\233\255\233m\240\234\3026\2576\357\034\277\024\351\207\324}\031\231\364\333\006\275\330/\034(\260\231\212\340\370\345\365\371\365iSM\267\017-=\371\355\231\345L\331_\200i\226g0\230s9\244\033\357\2607{\3159\313u\330\334\n+\374\003\314\272\227C\353\306F\214\a\367\203%\227/R\021\315-\022\231\264\225\274\002\263\327\336X\205\371\271\235\000\000\000\000IEND\256B`\202", 481);
 		_img_plus = new wxBitmap(wxImage(sm));
 	}
+
+#ifdef SURVEY_USE_SVG
+	wxFileName fn;
+	fn.SetPath(*GetpSharedDataLocation());
+	fn.AppendDir(_T("plugins"));
+	fn.AppendDir(_T("survey_pi"));
+	fn.AppendDir(_T("data"));
+	fn.SetFullName(_T("survey_pi.svg"));
+	_svg_survey = fn.GetFullPath();
+	fn.SetFullName(_T("survey_pi_toggled.svg"));
+	_svg_survey_toggled = fn.GetFullPath();
+#endif
 
 	return;
 }

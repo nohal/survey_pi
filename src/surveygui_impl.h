@@ -109,6 +109,7 @@ public:
       SurveyDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 	  void SetViewPort(PlugIn_ViewPort *vp);
+	  void OnClose(wxCloseEvent& event);
 	  PlugIn_ViewPort *vp;
 	  void LoadSurvey_0();
 

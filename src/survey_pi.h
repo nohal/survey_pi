@@ -53,8 +53,8 @@
 
 //#include "SurveyOverlayFactory.h"
 
-#define     PLUGIN_VERSION_MAJOR    2
-#define     PLUGIN_VERSION_MINOR    1
+#define     PLUGIN_VERSION_MAJOR    3
+#define     PLUGIN_VERSION_MINOR    0
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
@@ -77,9 +77,9 @@
 
 #include <algorithm>
 
-#include "libspatialite-amalgamation-3.0.1/headers/spatialite/sqlite3.h"
-#include "libspatialite-amalgamation-3.0.1/headers/spatialite.h"
-#include "libspatialite-amalgamation-3.0.1/headers/spatialite/gaiageo.h"
+#include <sqlite3.h>
+#include <wx/filefn.h>
+
 
 #include "tcmgr.h"
 #include <vector>
@@ -147,6 +147,7 @@ public:
       void SetSurveyDialogY    (int x){ m_survey_dialog_y = x;}
 
       void OnSurveyDialogClose();
+	  wxString StandardPath();
 
       bool              ImportHydromagic(wxString filename);
 	  bool              ImportXYZ(wxString filename);
@@ -207,9 +208,23 @@ public:
 
 	  SurveyOverlayFactory *GetSurveyOverlayFactory(){ return m_pSurveyOverlayFactory; }
 
+	  double GetCursorLon(void) { return m_cursor_lon; }
+	  double GetCursorLat(void) { return m_cursor_lat; }
+	  
+	  int GetSoundingID(wxString lat, wxString lon);
+
+	  void OnContextMenuItemCallback(int id);
+	  void SetCursorLatLon(double lat, double lon);
+
+	  bool m_bShowSurvey;
+	  wxBitmap  m_panelBitmap;
+	  bool m_bSurveyShowIcon;
 
 private:
-
+	
+	int m_delete_menu_id;
+	double m_cursor_lon;
+	double m_cursor_lat;
 
 	  SurveyOverlayFactory *m_pSurveyOverlayFactory;
 	  SurveyDlg *m_pSurveyDialog;

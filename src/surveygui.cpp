@@ -514,6 +514,8 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	this->Centre( wxBOTH );
 	
 	// Connect Events
+
+	this->Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(SurveyDlgDef::OnClose));
 	m_chSurvey->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( SurveyDlgDef::OnSurveySelection ), NULL, this );
 	m_btnLoadFromFile->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SurveyDlgDef::LoadFromFile), NULL, this );
 	m_btbRecord->Connect(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(SurveyDlgDef::OnSurveyRecordToggleNMEA), NULL, this);

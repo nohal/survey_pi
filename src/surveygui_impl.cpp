@@ -51,6 +51,11 @@ void SurveyDlg::SetViewPort(PlugIn_ViewPort *vp)
 	m_vp = new PlugIn_ViewPort(*vp);
 }
 
+void SurveyDlg::OnClose(wxCloseEvent& event)
+{
+	plugin->OnSurveyDialogClose();
+}
+
 void SurveyDlg::OnSurveyRecordToggleNMEA(wxCommandEvent& event)
 {
 	bool b = m_tbRecordNMEA->GetValue();

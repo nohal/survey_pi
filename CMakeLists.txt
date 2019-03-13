@@ -15,15 +15,25 @@ SET(TITLE_NAME survey_pi)
 SET(CPACK_PACKAGE_CONTACT "Mike Rossiter")
 #SET(CMAKE_BUILD_TYPE Debug)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers ${CMAKE_SOURCE_DIR}/src/libspatialite-amalgamation-3.0.1/headers/spatialite)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/splite-msvc/include)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/splite-msvc/include/spatialite)
-LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/splite-msvc/lib)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 
-SET(VERSION_MAJOR "2")
-SET(VERSION_MINOR "1")
+SET(VERSION_MAJOR "3")
+SET(VERSION_MINOR "0")
+
+SET(NAME_SUFFIX "ov50")
+
+set (CMAKE_CXX_STANDARD 11)
 
 #SET(CMAKE_BUILD_TYPE Debug)
+
+OPTION(SURVEY_USE_SVG "Use SVG graphics" ON)
+
+INCLUDE("cmake/PluginConfigure.cmake")
+
+IF(SURVEY_USE_SVG)
+  ADD_DEFINITIONS(-DSURVEY_USE_SVG)
+ENDIF(SURVEY_USE_SVG)
+
 
 IF( NOT CMAKE_BUILD_TYPE )
   SET( CMAKE_BUILD_TYPE Release CACHE STRING
@@ -32,6 +42,12 @@ IF( NOT CMAKE_BUILD_TYPE )
 ENDIF( NOT CMAKE_BUILD_TYPE )
 
 
+IF(WIN32)
+	SET(sqlite ${CMAKE_SOURCE_DIR}/sqlite-msvc/lib/sqlite3_i.lib)
+	SET(sqlite "${PARENT}.lib")
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/sqlite-msvc/include)
+	LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/sqlite-msvc/lib)
+ENDIF(WIN32)
 
 #  Search for wxWidgets 2.9 or newer
 STRING(REGEX MATCHALL "-2.9|-3." wx_Version_2.9+ "${wxWidgets_INCLUDE_DIRS}")
@@ -87,35 +103,35 @@ SET(SRC_NMEA0183
 		src/nmea0183/gga.cpp
 		src/nmea0183/gsv.hpp
 		src/nmea0183/gsv.cpp
-        	src/nmea0183/dbt.cpp
-        	src/nmea0183/dbt.hpp
-        	src/nmea0183/dpt.cpp
-        	src/nmea0183/dpt.hpp
-        	src/nmea0183/mtw.cpp
-        	src/nmea0183/mtw.hpp
-        	src/nmea0183/mwv.cpp
-        	src/nmea0183/mwv.hpp
-        	src/nmea0183/vhw.hpp
-        	src/nmea0183/vhw.cpp
-        	src/nmea0183/vwr.cpp
-        	src/nmea0183/vwr.hpp
-        	src/nmea0183/zda.cpp
-        	src/nmea0183/zda.hpp
+        src/nmea0183/dbt.cpp
+        src/nmea0183/dbt.hpp
+        src/nmea0183/dpt.cpp
+        src/nmea0183/dpt.hpp
+        src/nmea0183/mtw.cpp
+        src/nmea0183/mtw.hpp
+        src/nmea0183/mwv.cpp
+        src/nmea0183/mwv.hpp
+        src/nmea0183/vhw.hpp
+        src/nmea0183/vhw.cpp
+        src/nmea0183/vwr.cpp
+        src/nmea0183/vwr.hpp
+        src/nmea0183/zda.cpp
+        src/nmea0183/zda.hpp
 		src/nmea0183/rsa.hpp
 		src/nmea0183/rsa.cpp
 		src/nmea0183/SatInfo.h
-        	src/nmea0183/mwd.cpp
-        	src/nmea0183/mwd.hpp
-        	src/nmea0183/vwt.cpp
-        	src/nmea0183/vwt.hpp
+        src/nmea0183/mwd.cpp
+        src/nmea0183/mwd.hpp
+        src/nmea0183/vwt.cpp
+        src/nmea0183/vwt.hpp
 	)
 INCLUDE_DIRECTORIES(src/nmea0183)
 
 SET(SRC_SURVEY
-        src/survey_pi.h
-        src/survey_pi.cpp
-        src/icons.h
-        src/icons.cpp
+    src/survey_pi.h
+    src/survey_pi.cpp
+    src/icons.h
+    src/icons.cpp
 	src/surveygui.h
 	src/surveygui.cpp
 	src/surveygui_impl.cpp
@@ -135,21 +151,19 @@ SET(SRC_SURVEY
 	src/circle.xpm
 	src/cross.xpm
 	src/square.xpm
-        src/bbox.cpp
+    src/bbox.cpp
 	src/bbox.h
 	src/SurveyOverlayFactory.cpp
 	src/SurveyOverlayFactory.h
 	src/dychart.h
-	src/libspatialite-amalgamation-3.0.1/spatialite.c
-	src/libspatialite-amalgamation-3.0.1/sqlite3.c
-	
+	src/ocpn_plugin.h
 	)
 
 SET(SRC_TINYXML
 	src/tinyxml.h
 	src/tinyxml.cpp
-        src/tinyxmlparser.cpp
-        src/tinyxmlerror.cpp
+    src/tinyxmlparser.cpp
+    src/tinyxmlerror.cpp
 	)
 
 IF(TINYXML_FOUND)
@@ -166,10 +180,13 @@ ADD_DEFINITIONS(-D SQLITE_ENABLE_RTREE)
 
 ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_SURVEY} ${SRC_NMEA0183})
 
-TARGET_LINK_LIBRARIES(${PACKAGE_NAME} geos_c)
-TARGET_LINK_LIBRARIES(${PACKAGE_NAME} freexl_i)
-TARGET_LINK_LIBRARIES(${PACKAGE_NAME} proj)
-TARGET_LINK_LIBRARIES(${PACKAGE_NAME} iconv)
+IF(WIN32)
+	FIND_LIBRARY(sqlite3_i ${CMAKE_SOURCE_DIR}/sqlite-msvc/lib)
+	TARGET_LINK_LIBRARIES(${PACKAGE_NAME} sqlite3_i)
+
+ENDIF(WIN32)
+
+
 
 ADD_DEFINITIONS(-DTIXML_USE_STL)
 

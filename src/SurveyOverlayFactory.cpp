@@ -28,7 +28,7 @@
 #include "wx/wxprec.h"
 
 #ifndef  WX_PRECOMP
-  #include "wx/wx.h"
+#include "wx/wx.h"
 #endif //precompiled headers
 
 #include <wx/glcanvas.h>
@@ -62,11 +62,11 @@ SurveyOverlayFactory::SurveyOverlayFactory(SurveyDlg &dlg)
 	: m_dlg(dlg), m_sdgs(dlg.mysoundings), m_settings(dlg.mySettings)
 
 {
-    m_dFont_map = new wxFont( 10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
-    m_dFont_war = new wxFont( 16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_NORMAL );
+	m_dFont_map = new wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+	m_dFont_war = new wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_NORMAL);
 
 	m_last_vp_scale = 0.;
-	m_dtUseNew = wxDateTime::Now(); 
+	m_dtUseNew = wxDateTime::Now();
 }
 
 SurveyOverlayFactory::~SurveyOverlayFactory()
@@ -79,80 +79,80 @@ void SurveyOverlayFactory::Reset()
 
 }
 
-bool SurveyOverlayFactory::RenderGLSurveyOverlay( wxGLContext *pcontext, PlugIn_ViewPort *vp )
+bool SurveyOverlayFactory::RenderGLSurveyOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 {
-    m_pdc = NULL;  // inform lower layers that this is OpenGL render
+	m_pdc = NULL;  // inform lower layers that this is OpenGL render
 
-    DrawAllSoundingsInViewPort(vp,false,false,false, m_dtUseNew);
-    return true;
+	DrawAllSoundingsInViewPort(vp, false, false, false, m_dtUseNew);
+	return true;
 
 }
 
-bool SurveyOverlayFactory::RenderSurveyOverlay( wxDC &dc, PlugIn_ViewPort *vp )
+bool SurveyOverlayFactory::RenderSurveyOverlay(wxDC &dc, PlugIn_ViewPort *vp)
 {
 
 #if wxUSE_GRAPHICS_CONTEXT
-    wxMemoryDC *pmdc;
-    pmdc = wxDynamicCast(&dc, wxMemoryDC);
-    wxGraphicsContext *pgc = wxGraphicsContext::Create( *pmdc );
-    m_gdc = pgc;
-    m_pdc = &dc;
-#else
-    m_pdc = &dc;
-#endif
-	   
+	wxMemoryDC *pmdc;
+	pmdc = wxDynamicCast(&dc, wxMemoryDC);
+	wxGraphicsContext *pgc = wxGraphicsContext::Create(*pmdc);
+	m_gdc = pgc;
 	m_pdc = &dc;
-	DrawAllSoundingsInViewPort(vp,false,false,false, m_dtUseNew);
-    return true;
+#else
+	m_pdc = &dc;
+#endif
+
+	m_pdc = &dc;
+	DrawAllSoundingsInViewPort(vp, false, false, false, m_dtUseNew);
+	return true;
 
 }
 
 
 
-bool SurveyOverlayFactory::DoRenderSurveyOverlay( PlugIn_ViewPort *vp )
+bool SurveyOverlayFactory::DoRenderSurveyOverlay(PlugIn_ViewPort *vp)
 {
-    
-    m_Message_Hiden.Empty();
-    m_last_vp_scale = vp->view_scale_ppm;
-	
-    if( !m_Message_Hiden.IsEmpty() )
-        DrawMessageWindow( m_Message_Hiden , vp->pix_width, vp->pix_height, m_dFont_map );
-	    DrawMessageWindow( m_Message_Hiden , vp->pix_width, vp->pix_height, m_dFont_map );
-    return true;
+
+	m_Message_Hiden.Empty();
+	m_last_vp_scale = vp->view_scale_ppm;
+
+	if (!m_Message_Hiden.IsEmpty())
+		DrawMessageWindow(m_Message_Hiden, vp->pix_width, vp->pix_height, m_dFont_map);
+	DrawMessageWindow(m_Message_Hiden, vp->pix_width, vp->pix_height, m_dFont_map);
+	return true;
 }
 
 
-void SurveyOverlayFactory::DrawMessageWindow( wxString msg, int x, int y , wxFont *mfont)
+void SurveyOverlayFactory::DrawMessageWindow(wxString msg, int x, int y, wxFont *mfont)
 {
-    if(msg.empty())
-        return;
+	if (msg.empty())
+		return;
 
-    wxMemoryDC mdc;
-    wxBitmap bm( 1000, 1000 );
-    mdc.SelectObject( bm );
-    mdc.Clear();
+	wxMemoryDC mdc;
+	wxBitmap bm(1000, 1000);
+	mdc.SelectObject(bm);
+	mdc.Clear();
 
-    mdc.SetFont( *mfont );
-    mdc.SetPen( *wxTRANSPARENT_PEN);
-    mdc.SetBrush( wxColour(243, 229, 47 ) );
-    int w, h;
-    mdc.GetMultiLineTextExtent( msg, &w, &h );
-    h += 2;
-    int label_offset = 10;
-    int wdraw = w + ( label_offset * 2 );
-    mdc.DrawRectangle( 0, 0, wdraw, h );
+	mdc.SetFont(*mfont);
+	mdc.SetPen(*wxTRANSPARENT_PEN);
+	mdc.SetBrush(wxColour(243, 229, 47));
+	int w, h;
+	mdc.GetMultiLineTextExtent(msg, &w, &h);
+	h += 2;
+	int label_offset = 10;
+	int wdraw = w + (label_offset * 2);
+	mdc.DrawRectangle(0, 0, wdraw, h);
 
-    mdc.DrawLabel( msg, wxRect( label_offset, 0, wdraw, h ), wxALIGN_LEFT| wxALIGN_CENTRE_VERTICAL);
-    mdc.SelectObject( wxNullBitmap );
+	mdc.DrawLabel(msg, wxRect(label_offset, 0, wdraw, h), wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL);
+	mdc.SelectObject(wxNullBitmap);
 
-    wxBitmap sbm = bm.GetSubBitmap( wxRect( 0, 0, wdraw, h ) );
+	wxBitmap sbm = bm.GetSubBitmap(wxRect(0, 0, wdraw, h));
 
-    DrawOLBitmap( sbm, 0, y - ( GetChartbarHeight() + h ), false );
+	DrawOLBitmap(sbm, 0, y - (GetChartbarHeight() + h), false);
 }
 
 
-wxColour SurveyOverlayFactory::GetDepthColour(double my_depth){
-	
+wxColour SurveyOverlayFactory::GetDepthColour(double my_depth) {
+
 	wxColour c_blue = wxColour(0, 0, 255);
 	wxColour c_sky = wxColour(0, 128, 255);
 	wxColour c_cyan = wxColour(0, 255, 255);
@@ -163,529 +163,543 @@ wxColour SurveyOverlayFactory::GetDepthColour(double my_depth){
 	wxColour c_brown = wxColour(255, 128, 0);
 	wxColour c_red = wxColour(255, 0, 0);
 
-	if (my_depth < 2){ return c_red;}
-	if ((my_depth >= 2) && (my_depth < 4)){ return c_brown;}
-	if ((my_depth >= 4) && (my_depth < 6)){ return c_yellow;}
-	if ((my_depth >= 6) && (my_depth < 8)){ return c_lime; }
-	if ((my_depth >= 8) && (my_depth < 10)){ return c_green; }
-	if ((my_depth >= 10) && (my_depth < 12)){ return c_spring; }
-	if ((my_depth >= 12) && (my_depth < 14)){ return c_cyan;}
-	if ((my_depth >= 14) && (my_depth < 20)){ return c_sky; }
-	if ((my_depth >= 20) ){ return c_blue;}
+	if (my_depth < 2) { return c_red; }
+	if ((my_depth >= 2) && (my_depth < 4)) { return c_brown; }
+	if ((my_depth >= 4) && (my_depth < 6)) { return c_yellow; }
+	if ((my_depth >= 6) && (my_depth < 8)) { return c_lime; }
+	if ((my_depth >= 8) && (my_depth < 10)) { return c_green; }
+	if ((my_depth >= 10) && (my_depth < 12)) { return c_spring; }
+	if ((my_depth >= 12) && (my_depth < 14)) { return c_cyan; }
+	if ((my_depth >= 14) && (my_depth < 20)) { return c_sky; }
+	if ((my_depth >= 20)) { return c_blue; }
 
 	return wxColour(0, 0, 0);
 }
 
-wxImage &SurveyOverlayFactory::DrawGLText( double value, int precision ){
+wxImage &SurveyOverlayFactory::DrawGLText(double value, int precision) {
 
 	wxString labels;
 
 	int p = precision;
 
-	labels.Printf( _T("%.*f"), p, value );
-	
+	labels.Printf(_T("%.*f"), p, value);
+
 	wxMemoryDC mdc(wxNullBitmap);
 
 
-	mdc.SetFont(wxFont(m_settings.m_sFont)); 
+	mdc.SetFont(wxFont(m_settings.m_sFont));
 
-    int w, h;
-    mdc.GetTextExtent(labels, &w, &h);
+	int w, h;
+	mdc.GetTextExtent(labels, &w, &h);
 
-    int label_offset = 20;   //5
+	
+	int	label_offset = 0;   //20
+	
 
-    wxBitmap bm(w +  label_offset*2, h + 1);
-    mdc.SelectObject(bm);
-    mdc.Clear();
+	wxBitmap bm(w + label_offset * 2, h);
+	mdc.SelectObject(bm);
+	mdc.Clear();
 
-    wxColour text_color;
+	wxColour text_color;
 
-    GetGlobalColor( _T ("UINFD" ), &text_color );
-    wxPen penText(text_color);
+	GetGlobalColor(_T("UINFD"), &text_color);
+	wxPen penText(text_color);
 	mdc.SetPen(penText);
 
-    mdc.SetBrush(*wxTRANSPARENT_BRUSH);
-    mdc.SetTextForeground(text_color);
-    mdc.SetTextBackground(wxTRANSPARENT);
-          
-    int xd = 0;
-    int yd = 0;
+	mdc.SetBrush(*wxTRANSPARENT_BRUSH);
+	mdc.SetTextForeground(text_color);
+	mdc.SetTextBackground(wxTRANSPARENT);
 
-    mdc.DrawText(labels, label_offset + xd, yd+4);
-          
-    mdc.SelectObject(wxNullBitmap);
+	int xd = 0;
+	int yd = 0;
 
-    m_labelCache[value] = bm.ConvertToImage();
+	mdc.DrawText(labels, label_offset + xd, yd);
 
-    m_labelCache[value].InitAlpha();
+	mdc.SelectObject(wxNullBitmap);
 
-    wxImage &image = m_labelCache[value];
+	m_labelCache[value] = bm.ConvertToImage();
 
-    unsigned char *d = image.GetData();
-    unsigned char *a = image.GetAlpha();
+	m_labelCache[value].InitAlpha();
 
-    w = image.GetWidth(), h = image.GetHeight();
-    for( int y = 0; y < h; y++ )
-        for( int x = 0; x < w; x++ ) {
-            int r, g, b;
-            int ioff = (y * w + x);
-            r = d[ioff* 3 + 0];
-            g = d[ioff* 3 + 1];
-            b = d[ioff* 3 + 2];
+	wxImage &image = m_labelCache[value];
 
-            a[ioff] = 255-(r+g+b)/3;
-        }
-		
-		return m_labelCache[value];
+	unsigned char *d = image.GetData();
+	unsigned char *a = image.GetAlpha();
+
+	w = image.GetWidth(), h = image.GetHeight();
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++) {
+			int r, g, b;
+			int ioff = (y * w + x);
+			r = d[ioff * 3 + 0];
+			g = d[ioff * 3 + 1];
+			b = d[ioff * 3 + 2];
+
+			a[ioff] = 255 - (r + g + b) / 3;
+		}
+
+	return m_labelCache[value];
 }
 
-wxImage &SurveyOverlayFactory::DrawGLTextDir( double value, int precision ){
+wxImage &SurveyOverlayFactory::DrawGLTextDir(double value, int precision) {
 
 	wxString labels;
 
 	int p = precision;
 
-	labels.Printf( _T("%03.*f"), p, value );
-	
+	labels.Printf(_T("%03.*f"), p, value);
+
 	wxMemoryDC mdc(wxNullBitmap);
 
 	wxFont *pTCFont;
-					pTCFont = wxTheFontList->FindOrCreateFont( 12, wxDEFAULT, wxNORMAL, wxBOLD, FALSE,
-                                                   wxString( _T ( "Eurostile Extended" ) ) );
+	pTCFont = wxTheFontList->FindOrCreateFont(12, wxDEFAULT, wxNORMAL, wxBOLD, FALSE,
+		wxString(_T("Eurostile Extended")));
 
-    mdc.SetFont(*pTCFont);
+	mdc.SetFont(*pTCFont);
 
-    int w, h;
-    mdc.GetTextExtent(labels, &w, &h);
+	int w, h;
+	mdc.GetTextExtent(labels, &w, &h);
 
-    int label_offset = 10;   //5
+	int label_offset = 10;   //5
 
-    wxBitmap bm(w +  label_offset*2, h + 1);
-    mdc.SelectObject(bm);
-    mdc.Clear();
+	wxBitmap bm(w + label_offset * 2, h + 1);
+	mdc.SelectObject(bm);
+	mdc.Clear();
 
-    wxColour text_color;
+	wxColour text_color;
 
-    GetGlobalColor( _T ("UINFD" ), &text_color );
-    wxPen penText(text_color);
+	GetGlobalColor(_T("UINFD"), &text_color);
+	wxPen penText(text_color);
 	mdc.SetPen(penText);
 
-    mdc.SetBrush(*wxTRANSPARENT_BRUSH);
-    mdc.SetTextForeground(text_color);
-    mdc.SetTextBackground(wxTRANSPARENT);
-          
-    int xd = 0;
-    int yd = 0;
+	mdc.SetBrush(*wxTRANSPARENT_BRUSH);
+	mdc.SetTextForeground(text_color);
+	mdc.SetTextBackground(wxTRANSPARENT);
 
-    mdc.DrawText(labels, label_offset + xd, yd+1);
-          
-    mdc.SelectObject(wxNullBitmap);
+	int xd = 0;
+	int yd = 0;
 
-    m_labelCache[value] = bm.ConvertToImage();
+	mdc.DrawText(labels, label_offset + xd, yd + 1);
 
-    m_labelCache[value].InitAlpha();
+	mdc.SelectObject(wxNullBitmap);
 
-    wxImage &image = m_labelCache[value];
+	m_labelCache[value] = bm.ConvertToImage();
 
-    unsigned char *d = image.GetData();
-    unsigned char *a = image.GetAlpha();
+	m_labelCache[value].InitAlpha();
 
-    w = image.GetWidth(), h = image.GetHeight();
-    for( int y = 0; y < h; y++ )
-        for( int x = 0; x < w; x++ ) {
-            int r, g, b;
-            int ioff = (y * w + x);
-            r = d[ioff* 3 + 0];
-            g = d[ioff* 3 + 1];
-            b = d[ioff* 3 + 2];
+	wxImage &image = m_labelCache[value];
 
-            a[ioff] = 255-(r+g+b)/3;
-        }
-		
-		return m_labelCache[value];
+	unsigned char *d = image.GetData();
+	unsigned char *a = image.GetAlpha();
+
+	w = image.GetWidth(), h = image.GetHeight();
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++) {
+			int r, g, b;
+			int ioff = (y * w + x);
+			r = d[ioff * 3 + 0];
+			g = d[ioff * 3 + 1];
+			b = d[ioff * 3 + 2];
+
+			a[ioff] = 255 - (r + g + b) / 3;
+		}
+
+	return m_labelCache[value];
 }
 
-wxImage &SurveyOverlayFactory::DrawGLTextString( wxString myText ){
+wxImage &SurveyOverlayFactory::DrawGLTextString(wxString myText) {
 
 	wxString labels;
 	labels = myText;
-		
+
 	wxMemoryDC mdc(wxNullBitmap);
 
 	wxFont *pTCFont;
-					pTCFont = wxTheFontList->FindOrCreateFont( 12, wxDEFAULT, wxNORMAL, wxBOLD, FALSE,
-                                                   wxString( _T ( "Eurostile Extended" ) ) );	
-    mdc.SetFont( *pTCFont);
+	pTCFont = wxTheFontList->FindOrCreateFont(12, wxDEFAULT, wxNORMAL, wxBOLD, FALSE,
+		wxString(_T("Eurostile Extended")));
+	mdc.SetFont(*pTCFont);
 
-    int w, h;
-    mdc.GetTextExtent(labels, &w, &h);
+	int w, h;
+	mdc.GetTextExtent(labels, &w, &h);
 
-    int label_offset = 10;   //5
+	int label_offset = 10;   //5
 
-    wxBitmap bm(w +  label_offset*2, h + 1);
-    mdc.SelectObject(bm);
-    mdc.Clear();
+	wxBitmap bm(w + label_offset * 2, h + 1);
+	mdc.SelectObject(bm);
+	mdc.Clear();
 
-    wxColour text_color;
+	wxColour text_color;
 
-    GetGlobalColor( _T ("UINFD" ), &text_color );
-    wxPen penText(text_color);
+	GetGlobalColor(_T("UINFD"), &text_color);
+	wxPen penText(text_color);
 	mdc.SetPen(penText);
 
-    mdc.SetBrush(*wxTRANSPARENT_BRUSH);
-    mdc.SetTextForeground(text_color);
-    mdc.SetTextBackground(wxTRANSPARENT);
-          
-    int xd = 0;
-    int yd = 0;
+	mdc.SetBrush(*wxTRANSPARENT_BRUSH);
+	mdc.SetTextForeground(text_color);
+	mdc.SetTextBackground(wxTRANSPARENT);
 
-    mdc.DrawText(labels, label_offset + xd, yd+1);          
-    mdc.SelectObject(wxNullBitmap);
+	int xd = 0;
+	int yd = 0;
 
-    m_labelCacheText[myText] = bm.ConvertToImage();
+	mdc.DrawText(labels, label_offset + xd, yd + 1);
+	mdc.SelectObject(wxNullBitmap);
 
-    m_labelCacheText[myText].InitAlpha();
+	m_labelCacheText[myText] = bm.ConvertToImage();
 
-    wxImage &image = m_labelCacheText[myText];
+	m_labelCacheText[myText].InitAlpha();
 
-    unsigned char *d = image.GetData();
-    unsigned char *a = image.GetAlpha();
+	wxImage &image = m_labelCacheText[myText];
 
-    w = image.GetWidth(), h = image.GetHeight();
-    for( int y = 0; y < h; y++ )
-        for( int x = 0; x < w; x++ ) {
-            int r, g, b;
-            int ioff = (y * w + x);
-            r = d[ioff* 3 + 0];
-            g = d[ioff* 3 + 1];
-            b = d[ioff* 3 + 2];
+	unsigned char *d = image.GetData();
+	unsigned char *a = image.GetAlpha();
 
-            a[ioff] = 255-(r+g+b)/3;
-        }
-	
+	w = image.GetWidth(), h = image.GetHeight();
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++) {
+			int r, g, b;
+			int ioff = (y * w + x);
+			r = d[ioff * 3 + 0];
+			g = d[ioff * 3 + 1];
+			b = d[ioff * 3 + 2];
+
+			a[ioff] = 255 - (r + g + b) / 3;
+		}
+
 	return m_labelCacheText[myText];
 }
 
-void SurveyOverlayFactory::DrawGLLine( double x1, double y1, double x2, double y2, double width, wxColour myColour )
+void SurveyOverlayFactory::DrawGLLine(double x1, double y1, double x2, double y2, double width, wxColour myColour)
 {
-    {
-        wxColour isoLineColor = myColour;
+	{
+		wxColour isoLineColor = myColour;
 		glColor4ub(isoLineColor.Red(), isoLineColor.Green(), isoLineColor.Blue(),
-                     255/*isoLineColor.Alpha()*/);
+			255/*isoLineColor.Alpha()*/);
 
 		glPushAttrib(GL_COLOR_BUFFER_BIT | GL_LINE_BIT | GL_ENABLE_BIT |
-                     GL_POLYGON_BIT | GL_HINT_BIT ); //Save state
-        {
+			GL_POLYGON_BIT | GL_HINT_BIT); //Save state
+		{
 
-            //      Enable anti-aliased lines, at best quality
-            glEnable( GL_LINE_SMOOTH );
-            glEnable( GL_BLEND );
-            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-            glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-            glLineWidth( width );
+			//      Enable anti-aliased lines, at best quality
+			glEnable(GL_LINE_SMOOTH);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+			glLineWidth(width);
 
-            glBegin( GL_LINES );
-            glVertex2d( x1, y1 );
-            glVertex2d( x2, y2 );
-            glEnd();
-        }
+			glBegin(GL_LINES);
+			glVertex2d(x1, y1);
+			glVertex2d(x2, y2);
+			glEnd();
+		}
 
-        glPopAttrib();
-    }
+		glPopAttrib();
+	}
 }
-void SurveyOverlayFactory::DrawOLBitmap( const wxBitmap &bitmap, wxCoord x, wxCoord y, bool usemask )
+void SurveyOverlayFactory::DrawOLBitmap(const wxBitmap &bitmap, wxCoord x, wxCoord y, bool usemask)
 {
-    wxBitmap bmp;
-    if( x < 0 || y < 0 ) {
-        int dx = ( x < 0 ? -x : 0 );
-        int dy = ( y < 0 ? -y : 0 );
-        int w = bitmap.GetWidth() - dx;
-        int h = bitmap.GetHeight() - dy;
-        /* picture is out of viewport */
-        if( w <= 0 || h <= 0 ) return;
-        wxBitmap newBitmap = bitmap.GetSubBitmap( wxRect( dx, dy, w, h ) );
-        x += dx;
-        y += dy;
-        bmp = newBitmap;
-    } else {
-        bmp = bitmap;
-    }
-    if( m_pdc )
-        m_pdc->DrawBitmap( bmp, x, y, usemask );
-    else {
-        wxImage image = bmp.ConvertToImage();
-        int w = image.GetWidth(), h = image.GetHeight();
+	wxBitmap bmp;
+	if (x < 0 || y < 0) {
+		int dx = (x < 0 ? -x : 0);
+		int dy = (y < 0 ? -y : 0);
+		int w = bitmap.GetWidth() - dx;
+		int h = bitmap.GetHeight() - dy;
+		/* picture is out of viewport */
+		if (w <= 0 || h <= 0) return;
+		wxBitmap newBitmap = bitmap.GetSubBitmap(wxRect(dx, dy, w, h));
+		x += dx;
+		y += dy;
+		bmp = newBitmap;
+	}
+	else {
+		bmp = bitmap;
+	}
+	if (m_pdc)
+		m_pdc->DrawBitmap(bmp, x, y, usemask);
+	else {
+		wxImage image = bmp.ConvertToImage();
+		int w = image.GetWidth(), h = image.GetHeight();
 
-        if( usemask ) {
-            unsigned char *d = image.GetData();
-            unsigned char *a = image.GetAlpha();
+		if (usemask) {
+			unsigned char *d = image.GetData();
+			unsigned char *a = image.GetAlpha();
 
-            unsigned char mr, mg, mb;
-            if( !image.GetOrFindMaskColour( &mr, &mg, &mb ) && !a ) printf(
-                    "trying to use mask to draw a bitmap without alpha or mask\n" );
+			unsigned char mr, mg, mb;
+			if (!image.GetOrFindMaskColour(&mr, &mg, &mb) && !a) printf(
+				"trying to use mask to draw a bitmap without alpha or mask\n");
 
-            unsigned char *e = new unsigned char[4 * w * h];
-            {
-                for( int y = 0; y < h; y++ )
-                    for( int x = 0; x < w; x++ ) {
-                        unsigned char r, g, b;
-                        int off = ( y * image.GetWidth() + x );
-                        r = d[off * 3 + 0];
-                        g = d[off * 3 + 1];
-                        b = d[off * 3 + 2];
+			unsigned char *e = new unsigned char[4 * w * h];
+			{
+				for (int y = 0; y < h; y++)
+					for (int x = 0; x < w; x++) {
+						unsigned char r, g, b;
+						int off = (y * image.GetWidth() + x);
+						r = d[off * 3 + 0];
+						g = d[off * 3 + 1];
+						b = d[off * 3 + 2];
 
-                        e[off * 4 + 0] = r;
-                        e[off * 4 + 1] = g;
-                        e[off * 4 + 2] = b;
+						e[off * 4 + 0] = r;
+						e[off * 4 + 1] = g;
+						e[off * 4 + 2] = b;
 
-                        e[off * 4 + 3] =
-                                a ? a[off] : ( ( r == mr ) && ( g == mg ) && ( b == mb ) ? 0 : 255 );
-                    }
-            }
+						e[off * 4 + 3] =
+							a ? a[off] : ((r == mr) && (g == mg) && (b == mb) ? 0 : 255);
+					}
+			}
 
-            glColor4f( 1, 1, 1, 1 );
+			glColor4f(1, 1, 1, 1);
 
-            glEnable( GL_BLEND );
-            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-            glRasterPos2i( x, y );
-            glPixelZoom( 1, -1 );
-            glDrawPixels( w, h, GL_RGBA, GL_UNSIGNED_BYTE, e );
-            glPixelZoom( 1, 1 );
-            glDisable( GL_BLEND );
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glRasterPos2i(x, y);
+			glPixelZoom(1, -1);
+			glDrawPixels(w, h, GL_RGBA, GL_UNSIGNED_BYTE, e);
+			glPixelZoom(1, 1);
+			glDisable(GL_BLEND);
 
-            delete[] ( e );
-        } else {
-            glRasterPos2i( x, y );
-            glPixelZoom( 1, -1 ); /* draw data from top to bottom */
-            glDrawPixels( w, h, GL_RGB, GL_UNSIGNED_BYTE, image.GetData() );
-            glPixelZoom( 1, 1 );
-        }
-    }
+			delete[](e);
+		}
+		else {
+			glRasterPos2i(x, y);
+			glPixelZoom(1, -1); /* draw data from top to bottom */
+			glDrawPixels(w, h, GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
+			glPixelZoom(1, 1);
+		}
+	}
 }
 
 void SurveyOverlayFactory::DrawGLLabels(SurveyOverlayFactory *pof, wxDC *dc,
-                                PlugIn_ViewPort *vp,
-                                wxImage &imageLabel, double myLat, double myLon, int offset )
+	PlugIn_ViewPort *vp,
+	wxImage &imageLabel, double myLat, double myLon, int offset)
 {
 
-    //---------------------------------------------------------
-    // Ecrit les labels
-    //---------------------------------------------------------
-        
-         wxPoint ab;
-         GetCanvasPixLL(vp, &ab, myLat, myLon);
-                 
-	     //wxPoint cd;
-        // GetCanvasPixLL(vp, &cd,myLat, myLon);
-                
-         int w = imageLabel.GetWidth();
-         int h = imageLabel.GetHeight();
+	//---------------------------------------------------------
+	// Ecrit les labels
+	//---------------------------------------------------------
 
-         int label_offset = 0;
-		 int xd = (ab.x - w/2);
-         int yd = (ab.y - h) + offset;
-                
-         if(dc) {
-                    /* don't use alpha for isobars, for some reason draw bitmap ignores
-                       the 4th argument (true or false has same result) */
-                    wxImage img(w, h, imageLabel.GetData(), true);
-                    dc->DrawBitmap(img, xd, yd, false);
-         } 
-		 else { /* opengl */
-                  
-			int w = imageLabel.GetWidth(), h = imageLabel.GetHeight();
+	wxPoint ab;
+	GetCanvasPixLL(vp, &ab, myLat, myLon);
 
-            unsigned char *d = imageLabel.GetData();
-            unsigned char *a = imageLabel.GetAlpha();
+	//wxPoint cd;
+   // GetCanvasPixLL(vp, &cd,myLat, myLon);
 
-            unsigned char mr, mg, mb;
-            if( !imageLabel.GetOrFindMaskColour( &mr, &mg, &mb ) && !a ) wxMessageBox(_T(
-                    "trying to use mask to draw a bitmap without alpha or mask\n" ));
+	int w = imageLabel.GetWidth();
+	int h = imageLabel.GetHeight();
 
-            unsigned char *e = new unsigned char[4 * w * h];
-            {
-                for( int y = 0; y < h; y++ )
-                    for( int x = 0; x < w; x++ ) {
-                        unsigned char r, g, b;
-                        int off = ( y * imageLabel.GetWidth() + x );
-                        r = d[off * 3 + 0];
-                        g = d[off * 3 + 1];
-                        b = d[off * 3 + 2];
+	int label_offset = 0;
+	int xd = (ab.x - w / 2);
+	if (!m_settings.m_bUseSymbol) { offset = 0; }
+	int yd = (ab.y - h/2) + offset;
 
-                        e[off * 4 + 0] = r;
-                        e[off * 4 + 1] = g;
-                        e[off * 4 + 2] = b;
+	if (dc) {
+		/* don't use alpha for isobars, for some reason draw bitmap ignores
+		   the 4th argument (true or false has same result) */
+		wxImage img(w, h, imageLabel.GetData(), true);
+		dc->DrawBitmap(img, xd, yd, false);
+	}
+	else { /* opengl */
 
-                        e[off * 4 + 3] =
-                                a ? a[off] : ( ( r == mr ) && ( g == mg ) && ( b == mb ) ? 0 : 255 );
-                    }
-            }
+		int w = imageLabel.GetWidth(), h = imageLabel.GetHeight();
 
-            glColor4f( 1, 1, 1, 1 );
+		unsigned char *d = imageLabel.GetData();
+		unsigned char *a = imageLabel.GetAlpha();
 
-            glEnable( GL_BLEND );
-            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-            glRasterPos2i( xd + 10, yd + 10 );
-            glPixelZoom( 1, -1 );
-            glDrawPixels( w, h, GL_RGBA, GL_UNSIGNED_BYTE, e );
-            glPixelZoom( 1, 1 );
-            glDisable( GL_BLEND );
+		unsigned char mr, mg, mb;
+		if (!imageLabel.GetOrFindMaskColour(&mr, &mg, &mb) && !a) wxMessageBox(_T(
+			"trying to use mask to draw a bitmap without alpha or mask\n"));
 
-            delete[] ( e );
+		unsigned char *e = new unsigned char[4 * w * h];
+		{
+			for (int y = 0; y < h; y++)
+				for (int x = 0; x < w; x++) {
+					unsigned char r, g, b;
+					int off = (y * imageLabel.GetWidth() + x);
+					r = d[off * 3 + 0];
+					g = d[off * 3 + 1];
+					b = d[off * 3 + 2];
 
-      }
+					e[off * 4 + 0] = r;
+					e[off * 4 + 1] = g;
+					e[off * 4 + 2] = b;
+
+					e[off * 4 + 3] =
+						a ? a[off] : ((r == mr) && (g == mg) && (b == mb) ? 0 : 255);
+				}
+		}
+
+		glColor4f(1, 1, 1, 1);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		int of;
+		if (!m_settings.m_bUseSymbol) { 
+			of = 0; 
+		}
+		else {
+			of = 10;
+		}
+		glRasterPos2i(xd + of, yd + of);  //(xd + 10, yd + 10);
+		glPixelZoom(1, -1);
+		glDrawPixels(w, h, GL_RGBA, GL_UNSIGNED_BYTE, e);
+		glPixelZoom(1, 1);
+		glDisable(GL_BLEND);
+
+		delete[](e);
+
+	}
 
 
 }
 
-wxImage &SurveyOverlayFactory::DrawGLPolygon(wxColour c){
+wxImage &SurveyOverlayFactory::DrawGLPolygon(wxColour c) {
 
 	wxString labels;
 	labels = _T("");  // dummy label for drawing with
 
 	wxPen penText(c);
-    wxBrush backBrush(c);
+	wxBrush backBrush(c);
 
-    wxMemoryDC mdc(wxNullBitmap);
+	wxMemoryDC mdc(wxNullBitmap);
 
-   // wxFont mfont( 9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
-  //  mdc.SetFont( mfont );
+	// wxFont mfont( 9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
+   //  mdc.SetFont( mfont );
 
-    int w, h;
-    //mdc.GetTextExtent(labels, &w, &h);
-	
+	int w, h;
+	//mdc.GetTextExtent(labels, &w, &h);
+
 	w = 10;
 	h = 10;
 
-    wxBitmap bm(w, h);
-    mdc.SelectObject(bm);
-    mdc.Clear();
+	wxBitmap bm(w, h);
+	mdc.SelectObject(bm);
+	mdc.Clear();
 
-    mdc.SetPen(penText);
-    mdc.SetBrush(backBrush);
-    mdc.SetTextForeground(c);
-    mdc.SetTextBackground(c);
-          
-    int xd = 0;
-    int yd = 0;
+	mdc.SetPen(penText);
+	mdc.SetBrush(backBrush);
+	mdc.SetTextForeground(c);
+	mdc.SetTextBackground(c);
+
+	int xd = 0;
+	int yd = 0;
 
 	int label_offset = 0;
 
-	switch (m_settings.m_iSoundingShape)
-	{
-	case 1:
-		mdc.DrawCircle(xd+5, yd+5, 5);
-		break;
-	case 2:
-		mdc.DrawRectangle(xd, yd, w, h);
-		break;
+	if (m_settings.m_bUseSymbol) {
+		switch (m_settings.m_iSoundingShape)
+		{
+		case 1:
+			mdc.DrawCircle(xd + 5, yd + 5, 5);
+			break;
+		case 2:
+			mdc.DrawRectangle(xd, yd, w, h);
+			break;
+		}
 	}
-          
-    mdc.SelectObject(wxNullBitmap);
 
-    m_labelCacheText[labels] = bm.ConvertToImage();
+	mdc.SelectObject(wxNullBitmap);
 
-    m_labelCacheText[labels].InitAlpha();
+	m_labelCacheText[labels] = bm.ConvertToImage();
 
-    wxImage &image = m_labelCacheText[labels];
+	m_labelCacheText[labels].InitAlpha();
 
-    unsigned char *d = image.GetData();
-    unsigned char *a = image.GetAlpha();
+	wxImage &image = m_labelCacheText[labels];
 
-    w = image.GetWidth(), h = image.GetHeight();
-    for( int y = 0; y < h; y++ )
-        for( int x = 0; x < w; x++ ) {
-            int r, g, b;
-            int ioff = (y * w + x);
-            r = d[ioff* 3 + 0];
-            g = d[ioff* 3 + 1];
-            b = d[ioff* 3 + 2];
+	unsigned char *d = image.GetData();
+	unsigned char *a = image.GetAlpha();
 
-            a[ioff] = 255-(r+g+b)/3;
-        }
+	w = image.GetWidth(), h = image.GetHeight();
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++) {
+			int r, g, b;
+			int ioff = (y * w + x);
+			r = d[ioff * 3 + 0];
+			g = d[ioff * 3 + 1];
+			b = d[ioff * 3 + 2];
 
-    return m_labelCacheText[labels];
+			a[ioff] = 255 - (r + g + b) / 3;
+		}
+
+	return m_labelCacheText[labels];
 
 }
 void SurveyOverlayFactory::drawGLPolygons(SurveyOverlayFactory *pof, wxDC *dc,
-                                PlugIn_ViewPort *vp,
-                                wxImage &imageLabel, double myLat, double myLon, int offset )
+	PlugIn_ViewPort *vp,
+	wxImage &imageLabel, double myLat, double myLon, int offset)
 {
 
-    //---------------------------------------------------------
-    // Ecrit les labels
-    //---------------------------------------------------------
-        
-         wxPoint ab;
-         GetCanvasPixLL(vp, &ab, myLat, myLon);
-                 
-	     wxPoint cd;
-         GetCanvasPixLL(vp, &cd,myLat, myLon);
-                
-         int w = imageLabel.GetWidth();
-         int h = imageLabel.GetHeight();
+	//---------------------------------------------------------
+	// Ecrit les labels
+	//---------------------------------------------------------
 
-         int label_offset = 0;
-         int xd = (ab.x + cd.x - w)/2;
-         int yd = (ab.y + cd.y - h)/2 + offset;
-                
-         if(dc) {
-                    /* don't use alpha for isobars, for some reason draw bitmap ignores
-                       the 4th argument (true or false has same result) */
-                    wxImage img(w, h, imageLabel.GetData(), true);
-                    dc->DrawBitmap(img, xd, yd, false);
-         } 
-		 else { /* opengl */
-                  
-			int w = imageLabel.GetWidth(), h = imageLabel.GetHeight();
+	wxPoint ab;
+	GetCanvasPixLL(vp, &ab, myLat, myLon);
 
-            unsigned char *d = imageLabel.GetData();
-            unsigned char *a = imageLabel.GetAlpha();
+	wxPoint cd;
+	GetCanvasPixLL(vp, &cd, myLat, myLon);
 
-            unsigned char mr, mg, mb;
-           if( !imageLabel.GetOrFindMaskColour( &mr, &mg, &mb ) && !a ) wxMessageBox(_T(
-                    "trying to use mask to draw a bitmap without alpha or mask\n" ));
+	int w = imageLabel.GetWidth();
+	int h = imageLabel.GetHeight();
 
-            unsigned char *e = new unsigned char[4 * w * h];
-            {
-                for( int y = 0; y < h; y++ )
-                    for( int x = 0; x < w; x++ ) {
-                        unsigned char r, g, b;
-                        int off = ( y * imageLabel.GetWidth() + x );
-                        r = d[off * 3 + 0];
-                        g = d[off * 3 + 1];
-                        b = d[off * 3 + 2];
+	int label_offset = 0;
+	int xd = (ab.x + cd.x - w) / 2;
+	int yd = (ab.y + cd.y - h) / 2 + offset;
 
-                        e[off * 4 + 0] = r;
-                        e[off * 4 + 1] = g;
-                        e[off * 4 + 2] = b;
+	if (dc) {
+		/* don't use alpha for isobars, for some reason draw bitmap ignores
+		   the 4th argument (true or false has same result) */
+		wxImage img(w, h, imageLabel.GetData(), true);
+		dc->DrawBitmap(img, xd, yd, false);
+	}
+	else { /* opengl */
 
-                        e[off * 4 + 3] =
-                                a ? a[off] : ( ( r == mr ) && ( g == mg ) && ( b == mb ) ? 0 : 255 );
-                    }
-            }
-			
-            glColor4f( 1, 1, 1, 1 );
+		int w = imageLabel.GetWidth(), h = imageLabel.GetHeight();
 
-            glEnable( GL_BLEND );
-            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-            glRasterPos2i( xd, yd );
-            glPixelZoom( 1, -1 );
-            glDrawPixels( w, h, GL_RGBA, GL_UNSIGNED_BYTE, e );
-            glPixelZoom( 1, 1 );
-            glDisable( GL_BLEND );
+		unsigned char *d = imageLabel.GetData();
+		unsigned char *a = imageLabel.GetAlpha();
 
-            delete[] ( e );
-      }
+		unsigned char mr, mg, mb;
+		if (!imageLabel.GetOrFindMaskColour(&mr, &mg, &mb) && !a) wxMessageBox(_T(
+			"trying to use mask to draw a bitmap without alpha or mask\n"));
+
+		unsigned char *e = new unsigned char[4 * w * h];
+		{
+			for (int y = 0; y < h; y++)
+				for (int x = 0; x < w; x++) {
+					unsigned char r, g, b;
+					int off = (y * imageLabel.GetWidth() + x);
+					r = d[off * 3 + 0];
+					g = d[off * 3 + 1];
+					b = d[off * 3 + 2];
+
+					e[off * 4 + 0] = r;
+					e[off * 4 + 1] = g;
+					e[off * 4 + 2] = b;
+
+					e[off * 4 + 3] =
+						a ? a[off] : ((r == mr) && (g == mg) && (b == mb) ? 0 : 255);
+				}
+		}
+
+		glColor4f(1, 1, 1, 1);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glRasterPos2i(xd, yd);
+		glPixelZoom(1, -1);
+		glDrawPixels(w, h, GL_RGBA, GL_UNSIGNED_BYTE, e);
+		glPixelZoom(1, 1);
+		glDisable(GL_BLEND);
+
+		delete[](e);
+	}
 }
 
 
 void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, bool bRebuildSelList,
-        bool bforce_redraw_currents, bool bdraw_mono_for_mask, wxDateTime myTime)
+	bool bforce_redraw_currents, bool bdraw_mono_for_mask, wxDateTime myTime)
 {
 	vector<soundingdata>myfactorysoundings = m_dlg.mysoundings;
-	
-	if (BBox->chart_scale > 500000){
+
+	if (BBox->chart_scale > 500000) {
 		return;
 	}
 
@@ -698,8 +712,8 @@ void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, boo
 	double tid;
 	double corrn;
 
-	for (std::vector<soundingdata>::iterator it = myfactorysoundings.begin(); it != myfactorysoundings.end(); it++){
-		
+	for (std::vector<soundingdata>::iterator it = myfactorysoundings.begin(); it != myfactorysoundings.end(); it++) {
+
 		lat = it->latD;
 		lon = it->lonD;
 		it->depth.ToDouble(&depth);
@@ -711,7 +725,7 @@ void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, boo
 		wxBoundingBox LLBBox(BBox->lon_min, BBox->lat_min, BBox->lon_max, BBox->lat_max);
 		double testLon;
 
-		if (LLBBox.PointInBox(lon, lat, 0))  {
+		if (LLBBox.PointInBox(lon, lat, 0)) {
 
 			double myLat = LLBBox.GetMaxY();
 			double myLon = LLBBox.GetMaxX();
@@ -723,41 +737,41 @@ void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, boo
 			pixyc = cpoint.y;
 
 			wxColour c_Colour;
-			if (m_settings.m_bUseDepthColours){
+			if (m_settings.m_bUseDepthColours) {
 				c_Colour = GetDepthColour(depth);
 			}
-			else{
-				c_Colour = wxColour(0, 0, 0);
+			else {
+				c_Colour = wxColour(m_settings.m_sFontColor); // wxColour(0, 0, 0);
 			}
 
-			if (m_settings.m_bRenderWithTide){
+			if (m_settings.m_bRenderWithTide) {
 				m_settings.m_sCorrection.ToDouble(&corrn);
 				depth = depth - tid + corrn;
 			}
 
-			if (!m_pdc){
+			if (!m_pdc) {
 
-				if (m_settings.m_bUseSymbol && (m_settings.m_iSoundingShape == 1 || m_settings.m_iSoundingShape == 2)){
+				if (m_settings.m_bUseSymbol && (m_settings.m_iSoundingShape == 1 || m_settings.m_iSoundingShape == 2)) {
 					drawGLPolygons(this, m_pdc, BBox, DrawGLPolygon(c_Colour), lat, lon, 0);
 				}
-				else{
+				else {
 					DrawGLSoundingMark(pixxc, pixyc, 0, depth, sdgid, surid, c_Colour);
 				}
 				//
-				if (m_settings.m_bRenderSoundingText){
+				if (m_settings.m_bRenderSoundingText) {
 					DrawGLLabels(this, m_pdc, BBox,
-				     	DrawGLText(depth, 1), lat, lon, 5);
+						DrawGLText(depth, 1), lat, lon, 5);
 				}
 			}
 
 			if (m_pdc)
-			{				
+			{
 				DrawSounding(*m_pdc, pixxc, pixyc, depth, sdgid, surid, c_Colour, 5);
 			}
 		}
 	}
-           
-}        
+
+}
 
 
 void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, int sounding_id, int survey_id, wxColour c, int text_offset)
@@ -767,6 +781,10 @@ void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, in
 		coef = 1.8288;
 	else if (m_settings.m_iUnits == FEET)
 		coef = 0.3048;
+
+	if (m_settings.m_bUseSymbol) {
+		c = wxColour(m_settings.m_sSoundingColor);
+	}
 
 	wxPen p(c, 2);
 	dc.SetPen(p);
@@ -783,18 +801,18 @@ void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, in
 		dc.DrawCircle(x, y, 1);
 		break;
 	case 2:
-		dc.DrawRectangle(x-4, y-3, 8, 8);
-		dc.DrawRectangle(x-4, y-3, 6, 6);
-		dc.DrawRectangle(x-4, y-3, 4, 4);
-		dc.DrawRectangle(x-4, y-3, 2, 2);
+		dc.DrawRectangle(x - 4, y - 3, 8, 8);
+		dc.DrawRectangle(x - 4, y - 3, 6, 6);
+		dc.DrawRectangle(x - 4, y - 3, 4, 4);
+		dc.DrawRectangle(x - 4, y - 3, 2, 2);
 		break;
 	}
-	
+
 	dc.SetFont(wxFont(m_settings.m_sFont));
 	dc.SetTextForeground(wxColour(m_settings.m_sFontColor));
 
 	// Want to show depth values
-	if (m_settings.m_bRenderSoundingText){
+	if (m_settings.m_bRenderSoundingText) {
 		dc.DrawText(wxString::Format(wxT("%.1f"), depth / coef), x, y + text_offset);
 	}
 
@@ -812,26 +830,28 @@ void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, in
 		m_settings.mLastSdgId = sounding_id;
 		m_settings.mLastSurveyId = survey_id;
 	}
-	
+
 }
 
-void SurveyOverlayFactory::DrawGLSoundingMark(int x, int y,  double scale, double depth, int sounding_id, int survey_id, wxColour c)
+void SurveyOverlayFactory::DrawGLSoundingMark(int x, int y, double scale, double depth, int sounding_id, int survey_id, wxColour c)
 {
-		DrawGLLine(x - 5, y - 5, x + 5, y + 5, 1, c);		
+	
+	if (m_settings.m_bUseSymbol) {
+		DrawGLLine(x - 5, y - 5, x + 5, y + 5, 1, c);
 		DrawGLLine(x - 5, y + 5, x + 5, y - 5, 1, c);
+	}
+	wxColour colour;
+	if (m_settings.m_bConnectSoundings)
+	{
 
-		wxColour colour;
-		if (m_settings.m_bConnectSoundings)
+		if (m_settings.mLastX != -1 && m_settings.mLastY != -1 && m_settings.mLastSdgId == sounding_id - 1 && m_settings.mLastSurveyId == survey_id)
 		{
-			
-			if (m_settings.mLastX != -1 && m_settings.mLastY != -1 && m_settings.mLastSdgId == sounding_id - 1 && m_settings.mLastSurveyId == survey_id)
-			{
-				colour = wxColour(m_settings.m_sConnectorColor);				
-				DrawGLLine(x, y, m_settings.mLastX, m_settings.mLastY, 0.25, colour);
-			}
-			m_settings.mLastX = x;
-			m_settings.mLastY = y;
-			m_settings.mLastSdgId = sounding_id;
-			m_settings.mLastSurveyId = survey_id;
+			colour = wxColour(m_settings.m_sConnectorColor);
+			DrawGLLine(x, y, m_settings.mLastX, m_settings.mLastY, 0.25, colour);
 		}
+		m_settings.mLastX = x;
+		m_settings.mLastY = y;
+		m_settings.mLastSdgId = sounding_id;
+		m_settings.mLastSurveyId = survey_id;
+	}
 }

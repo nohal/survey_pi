@@ -149,6 +149,7 @@ class SurveyDlgDef : public wxDialog
 		
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnClose(wxCloseEvent& event) { event.Skip(); }
 		virtual void OnSurveySelection( wxCommandEvent& event ) { event.Skip(); }
 		virtual void LoadFromFile( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSurveyRecordToggleNMEA(wxCommandEvent& event) { event.Skip(); }

@@ -1,54 +1,30 @@
-THIS PLUGIN HAS A FUNDAMENTAL MISTAKE IN THE USE OF THE SPATIALITE POINT FORMAT. 
-THE ERROR IS NOT PRESENT IN THE ORIGINAL SOURCE CODE (nohal/survey_pi).
+VERSION 3 - MAJOR UPDATE - in the master code only
 
-FOR THIS REASON THE PLUGIN IS WITHDRAWN FROM THE OPENCPN BETA PLUGINS. IT WILL BE RE-WRITTEN WHEN TIME ALLOWS.
-APOLOGIES FOR ANY PROBLEMS CAUSED BY THE INCORRECT POINT FORMAT.
+For OpenCPN v5. Uses svg icons.
 
+Changes
 
-Update (16 Feb 2019)
+Soundings are saved in point format lon-lat. This affects any soundings saved in the sqlite file, with version 2. To fix this, export the survey to a Hydromagic,xyz or csv
+file. Delete the old survey and add a new survey. Import from the saved file into the new survey.
 
-In 'Releases' is a new Windows compiled version of survey_pi for OpenCPN 5 beta.
+libspatialite-amalgamation cannot be recommended and has been replaced by mod_spatialite. This change was necessary to use the full range of spatialite functions.
 
-To run the v2.1 plugin copy the following DLLs/LIBs from 'Releases 2.1' to the main OpenCPN program folder: freexl.dll, geos_c.dll, iconv.dll, proj.lib.
+The lon-lat point format for the geometry objects can now be used with these functions.
 
-In 'Releases' is a Hydromagic file (tamar.gmp) to test Import.
-In 'Releases' is a NMEA file (tamar.txt) to test Import from a NMEA file or to run using VDR_pi to make an NMEA stream.
+A tidal correction is still in the code but it is not satisfactory. Intention is to replace this with tidal corrections entered in a text file that can be read and used by
+the plugin. This will allow separation between raw data and adjusted data.
 
-For compiling standalone with VisualStudio 2015:
+Using OpenGL the soundings can be viewed without a sounding mark.
+Now possible to delete a sounding using right-click.
 
-Install OSGeo4W_x86.
-Link to the following libraries: freexl_i.lib, geos_c.lib, iconv.lib:
-Add OSGeo4W bin to linker folders and the include folder to additional include directories.
-Place proj.lib in the build folder (Had to build a new version compiled with VS2015).
-Place OpenCPN 5 'opencpn.lib' in the build folder.
-
-
-Original notes by @nohal:
-Survey plugin for OpenCPN
-=========================
-
-Uses the excellent Spatialite library from http://www.gaia-gis.it/gaia-sins/
-To browse and organize your data, get https://www.gaia-gis.it/fossil/spatialite_gui/index and/or https://www.gaia-gis.it/fossil/spatialite_gis/index
-
-On Windows you need iconv.dll somewhere in your PATH or in OpenCPN's program directory. Get it from https://github.com/downloads/nohal/survey_pi/iconv.dll
-
-To compile on Windows you need iconv - The easiest to get it is to use OSGeo4W - described a bit more in the note bellow.
-
-Note
-====
-
-If, in the future, we will want to get all the functionality from spatialite
-
-Compilation on Linux
-sudo apt-get install libgeos-dev libproj-dev libfreexl-dev
-
-Compilation on Windows:
-Get OSGeo4Win: http://trac.osgeo.org/osgeo4w/
-Install the following libraries: proj.4, freexl, geos, iconv
-If you don't like the default location C:\OSGeo4W, you will have to modify CMakeLists.txt
+Windows 
+The plugin builds standalone without additional files.
 
 Usage on Windows
-Copy the following DLLs to the OpenCPN program folder: freexl.dll, geos_c.dll, proj.dll - They can be found in the bin subfolder of your OSGeo4W instalation
+Download the file 'mod_spatialite-4.3.0a-win-x86.7z' from http://www.gaia-gis.it/gaia-sins/windows-bin-x86/. Extract the files and place them in the main OpenCPN
+program (The folder containing 'opencpn.exe').
+
+
 
 License
 =======
