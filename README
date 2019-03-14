@@ -21,10 +21,7 @@ Windows
 The plugin builds standalone without additional files.
 
 Usage on Windows
-Download the file 'mod_spatialite-4.3.0a-win-x86.7z' from http://www.gaia-gis.it/gaia-sins/windows-bin-x86/. Extract the files and place them in the main OpenCPN
-program (The folder containing 'opencpn.exe').
-
-
+Download the file 'mod_spatialite-4.3.0a-win-x86.7z' from http://www.gaia-gis.it/gaia-sins/windows-bin-x86/. Extract the files. Place all the files EXCEPT 'zlib1.dll' and 'sqlite3.exe' in the main OpenCPN program folder (The folder containing 'opencpn.exe'). Download sqlite3.dll and place in the same folder.
 
 License
 =======
