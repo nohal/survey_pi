@@ -19,9 +19,14 @@ Now possible to delete a sounding using right-click.
 
 Windows 
 The plugin builds standalone without additional files.
+Linux
+Install packages 'libsqlite3','libsqlite3-dev', 'libsqlite3-mod-spatialite' before compiling.
 
 Usage on Windows
 Download the file 'mod_spatialite-4.3.0a-win-x86.7z' from http://www.gaia-gis.it/gaia-sins/windows-bin-x86/. Extract the files. Place all the files EXCEPT 'zlib1.dll' and 'sqlite3.exe' in the main OpenCPN program folder (The folder containing 'opencpn.exe'). Download sqlite3.dll and place in the same folder.
+
+Usage on Linux (Tested on Ubuntu 16.04.03)
+Install the packages 'libsqlite3','libsqlite3-mod-spatialite'.
 
 License
 =======

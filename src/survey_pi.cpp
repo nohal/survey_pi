@@ -1104,11 +1104,11 @@ int survey_pi::Init(void)
 	      b_dbUsable = false;
       }
 
-	  
+
 		char* spatialiteDll = "mod_spatialite";
 		sqlite3_enable_load_extension(m_database, 1);
 		sqlite3_load_extension(m_database, spatialiteDll, 0, &err_msg);
-		
+
 
 		if (newDB && b_dbUsable)
 		{
@@ -1229,7 +1229,7 @@ int survey_pi::Init(void)
               WANTS_NMEA_EVENTS         |
               WANTS_OVERLAY_CALLBACK    |
               WANTS_ONPAINT_VIEWPORT    |
-              WANTS_OPENGL_OVERLAY_CALLBACK |             
+              WANTS_OPENGL_OVERLAY_CALLBACK |
               WANTS_CONFIG
            );
 
@@ -1434,9 +1434,9 @@ void survey_pi::SetSettings(){
 		m_pSurveyDialog->Move(wxPoint(m_survey_dialog_x, m_survey_dialog_y));
 		FillSurveyDropdown();
 		FillSurveyInfo();
-		FillSurveyGrid();		
+		FillSurveyGrid();
 	}
-	
+
 	m_pSurveyDialog->mySettings.m_iOpacity = m_iOpacity;
 	m_pSurveyDialog->mySettings.m_iUnits = m_iUnits;
 	m_pSurveyDialog->mySettings.m_bCalcTide = m_bCalcTide;
@@ -1465,10 +1465,10 @@ void survey_pi::SetSettings(){
 	m_pSurveyDialog->mySettings.mLastSurveyId = mLastSurveyId;
 
 	m_pSurveyDialog->mySettings.mLastX = mLastX;
-	m_pSurveyDialog->mySettings.mLastY = mLastY;	
+	m_pSurveyDialog->mySettings.mLastY = mLastY;
 
 	int gl = wxUSE_GLCANVAS;
-	
+
 	if (!m_bUseSymbol && (gl==0)) {
 		wxMessageBox(_T("WITHOUT OpenGL the display must still use a symbol"));
 	}
@@ -1512,7 +1512,7 @@ bool survey_pi::LoadConfig(void)
             pConf->Read ( _T ( "GPSPort" ), &m_fGPSPort, 0.0 );
             pConf->Read ( _T ( "MinSoundingDist" ), &m_fMinDistance, 0.0 );
             pConf->Read ( _T ( "AutoNewDistance" ), &m_fAutoNewDistance, 0.0 );
-			
+
 			pConf->Read(_T("ShowSurveyIcon"), &m_bSurveyShowIcon, 1);
 
             m_survey_dialog_x =  pConf->Read ( _T ( "DialogPosX" ), 20L );
@@ -2336,8 +2336,8 @@ FROM airports;
 
 	//wxMessageBox(lat);
 
-	string sLat = lat.mb_str();
-	string sLon = lon.mb_str();
+	string sLat = std::string(lat.mb_str());
+	string sLon = std::string(lon.mb_str());
 
 	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide,	Min(ST_Distance(MakePoint(%s, %s), geom))*60 AS dist_nM FROM sounding"), sLon, sLat);
 	//wxMessageBox(sql);
@@ -2379,7 +2379,7 @@ FROM airports;
 		double depth = atof(dpt);
 		int sounding_id = atoi(sdgid);
 
-		
+
 
 		double distance_calc = atof(distance);
 
