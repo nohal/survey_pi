@@ -54,7 +54,7 @@
 //#include "SurveyOverlayFactory.h"
 
 #define     PLUGIN_VERSION_MAJOR    3
-#define     PLUGIN_VERSION_MINOR    0
+#define     PLUGIN_VERSION_MINOR    1
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
@@ -90,7 +90,8 @@ using namespace std;
 
 class GPXTimeAndZDA;
 class soundingdata;
-
+class SurveyDlg;
+class SurveyTidalDlg;
 
 class GPXTimeAndZDA{
 public:
@@ -141,6 +142,7 @@ public:
       bool RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
 	 // bool RenderGLSurveyOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
 	  bool GetSurveySoundings(int as);
+	  bool GetEditedSoundings(int as);
 
 //    Other public methods
       void SetSurveyDialogX    (int x){ m_survey_dialog_x = x;};
@@ -160,7 +162,9 @@ public:
 	  void              DeleteSounding(int id);
       void              FillSurveyDropdown();
 	  void              FillSurveyGrid();
+	  void				FillEditSurveyGrid(int surv_id);
 	  void              FillSurveyInfo();
+	  void				FillEditSurveyInfo();
 
       int               InsertSounding(double depth, double lat, double lon, double tide = 0.0, time_t timestamp = 0, int projection = PROJECTION);
       wxArrayString     GetSurveyList();
@@ -171,11 +175,16 @@ public:
 	  wxString          GetSurveyMinDepth(int survey_id);
 	  wxString			GetSurveyNumSoundings(int survey_id);
 	  wxString			GetSurveyAreaSoundings(int survey_id);
+	  wxString			GetEditSurveyMaxDepth(int survey_id);
+	  wxString          GetEditSurveyMinDepth(int survey_id);
+	  wxString			GetEditSurveyNumSoundings(int survey_id);
+	  wxString			GetEditSurveyAreaSoundings(int survey_id);
 
       int               GetActiveSurveyId(){ return m_activesurvey; }
       void              SetActiveSurveyId(int id){ m_activesurvey = id; }
       void              SetActiveSurvey(wxString name){ m_activesurveyname = name; m_activesurvey = GetSurveyId(name); }
 	  vector<soundingdata>  SetTable(int i);
+	  vector<soundingdata> SetEditTable(int i);
 
 	  wxArrayString     SetSoundings(int i);
 	  void				ParseNMEASentence(wxString sentence);
@@ -191,11 +200,15 @@ public:
 	  int               numsoundings;
 	  bool				m_recording;
 	  bool              m_survey_trace;
-	  //SurveyDlg        *m_pSurveyDialog;
+
+	  SoundingsEditDlgDef *m_pSoundingsEdit;
 	  SurveyMergeDlgDef *m_pSurveyMerge;
 	  SurveyPropDlgDef *m_pSurveyProp;
+	  
 	  double           viewscale;
 	  bool              dbMergeSurveys(int survey1, int survey2);
+	  bool              dbEditSoundings(int survey1);
+	  bool				dbSaveTideHeights(int survey1);
 	  double			m_latprev;
 	  double       	  m_lonprev;
 
@@ -219,6 +232,7 @@ public:
 	  bool m_bShowSurvey;
 	  wxBitmap  m_panelBitmap;
 	  bool m_bSurveyShowIcon;
+	  SurveyDlg *m_pSurveyDialog;
 
 private:
 	
@@ -227,7 +241,7 @@ private:
 	double m_cursor_lat;
 
 	  SurveyOverlayFactory *m_pSurveyOverlayFactory;
-	  SurveyDlg *m_pSurveyDialog;
+	  
 
 	 // wxDC *m_pdc;
 	 // wxGraphicsContext *m_gdc;

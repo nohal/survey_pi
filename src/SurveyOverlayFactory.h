@@ -97,7 +97,7 @@ public:
 	wxImage &DrawGLText( double value, int precision);
 	wxImage &DrawGLTextDir( double value, int precision);
 	wxImage &DrawGLTextString( wxString myText);
-	wxImage &DrawGLPolygon(wxColour c);
+	wxImage &DrawGLPolygon();
 
 	void DrawGLLabels(SurveyOverlayFactory *pof, wxDC *dc,
                                PlugIn_ViewPort *vp,
@@ -105,7 +105,7 @@ public:
 
 	void drawGLPolygons(SurveyOverlayFactory *pof, wxDC *dc,
                                 PlugIn_ViewPort *vp, 
-                                wxImage &imageLabel, double myLat, double myLon, int offset );
+                                wxImage &imageLabel, double myLat, double myLon, int sdgid, int surid, int pixxc, int pixyc, int offset );
 
 	void DrawGLLine( double x1, double y1, double x2, double y2, double width, wxColour myColour );
     void DrawOLBitmap( const wxBitmap &bitmap, wxCoord x, wxCoord y, bool usemask );
@@ -120,7 +120,7 @@ private:
 	void RenderMyArrows(PlugIn_ViewPort *vp );
 
 	void DrawGLSoundingMark(int x, int y, double scale, double depth, int sounding_id, int survey_id, wxColour c);
-	void DrawSounding(wxDC &dc, int x, int y, double depth, int sounding_id, int survey_id, wxColour c, int text_offset);
+	void DrawSounding(wxDC &dc, int x, int y, double depth, int sounding_id, int survey_id, int text_offset);
     void DrawMessageWindow( wxString msg, int x, int y , wxFont *mfont);
 
     void drawWindArrowWithBarbs( int config, int x, int y, double vx, double vy,

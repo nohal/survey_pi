@@ -753,10 +753,10 @@ bool survey_pi::dbMergeSurveys(int survey1, int survey2){
 		int l = point.Len();
 
 		s0 = point.Mid(6, f - 6);
-		s0.ToDouble(&lat);
+		s0.ToDouble(&lon);
 
 		s1 = point.Mid(f + 1, l - f - 2);
-		s1.ToDouble(&lon);
+		s1.ToDouble(&lat);
 
 		tid = results[(i * n_columns) + 2];
 		wxString ti(tid, wxConvUTF8);
@@ -766,6 +766,153 @@ bool survey_pi::dbMergeSurveys(int survey1, int survey2){
 		dbQuery(sql);
 	}
 	return true;
+}
+
+bool survey_pi::dbEditSoundings(int survey1) {
+
+	int surv_id;
+	wxString rawSurveyName, editedSurveyName;
+	rawSurveyName = GetSurveyName(survey1);
+	editedSurveyName = _T("Edited_") + rawSurveyName;
+	CreateSurvey(editedSurveyName);
+	SetActiveSurvey(editedSurveyName);
+
+	surv_id = GetSurveyId(editedSurveyName);
+
+	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), tide, datetime(measured) FROM sounding WHERE survey_id=%i"), survey1);
+	char **results;
+	int n_rows;
+	int n_columns;
+	char *dpt;
+	//char *pos;
+	char *tid;
+	char *tim;
+	string measuredTime;
+
+	ret = sqlite3_get_table(m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
+	if (ret != SQLITE_OK)
+	{
+		/* some error occurred */
+		wxLogMessage(_T("Spatialite SQL error: %s\n"), err_msg);
+		sqlite3_free(err_msg);
+		return false;
+	}
+	int i = 0;
+	double lat, lon;
+	wxString s0, s1;
+	double depth;
+	double tide;
+	double offset = 0;
+
+	int projection = 3395;
+	for (i = 1; i <= n_rows; i++) {
+		dpt = results[(i * n_columns) + 0];
+		wxString dep(dpt, wxConvUTF8);
+		dep.ToDouble(&depth);
+
+		depth += offset;
+
+		tim = results[(i * n_columns) + 3];
+		wxString time(tim, wxConvUTF8);
+
+		wxDateTime dt;
+		dt.ParseDateTime(time);
+
+		time_t timestamp = dt.GetTicks();		
+		
+		if (timestamp > 0) {
+			time = _T("'") + wxDateTime(timestamp).FormatISODate().Append(_T(" ")).Append(wxDateTime(timestamp).FormatISOTime()) + _T("'");
+		}
+
+		//wxMessageBox(time);
+
+		char *geom = results[(i * n_columns) + 1];
+		wxString point(geom, wxConvUTF8);
+
+		int f = point.Find(_T(" "));
+		int l = point.Len();
+
+		s0 = point.Mid(6, f - 6);
+		s0.ToDouble(&lon);
+
+		s1 = point.Mid(f + 1, l - f - 2);
+		s1.ToDouble(&lat);
+
+		tid = results[(i * n_columns) + 2];
+		wxString ti(tid, wxConvUTF8);
+		ti.ToDouble(&tide);
+
+		if (time != wxEmptyString) {
+			wxString sql = wxString::Format(_T("INSERT INTO \"edited_sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\") VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time, surv_id, lon, lat, projection, tide);
+			dbQuery(sql);
+		}
+	}
+	SetActiveSurveyId(surv_id);
+	GetEditedSoundings(surv_id);
+	
+	FillSurveyDropdown();
+	FillEditSurveyGrid(surv_id);
+    FillEditSurveyInfo();
+
+	return 1;
+}
+
+bool survey_pi::dbSaveTideHeights(int survey1) {
+
+
+	int surv_id = 1;
+
+	char **results;
+	int n_rows;
+	int n_columns;
+	char *dpt;
+	//char *pos;
+	char *tid;
+	char *tim;
+	string measuredTime;
+
+	int i = 0;
+	double lat, lon;
+	wxString s0, s1;
+	double depth;
+	double tide;
+	double offset = 0;
+
+		
+	n_rows = m_pSurveyDialog->m_pSurveyTidalDialog->m_gdTidalHeights->GetNumberRows();
+	
+
+	int projection = 3395;
+	for (i = 0; i < n_rows; i++) {		
+	
+		wxString time = m_pSurveyDialog->m_pSurveyTidalDialog->m_gdTidalHeights->GetCellValue(i, 0);
+
+		wxDateTime dt;
+		dt.ParseDateTime(time);
+
+		time = _T("'") + dt.Format(wxT("%Y-%m-%d %H:%M:%S")) + _T("'");
+	
+		wxString ti = m_pSurveyDialog->m_pSurveyTidalDialog->m_gdTidalHeights->GetCellValue(i, 1);
+		ti.ToDouble(&tide);
+
+		if (time != wxEmptyString) {
+			wxString sql = wxString::Format(_T("INSERT INTO \"tide_height\" (\"measured\", \"height\", \"survey_id\") VALUES (%s , %f, 1)"), time, tide );
+			
+			wxMessageBox(sql);
+
+			dbQuery(sql);
+		}
+
+		
+	}
+	//SetActiveSurveyId(surv_id);
+	//GetEditedSoundings(surv_id);
+
+	//FillSurveyDropdown();
+	//FillEditSurveyGrid(surv_id);
+	//FillEditSurveyInfo();
+
+	return 1;
 }
 
 bool survey_pi::dbQuery(wxString sql)
@@ -884,7 +1031,74 @@ vector<soundingdata> survey_pi::SetTable(int i)
 
 }
 
+vector<soundingdata> survey_pi::SetEditTable(int i)
+{
+	char **result;
+	int n_rows = 0;
+	int n_columns;
+	soundingdata mysounding;
 
+	all_soundingdata.clear();
+
+	//wxString myInt = wxString::Format(wxT("%i"), i);
+
+	wxString myString = wxString::Format(_T("SELECT sounding_id, depth, measured, AsText(geom), tide FROM edited_sounding WHERE survey_id = %i"), i);
+	dbGetTable(myString, &result, n_rows, n_columns);
+	wxArrayString soundings;
+	wxString s0, s1;
+	double lat, lon;
+	if (n_rows == 0) {
+		return all_soundingdata;
+	}
+	for (int i = 1; i <= n_rows; i++) {
+
+		char *id = result[(i * n_columns) + 0];
+
+		int sounding_id = atoi(id);
+		mysounding.sdgid = sounding_id;
+
+		char *depth = result[(i * n_columns) + 1];
+
+		wxString sounding(depth, wxConvUTF8);
+		soundings.Add(sounding);
+		mysounding.depth = sounding;
+
+		char *measured = result[(i * n_columns) + 2];
+
+		wxString time_measured(measured, wxConvUTF8);
+		mysounding.time = time_measured;
+
+		char *geom = result[(i * n_columns) + 3];
+
+		char *tide = result[(i * n_columns) + 4];
+		wxString mt(tide, wxConvUTF8);
+
+		mysounding.tide = mt;
+
+		wxString point(geom, wxConvUTF8);
+		//wxMessageBox(point);
+
+		int f = point.Find(_T(" "));
+		int l = point.Len();
+
+		s0 = point.Mid(6, f - 6);
+		mysounding.lon = s0;
+
+		s0.ToDouble(&lon);
+		mysounding.lonD = lon;
+
+		s1 = point.Mid(f + 1, l - f - 2);
+		mysounding.lat = s1;
+
+		s1.ToDouble(&lat);
+		mysounding.latD = lat;
+
+		all_soundingdata.push_back(mysounding);
+	}
+	// dbFreeResults(result);
+	return all_soundingdata;
+
+}
 
 wxArrayString survey_pi::SetSoundings(int i)
 {
@@ -964,6 +1178,26 @@ wxString survey_pi::GetSurveyAreaSoundings(int survey_id)
 	return dbGetStringValue(wxString::Format(_T("SELECT SUM(AREA(geom)) FROM sounding WHERE survey_id=%i"), survey_id));
 }
 
+wxString survey_pi::GetEditSurveyMaxDepth(int survey_id)
+{
+	return dbGetStringValue(wxString::Format(_T("SELECT max(depth) FROM edited_sounding  WHERE survey_id=%i"), survey_id));
+}
+
+wxString survey_pi::GetEditSurveyMinDepth(int survey_id)
+{
+	return dbGetStringValue(wxString::Format(_T("SELECT min(depth) FROM edited_sounding WHERE survey_id=%i"), survey_id));
+}
+
+wxString survey_pi::GetEditSurveyNumSoundings(int survey_id)
+{
+	return dbGetStringValue(wxString::Format(_T("SELECT count(depth) FROM edited_sounding WHERE survey_id=%i"), survey_id));
+}
+
+wxString survey_pi::GetEditSurveyAreaSoundings(int survey_id)
+{
+
+	return dbGetStringValue(wxString::Format(_T("SELECT SUM(AREA(geom)) FROM edited_sounding WHERE survey_id=%i"), survey_id));
+}
 
 int survey_pi::GetSurveyId(wxString survey_name)
 {
@@ -984,22 +1218,48 @@ int survey_pi::CreateSurvey(wxString name)
 
 void survey_pi::DeleteSurvey(int id)
 {
-      wxString sql = wxString::Format(_T("DELETE FROM sounding WHERE survey_id=%i"), id);
-      dbQuery(sql);
-      sql = wxString::Format(_T("DELETE FROM survey WHERE survey_id=%i"), id);
-      dbQuery(sql);
-      m_activesurvey = 0;
-      m_activesurveyname = wxEmptyString;
-	  m_pSurveyDialog->mysoundings.clear();
-	  FillSurveyDropdown();
-	  FillSurveyGrid();
-	  FillSurveyInfo();
+	   int c = m_pSurveyDialog->m_chSurvey->GetCount();
+	   if (c != 0) {
+
+		   wxString sql = wxString::Format(_T("DELETE FROM sounding WHERE survey_id=%i"), id);
+		   dbQuery(sql);
+		   sql = wxString::Format(_T("DELETE FROM survey WHERE survey_id=%i"), id);
+		   dbQuery(sql);
+		   m_activesurvey = 0;
+		   m_activesurveyname = wxEmptyString;
+		   m_pSurveyDialog->mysoundings.clear();
+		   FillSurveyDropdown();
+		   FillSurveyGrid();
+		   FillSurveyInfo();
+
+	   }
 }
 
 void survey_pi::DeleteSounding(int id)
 {
-	wxString sql = wxString::Format(_T("DELETE FROM sounding WHERE sounding_id=%i"), id);
-	dbQuery(sql);
+	wxString s = m_pSurveyDialog->m_chSurvey->GetStringSelection();
+
+	int t = GetSurveyId(s);
+	SetActiveSurvey(s);
+
+	if (m_activesurvey != 0) {
+		wxString surveyName = GetSurveyName(m_activesurvey);
+		if (s.length() > 7) {
+			wxString testEdit = surveyName.Mid(0, 7);
+			if (testEdit == _T("Edited_")) {
+				wxString sql = wxString::Format(_T("DELETE FROM edited_sounding WHERE sounding_id=%i"), id);
+				dbQuery(sql);
+			}
+			else {
+				wxString sql = wxString::Format(_T("DELETE FROM sounding WHERE sounding_id=%i"), id);
+				dbQuery(sql);
+			}
+		}
+		else {
+			wxString sql = wxString::Format(_T("DELETE FROM sounding WHERE sounding_id=%i"), id);
+			dbQuery(sql);
+		}
+	}
 }
 
 int survey_pi::InsertSounding(double depth, double lat, double lon, double tide, time_t timestamp, int projection)
@@ -1130,7 +1390,7 @@ int survey_pi::Init(void)
 				_T("survey_id INTEGER NOT NULL,")
 				_T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
 			dbQuery(sql);
-			dbQuery(_T("SELECT AddGeometryColumn('sounding', 'geom', 32632, 'POINT', 2)"));
+			dbQuery(_T("SELECT AddGeometryColumn('sounding', 'geom', 32632, 'POINT', 2)"));					
 		}
 
 		//Update DB structure and contents
@@ -1164,6 +1424,7 @@ int survey_pi::Init(void)
 			sql = _T("ALTER TABLE sounding ")
 				_T("ADD COLUMN tide REAL NOT NULL DEFAULT 0.0");
 			dbQuery(sql);
+			
 			dbQuery(_T("UPDATE settings SET value = 3 WHERE key = 'DBVersion'"));
 			db_ver = 3;
 		}
@@ -1195,6 +1456,27 @@ int survey_pi::Init(void)
 			dbQuery(_T("SELECT DiscardGeometryColumn('new_sounding', 'geom')"));
 			dbQuery(_T("UPDATE settings SET value = 4 WHERE key = 'DBVersion'"));
 			db_ver = 4;
+		}
+
+		if (b_dbUsable && db_ver == 4 && newDB)
+		{
+			sql = _T("CREATE TABLE edited_sounding (")
+				_T("sounding_id INTEGER PRIMARY KEY AUTOINCREMENT,")
+				_T("depth REAL NOT NULL,")
+				_T("measured INTEGER NOT NULL,")
+				_T("survey_id INTEGER NOT NULL,")
+				_T("tide REAL NOT NULL DEFAULT 0.0,")
+				_T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
+			dbQuery(sql);
+			dbQuery(_T("SELECT AddGeometryColumn('edited_sounding', 'geom', 3395, 'POINT', 2)"));
+
+			sql = _T("CREATE TABLE tide_height (")				
+				_T("measured INTEGER NOT NULL,")
+				_T("height REAL NOT NULL,")
+				_T("survey_id INTEGER NOT NULL,")
+				_T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
+			dbQuery(sql);
+
 		}
 
 	  wxMenu dummy_menu;
@@ -1242,10 +1524,13 @@ bool survey_pi::DeInit(void)
 {
 	  RemovePlugInTool(m_leftclick_tool_id);
 	//    Record the dialog position
+	  
 
       if (NULL != m_pSurveyDialog)
       {
-		    wxPoint p = m_pSurveyDialog->GetPosition();
+		  
+		  
+		  wxPoint p = m_pSurveyDialog->GetPosition();
             SetSurveyDialogX(p.x);
             SetSurveyDialogY(p.y);
 
@@ -1255,7 +1540,8 @@ bool survey_pi::DeInit(void)
             m_pSurveyDialog = NULL;
 			m_pSurveyOverlayFactory = NULL;
 
-      }
+      }  
+
       SaveConfig();
 	  //spatialite_cleanup();
       int m = sqlite3_close(m_database);
@@ -1361,7 +1647,7 @@ void survey_pi::FillSurveyGrid(){
 		{
 			wxDateTime dt;
 			dt.ParseDateTime(it->time);
-			wxString str = dt.Format(wxT("%Y-%m-%dT%H:%M:%SZ"));
+			wxString str = dt.Format(wxT("%Y-%m-%d %H:%M:%S"));
 
 			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 0, it->depth);
 			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 1, str);
@@ -1378,6 +1664,42 @@ void survey_pi::FillSurveyGrid(){
 	}
 }
 
+void survey_pi::FillEditSurveyGrid(int surv_id) {
+
+	m_pSurveyDialog->m_gdSoundings->ClearGrid();
+
+	if (m_pSurveyDialog->m_chSurvey->GetCount() > 0)
+	{
+
+		int id = surv_id;
+		SetActiveSurveyId(id);
+
+		m_pSurveyDialog->mysoundings = SetEditTable(id);
+
+		int i = 0;
+
+		for (std::vector<soundingdata>::iterator it = all_soundingdata.begin(); it != all_soundingdata.end(); it++)
+		{
+			wxDateTime dt;
+			dt.ParseDateTime(it->time);
+			wxString str = dt.Format(wxT("%Y-%m-%d %H:%M:%S"));
+
+			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 0, it->depth);
+			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 1, str);
+			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 2, it->lat);
+			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 3, it->lon);
+
+			wxString sid = wxString::Format(wxT("%i"), it->sdgid);
+			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 4, sid);
+			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 5, it->tide);
+
+			m_pSurveyDialog->m_gdSoundings->AppendRows(1);
+			i++;
+		}
+	}
+}
+
+
 void survey_pi::FillSurveyInfo(){
 	int i = GetActiveSurveyId();
 	wxString maxD, minD, numD, areaD;
@@ -1389,9 +1711,24 @@ void survey_pi::FillSurveyInfo(){
 	m_pSurveyDialog->m_tMaxDepth->SetLabel(maxD);
 	m_pSurveyDialog->m_tMinDepth->SetLabel(minD);
 	m_pSurveyDialog->m_tNrSoundings->SetLabel(numD);
+
+	RequestRefresh(m_parent_window); // refresh main window
 }
 
+void survey_pi::FillEditSurveyInfo() {
+	int i = GetActiveSurveyId();
+	wxString maxD, minD, numD, areaD;
+	maxD = _("Maximum depth: ") + GetEditSurveyMaxDepth(i) + _("m");
+	minD = _("Minimum depth: ") + GetEditSurveyMinDepth(i) + _("m");
+	numD = _("Soundings: ") + GetEditSurveyNumSoundings(i);
+	areaD = GetEditSurveyAreaSoundings(i);
 
+	m_pSurveyDialog->m_tMaxDepth->SetLabel(maxD);
+	m_pSurveyDialog->m_tMinDepth->SetLabel(minD);
+	m_pSurveyDialog->m_tNrSoundings->SetLabel(numD);
+
+	RequestRefresh(m_parent_window); // refresh main window
+}
 
 void survey_pi::OnToolbarToolCallback(int id)
 {
@@ -1404,7 +1741,7 @@ void survey_pi::OnToolbarToolCallback(int id)
             FillSurveyDropdown();
 			FillSurveyInfo();
 			FillSurveyGrid();
-			SetSettings();
+			SetSettings();			
       }
 
 	  //Toggle otcurrent overlay display
@@ -1690,14 +2027,39 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp){
 
 	if (!m_pSurveyDialog ||
 		!m_pSurveyDialog->IsShown() ||
-		!m_pSurveyOverlayFactory){
+		!m_pSurveyOverlayFactory) {
 		return false;
 	}
 
 	m_pSurveyDialog->SetViewPort(vp);
 	viewscale = vp->view_scale_ppm;
-	GetSurveySoundings(m_activesurvey);
-	m_pSurveyOverlayFactory->RenderSurveyOverlay(dc, vp);
+
+	wxString s;
+
+	if (m_pSurveyDialog->m_chSurvey->GetCount() != 0) {
+		s = m_pSurveyDialog->m_chSurvey->GetStringSelection();
+		SetActiveSurvey(s);
+	}
+
+	if (m_activesurvey != 0) {
+
+		if (s.length() > 7) {
+			wxString testEdit = s.Mid(0, 7);
+			if (testEdit == _T("Edited_")) {
+				GetEditedSoundings(m_activesurvey);
+				m_pSurveyOverlayFactory->RenderSurveyOverlay(dc, vp);
+			}
+			else {
+				GetSurveySoundings(m_activesurvey);
+				m_pSurveyOverlayFactory->RenderSurveyOverlay(dc, vp);
+			}
+		}
+		else {
+			GetSurveySoundings(m_activesurvey);
+			m_pSurveyOverlayFactory->RenderSurveyOverlay(dc, vp);
+		}
+	}
+
 	return true;
 }
 
@@ -1710,8 +2072,32 @@ bool survey_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 
 	m_pSurveyDialog->SetViewPort(vp);
 	viewscale = vp->view_scale_ppm;
-    GetSurveySoundings(m_activesurvey);
-	m_pSurveyOverlayFactory->RenderGLSurveyOverlay(pcontext, vp);
+	wxString s;
+	if (m_pSurveyDialog->m_chSurvey->GetCount() != 0) {
+		s = m_pSurveyDialog->m_chSurvey->GetStringSelection();
+		SetActiveSurvey(s);
+	}
+
+	if (m_activesurvey != 0) {
+
+		if (s.length() > 7) {
+
+			wxString testEdit = s.Mid(0, 7);
+			if (testEdit == _T("Edited_")) {
+				GetEditedSoundings(m_activesurvey);
+				m_pSurveyOverlayFactory->RenderGLSurveyOverlay(pcontext, vp);
+			}
+			else {
+				GetSurveySoundings(m_activesurvey);
+				m_pSurveyOverlayFactory->RenderGLSurveyOverlay(pcontext, vp);
+			}
+		}
+		else {
+			GetSurveySoundings(m_activesurvey);
+			m_pSurveyOverlayFactory->RenderGLSurveyOverlay(pcontext, vp);
+		}
+	}
+
 	return true;
 }
 
@@ -1802,6 +2188,90 @@ bool survey_pi::GetSurveySoundings(int as)
       return true;
 }
 
+bool survey_pi::GetEditedSoundings(int as)
+{
+	soundingdata mySounding;
+	mySurveySoundings.clear();
+
+	if (!b_dbUsable || !m_bRenderOverlay)
+		return false;
+
+	//wxString sql = wxString::Format(_T("SELECT depth, AsText(geom) FROM sounding WHERE Within(geom, PolygonFromText('POLYGON((%f %f, %f %f, %f %f, %f %f))'))"), vp->lat_min, vp->lon_min, vp->lat_min, vp->lon_max, vp->lat_max, vp->lon_max, vp->lat_max, vp->lon_min);
+	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide FROM edited_sounding"));
+	if (as > 0 && !m_bRenderAllSurveys) {
+		sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide FROM edited_sounding WHERE survey_id = %i"), as);
+	}
+
+	char **results;
+	int n_rows;
+	int n_columns;
+	char *dpt;
+	char *pos;
+	char *sdgid;
+	char *surid;
+	char *measured;
+	char *tide;
+
+	wxString s0, s1;
+	ret = sqlite3_get_table(m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
+	if (ret != SQLITE_OK)
+	{
+		/* some error occurred */
+		wxLogMessage(_T("Spatialite SQL error: %s\n"), err_msg);
+		sqlite3_free(err_msg);
+		return false;
+	}
+
+	for (int i = 1; i <= n_rows; i++)
+	{
+		dpt = results[(i * n_columns) + 0];
+		pos = results[(i * n_columns) + 1];
+		sdgid = results[(i * n_columns) + 2];
+		surid = results[(i * n_columns) + 3];
+		measured = results[(i * n_columns) + 4];
+		tide = results[(i * n_columns) + 5];
+		double depth = atof(dpt);
+		wxString s(pos, wxConvUTF8);
+
+		wxString d(dpt, wxConvUTF8);
+
+		double latl;
+		double lonl;
+
+
+
+		int f = s.First(_T(" "));
+		int l = s.Len();
+
+		s0 = s.Mid(6, f - 6);
+		s0.ToDouble(&lonl);
+
+		s1 = s.Mid(f + 1, l - f - 2);
+		s1.ToDouble(&latl);
+
+		mySounding.latD = latl;
+		mySounding.lonD = lonl;
+
+		wxString ms(tide, wxConvUTF8);
+		mySounding.tide = ms;
+
+		wxString dt(dpt, wxConvUTF8);
+		mySounding.depth = dt;
+		mySounding.surid = atoi(surid);
+		mySounding.sdgid = atoi(sdgid);
+		mySurveySoundings.push_back(mySounding);
+	}
+
+	m_pSurveyDialog->mysoundings = mySurveySoundings;
+
+	mLastX = -1;
+	mLastY = -1;
+
+	sqlite3_free_table(results);
+
+
+	return true;
+}
 void survey_pi::StoreSounding(double depth)
 {
       if (m_lastPosReport.Subtract(wxDateTime::Now()).GetSeconds() > 2 || m_lat == 999.0 || m_lon == 999.0)
@@ -2448,7 +2918,7 @@ void survey_pi::OnSurveyDialogClose()
 	m_pSurveyDialog->Hide();
 	SaveConfig();
 
-	RequestRefresh(m_parent_window); // refresh main window
+	//RequestRefresh(m_parent_window); // refresh main window
 
 }
 
@@ -2487,3 +2957,4 @@ wxString survey_pi::StandardPath()
 	stdPath += s; // is this necessary?
 	return stdPath;
 }
+

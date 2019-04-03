@@ -201,8 +201,9 @@ wxImage &SurveyOverlayFactory::DrawGLText(double value, int precision) {
 	mdc.Clear();
 
 	wxColour text_color;
+	text_color = m_settings.m_sFontColor;
 
-	GetGlobalColor(_T("UINFD"), &text_color);
+	//GetGlobalColor(_T("UINFD"), &text_color);
 	wxPen penText(text_color);
 	mdc.SetPen(penText);
 
@@ -267,8 +268,8 @@ wxImage &SurveyOverlayFactory::DrawGLTextDir(double value, int precision) {
 	mdc.Clear();
 
 	wxColour text_color;
-
-	GetGlobalColor(_T("UINFD"), &text_color);
+	text_color = m_settings.m_sFontColor;
+	//GetGlobalColor(_T("UINFD"), &text_color);
 	wxPen penText(text_color);
 	mdc.SetPen(penText);
 
@@ -329,8 +330,8 @@ wxImage &SurveyOverlayFactory::DrawGLTextString(wxString myText) {
 	mdc.Clear();
 
 	wxColour text_color;
-
-	GetGlobalColor(_T("UINFD"), &text_color);
+	text_color = m_settings.m_sFontColor;
+	//GetGlobalColor(_T("UINFD"), &text_color);
 	wxPen penText(text_color);
 	mdc.SetPen(penText);
 
@@ -550,13 +551,16 @@ void SurveyOverlayFactory::DrawGLLabels(SurveyOverlayFactory *pof, wxDC *dc,
 
 }
 
-wxImage &SurveyOverlayFactory::DrawGLPolygon(wxColour c) {
+wxImage &SurveyOverlayFactory::DrawGLPolygon() {
 
 	wxString labels;
 	labels = _T("");  // dummy label for drawing with
 
-	wxPen penText(c);
-	wxBrush backBrush(c);
+	wxColour s_Colour;
+	s_Colour = m_settings.m_sSoundingColor;
+
+	wxPen penText(s_Colour);
+	wxBrush backBrush(s_Colour);
 
 	wxMemoryDC mdc(wxNullBitmap);
 
@@ -575,8 +579,8 @@ wxImage &SurveyOverlayFactory::DrawGLPolygon(wxColour c) {
 
 	mdc.SetPen(penText);
 	mdc.SetBrush(backBrush);
-	mdc.SetTextForeground(c);
-	mdc.SetTextBackground(c);
+	mdc.SetTextForeground(s_Colour);
+	mdc.SetTextBackground(s_Colour);
 
 	int xd = 0;
 	int yd = 0;
@@ -623,7 +627,7 @@ wxImage &SurveyOverlayFactory::DrawGLPolygon(wxColour c) {
 }
 void SurveyOverlayFactory::drawGLPolygons(SurveyOverlayFactory *pof, wxDC *dc,
 	PlugIn_ViewPort *vp,
-	wxImage &imageLabel, double myLat, double myLon, int offset)
+	wxImage &imageLabel, double myLat, double myLon, int sdgid, int surid, int pixxc, int pixyc , int offset)
 {
 
 	//---------------------------------------------------------
@@ -691,6 +695,23 @@ void SurveyOverlayFactory::drawGLPolygons(SurveyOverlayFactory *pof, wxDC *dc,
 
 		delete[](e);
 	}
+
+	wxColour colour;
+	if (m_settings.m_bConnectSoundings)
+	{
+		int x = pixxc;
+		int y = pixyc;
+
+		if (m_settings.mLastX != -1 && m_settings.mLastY != -1 && m_settings.mLastSdgId == sdgid - 1 && m_settings.mLastSurveyId == surid)
+		{
+			colour = wxColour(m_settings.m_sConnectorColor);
+			DrawGLLine(x, y, m_settings.mLastX, m_settings.mLastY, 0.25, colour);
+		}
+		m_settings.mLastX = x;
+		m_settings.mLastY = y;
+		m_settings.mLastSdgId = sdgid;
+		m_settings.mLastSurveyId = surid;
+	}
 }
 
 
@@ -736,6 +757,12 @@ void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, boo
 			pixxc = cpoint.x;
 			pixyc = cpoint.y;
 
+			wxColour f_Colour;
+			f_Colour = m_settings.m_sFontColor;
+
+			wxColour s_Colour;
+			s_Colour = m_settings.m_sSoundingColor;
+
 			wxColour c_Colour;
 			if (m_settings.m_bUseDepthColours) {
 				c_Colour = GetDepthColour(depth);
@@ -752,10 +779,10 @@ void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, boo
 			if (!m_pdc) {
 
 				if (m_settings.m_bUseSymbol && (m_settings.m_iSoundingShape == 1 || m_settings.m_iSoundingShape == 2)) {
-					drawGLPolygons(this, m_pdc, BBox, DrawGLPolygon(c_Colour), lat, lon, 0);
+					drawGLPolygons(this, m_pdc, BBox, DrawGLPolygon(), lat, lon, sdgid, surid, pixxc, pixyc, 0);
 				}
 				else {
-					DrawGLSoundingMark(pixxc, pixyc, 0, depth, sdgid, surid, c_Colour);
+					DrawGLSoundingMark(pixxc, pixyc, 0, depth, sdgid, surid, s_Colour);
 				}
 				//
 				if (m_settings.m_bRenderSoundingText) {
@@ -766,7 +793,7 @@ void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, boo
 
 			if (m_pdc)
 			{
-				DrawSounding(*m_pdc, pixxc, pixyc, depth, sdgid, surid, c_Colour, 5);
+				DrawSounding(*m_pdc, pixxc, pixyc, depth, sdgid, surid, 5);
 			}
 		}
 	}
@@ -774,7 +801,7 @@ void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, boo
 }
 
 
-void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, int sounding_id, int survey_id, wxColour c, int text_offset)
+void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, int sounding_id, int survey_id, int text_offset)
 {
 	double coef = 1.0;
 	if (m_settings.m_iUnits == FATHOMS)
@@ -782,12 +809,16 @@ void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, in
 	else if (m_settings.m_iUnits == FEET)
 		coef = 0.3048;
 
-	if (m_settings.m_bUseSymbol) {
-		c = wxColour(m_settings.m_sSoundingColor);
+	wxColour s_Colour;
+	s_Colour = m_settings.m_sSoundingColor;
+
+	if (!m_settings.m_bUseSymbol) {
+		m_settings.m_iSoundingShape = 0;
 	}
 
-	wxPen p(c, 2);
+	wxPen p(s_Colour, 2);
 	dc.SetPen(p);
+
 
 	switch (m_settings.m_iSoundingShape)
 	{
@@ -821,8 +852,10 @@ void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, in
 	{
 		if (m_settings.mLastX != -1 && m_settings.mLastY != -1 && m_settings.mLastSdgId == sounding_id - 1 && m_settings.mLastSurveyId == survey_id)
 		{
-			wxPen p(wxColour(m_settings.m_sConnectorColor), 1);
-			dc.SetPen(p);
+			wxColour c_Colour;
+			c_Colour = m_settings.m_sConnectorColor;
+			wxPen pc(c_Colour, 1);
+			dc.SetPen(pc);
 			dc.DrawLine(x, y, m_settings.mLastX, m_settings.mLastY);
 		}
 		m_settings.mLastX = x;

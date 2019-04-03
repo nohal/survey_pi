@@ -39,6 +39,9 @@
 #include <wx/notebook.h>
 #include <wx/listctrl.h>
 #include <wx/listbox.h>
+#include <wx/timectrl.h>
+#include <wx/dateevt.h>
+#include <wx/datectrl.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -126,6 +129,7 @@ class SurveyDlgDef : public wxDialog
 		
 		wxStaticText* m_tArea;
 		
+		wxButton*m_btnAddTide;
 		wxButton* m_btnLoadFromFile;
 		wxBitmapToggleButton* m_btbRecord;
 		wxToggleButton* m_tbRecordNMEA;
@@ -137,6 +141,7 @@ class SurveyDlgDef : public wxDialog
 		wxButton* m_btnDelete;
 		wxButton* m_btnProperties;
 		wxButton* m_btnZoomTo;
+		wxButton* m_btnEdit;
 		wxButton* m_btnMerge;
 		wxButton* m_btnImport;
 		wxButton* m_btnExport;
@@ -151,6 +156,7 @@ class SurveyDlgDef : public wxDialog
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose(wxCloseEvent& event) { event.Skip(); }
 		virtual void OnSurveySelection( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnAddTide(wxCommandEvent& event) { event.Skip(); }
 		virtual void LoadFromFile( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSurveyRecordToggleNMEA(wxCommandEvent& event) { event.Skip(); }
 		virtual void RecordNMEA(wxCommandEvent& event) { event.Skip(); }
@@ -158,6 +164,7 @@ class SurveyDlgDef : public wxDialog
 		virtual void OnDeleteSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSurveyProperties( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnZoomTSurvey( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnEditSoundings(wxCommandEvent& event) { event.Skip(); }
 		virtual void OnMergeSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnImportSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnExportSurvey( wxCommandEvent& event ) { event.Skip(); }
@@ -207,11 +214,36 @@ class SurveyMergeDlgDef : public wxDialog
 	public:
 		wxStaticText* m_staticText28;
 		wxChoice* m_cMergeWith;
-		SurveyMergeDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Merge surveys"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 525,286 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		SurveyMergeDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Merge surveys"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~SurveyMergeDlgDef();
 	
 };
 
+///////////////////////////////////////////////////////////////////////////////
+/// Class SoundingsEditDlgDef
+///////////////////////////////////////////////////////////////////////////////
+class SoundingsEditDlgDef : public wxDialog
+{
+private:
+
+protected:
+
+	wxStdDialogButtonSizer* m_sdbSizer3;
+	wxButton* m_sdbSizer3OK;
+	wxButton* m_sdbSizer3Cancel;
+
+	// Virtual event handlers, overide them in your derived class
+	virtual void OnEditCancelClick(wxCommandEvent& event) { event.Skip(); }
+	virtual void OnEditOkClick(wxCommandEvent& event) { event.Skip(); }
+
+
+public:
+	wxStaticText* m_staticText28;
+	wxStaticText* m_cMergeWith;
+	SoundingsEditDlgDef(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Edit soundings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(-1, -1), long style = wxDEFAULT_DIALOG_STYLE);
+	~SoundingsEditDlgDef();
+
+};
 ///////////////////////////////////////////////////////////////////////////////
 /// Class SurveyPropDlgDef
 ///////////////////////////////////////////////////////////////////////////////
@@ -238,4 +270,61 @@ public:
 	~SurveyPropDlgDef();
 
 };
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class SurveyTidalDlgDef
+///////////////////////////////////////////////////////////////////////////////
+class SurveyTidalDlgDef : public wxDialog
+{
+public: 
+	wxGrid* m_gdTidalHeights;
+	wxNotebook* m_notebook1;	
+	wxPanel* m_panel1;	
+	wxPanel* m_panel2;
+	wxTextCtrl* m_tcHeightOfTide1;
+private:
+
+protected:
+	wxButton* m_bAutoFill;
+	wxStaticText* m_staticText42;
+	wxChoice* m_choice5;
+	wxStaticText* m_staticText43;
+	wxStaticText* m_staticText39;
+	wxTimePickerCtrl* m_timePicker2;
+	wxStaticText* m_staticText40;
+	wxDatePickerCtrl* m_datePicker1;
+	wxStaticText* m_staticText391;
+	wxTimePickerCtrl* m_timePicker21;
+	wxStaticText* m_staticText401;
+	wxDatePickerCtrl* m_datePicker11;
+	wxStaticText* m_staticText411;
+	
+	wxButton* m_btnAddTidalHeight1;
+
+	wxStaticBitmap* m_profileTide;
+	wxButton* m_btnSave;
+	wxButton* m_btnCancelTidalHeights;
+	wxButton* m_btnImportTide;
+	wxButton* m_btnExportTide;
+
+	// Virtual event handlers, overide them in your derived class
+	virtual void OnSurveySelection(wxCommandEvent& event) { event.Skip(); }
+	virtual void AutoFill(wxCommandEvent& event) { event.Skip(); }
+	virtual void SetTidalHeight(wxCommandEvent& event) { event.Skip(); }
+	virtual void OnSaveTides(wxCommandEvent& event) { event.Skip(); }
+	virtual void OnCancelTides(wxCommandEvent& event) { event.Skip(); }
+	virtual void OnImportTides(wxCommandEvent& event) { event.Skip(); }
+	virtual void OnExportTides(wxCommandEvent& event) { event.Skip(); }
+
+
+public:
+	wxChoice* m_chSurvey;
+
+	SurveyTidalDlgDef(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(700, 550), long style = wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
+	~SurveyTidalDlgDef();
+
+};
+
+
+
 #endif //__SURVEYGUI_H__

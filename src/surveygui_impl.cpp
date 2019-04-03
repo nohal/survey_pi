@@ -42,6 +42,7 @@ SurveyDlg::SurveyDlg( wxWindow* parent, wxWindowID id, const wxString& title, co
 	first.latD = 50;
 	first.lonD = -4;
 	mysoundings.push_back(first);
+	
 }
 
 void SurveyDlg::SetViewPort(PlugIn_ViewPort *vp)
@@ -53,6 +54,9 @@ void SurveyDlg::SetViewPort(PlugIn_ViewPort *vp)
 
 void SurveyDlg::OnClose(wxCloseEvent& event)
 {
+	
+	
+
 	plugin->OnSurveyDialogClose();
 }
 
@@ -239,46 +243,19 @@ void SurveyDlg::OnSurveySelection( wxCommandEvent& event )
 
 	  int t = plugin->GetSurveyId(s);
 	  plugin->SetActiveSurvey(s);
-	  plugin->FillSurveyInfo();
-	  plugin->FillSurveyGrid();
 
-
-	  /*
-	  wxString maxD, minD, numD, areaD;
-	  maxD = _("Maximum depth: ") + plugin->GetSurveyMaxDepth(t) + _("m");
-	  minD = _("Minimum depth: ") + plugin->GetSurveyMinDepth(t) + _("m");
-	  numD = _("Soundings: ") + plugin->GetSurveyNumSoundings(t);
-	  areaD = plugin->GetSurveyAreaSoundings(t);
-
-	  //wxMessageBox(areaD);
-
-	  plugin->m_pSurveyDialog->m_tMaxDepth->SetLabel(maxD);
-	  plugin->m_pSurveyDialog->m_tMinDepth->SetLabel(minD);
-	  plugin->m_pSurveyDialog->m_tNrSoundings->SetLabel(numD);
-	  */
-	  /*
-	  mysoundings.clear();
-	  m_gdSoundings->ClearGrid();
-	  mysoundings = plugin->SetTable(t);
-
-	  int i = 0;
-	  for(std::vector<soundingdata>::iterator it = mysoundings.begin();  it != mysoundings.end(); it++)
-	{
-		m_gdSoundings->SetCellValue(i,0, it->depth);
-		m_gdSoundings->SetCellValue(i,1, it->time);
-		m_gdSoundings->SetCellValue(i, 2, it->lat);
-		m_gdSoundings->SetCellValue(i, 3, it->lon);
-
-		//for (int col = 0;col<5; col++){
-		//	wxString s = it->depth;
-		//	m_gdSoundings->SetCellValue(i,0,s);
-		//}
-		m_gdSoundings->AppendRows(1);
-		i++;
-	}
-	*/
-
-	 // RequestRefresh(plugin->m_pSurveyDialog->m_parent);
+	  wxString testEdit = s.Mid(0, 7);
+	  if (testEdit == _T("Edited_")){		 
+		  plugin->GetEditedSoundings(t);
+		  plugin->FillEditSurveyInfo();
+		  plugin->FillEditSurveyGrid(t);
+	  }
+	  else {
+		  plugin->FillSurveyInfo();
+		  plugin->FillSurveyGrid();
+	  }
+	
+	  RequestRefresh(m_parent);
       event.Skip();
 }
 
@@ -300,7 +277,7 @@ void SurveyDlg::OnNewSurvey( wxCommandEvent& event )
 		  plugin->FillSurveyGrid();
 		  plugin->FillSurveyInfo();
       }
-	  //RequestRefresh(plugin->m_pSurveyDialog->m_parent);
+	  RequestRefresh(m_parent);
       event.Skip();
 }
 
@@ -325,9 +302,9 @@ void SurveyDlg::OnDeleteSurvey( wxCommandEvent& event )
 		  plugin->FillSurveyDropdown();
 		  plugin->FillSurveyGrid();
 		  plugin->FillSurveyInfo();
-		  //RequestRefresh(plugin->m_pSurveyDialog->m_parent);
+		  
       }
-
+	  RequestRefresh(m_parent);
       event.Skip();
 }
 
@@ -356,8 +333,11 @@ void SurveyDlg::OnZoomTSurvey( wxCommandEvent& event )
 {
 	double mla, mlo;
 	wxString la = m_gdSoundings->GetCellValue(0, 2);
-
+	//wxMessageBox(la);
+	
 	wxString lo = m_gdSoundings->GetCellValue(0, 3);
+	//wxMessageBox(lo);
+	
 	if (la.IsEmpty()  || lo.IsEmpty()){
 		wxMessageBox(_T("Survey does not contain any soundings"));
 		return;
@@ -399,12 +379,48 @@ void SurveyDlg::OnMergeSurvey( wxCommandEvent& event )
     event.Skip();
 }
 
+void SurveyDlg::OnEditSoundings(wxCommandEvent& event)
+{
+	wxString s = m_chSurvey->GetStringSelection();
+	if (s == wxEmptyString) {
+		wxMessageBox(_("No survey selected, please select a survey"));
+		return;
+	}
+
+	wxString testEdit = s.Mid(0, 7);
+	if (testEdit == _T("Edited_")) {	
+		wxMessageBox(_("This survey has already been corrected\n\nFor amending corrections select a survey with raw data"));
+		return;	
+	}
+
+	int t = plugin->GetSurveyId(s);
+	plugin->m_pSoundingsEdit = new SoundingsEditDlgDef(this, wxID_ANY, _("Editing Soundings"), { 100, 100 }, wxSize(525, 140), 0);
+	plugin->m_pSoundingsEdit->m_staticText28->SetLabelText(_("Use survey ") + s + _(" and correct the soundings:"));
+
+	int id = plugin->GetActiveSurveyId();
+	wxString surveyName = plugin->GetSurveyName(id);
+
+	wxStaticText *m_choice;
+	m_choice = plugin->m_pSoundingsEdit->m_cMergeWith;
+	m_choice->SetLabel(surveyName);
+	
+	plugin->m_pSoundingsEdit->Show();
+
+	if (plugin->m_pSoundingsEdit->ShowModal() == wxID_OK)
+	{
+		int survey1;
+		survey1 = t;
+		plugin->dbEditSoundings(survey1);
+	}
+	event.Skip();
+}
+
 void SurveyDlg::OnImportSurvey( wxCommandEvent& event )
 {
 	int t = m_chSurvey->GetSelection();
 
 	if (t == -1){
-		wxMessageBox(_T("No survey selected, please select or create/select a new survey"));
+		wxMessageBox(_("No survey selected, please select or create/select a new survey"));
 		return;
 	}
 
@@ -425,7 +441,7 @@ void SurveyDlg::OnImportSurvey( wxCommandEvent& event )
 			  }
 		  }
 	  }
-	  else wxMessageBox(_T("No file entered"));
+	  else wxMessageBox(_("No file entered"));
       event.Skip();
 }
 
@@ -448,13 +464,23 @@ void SurveyDlg::OnExportSurvey( wxCommandEvent& event )
 			  }
 		  }
 	  }
-	  else wxMessageBox(_T("No file entered"));
+	  else wxMessageBox(_("No file entered"));
       event.Skip();
 }
 
-void SurveyDlg::OnSurveyCancelClick( wxCommandEvent& event ) { event.Skip(); }
+void SurveyDlg::OnSurveyCancelClick( wxCommandEvent& event ) {
+	
+	plugin->OnSurveyDialogClose();
+	event.Skip();
 
-void SurveyDlg::OnSurveyOkClick( wxCommandEvent& event ) { event.Skip(); }
+}
+
+void SurveyDlg::OnSurveyOkClick( wxCommandEvent& event ) {
+	
+	plugin->OnSurveyDialogClose();
+	event.Skip(); 
+
+}
 
 void SurveyDlg::IsPanelSelected(wxNotebookEvent& event){
 	int i = m_notebook1->GetSelection();
@@ -484,7 +510,7 @@ void SurveyDlg::SetProfile(){
 	int t = m_chSurvey->GetSelection();
 
 	if (t == -1){
-		wxMessageBox(_T("No survey selected, please select a survey"));
+		wxMessageBox(_("No survey selected, please select a survey"));
 		return;
 	}
 
@@ -565,7 +591,7 @@ void SurveyDlg::SetProfile(){
 
 void SurveyDlg::OnItemAdd(wxCommandEvent& event){
 
-
+	wxMessageBox(_("Not yet implemented"));
 
 }
 
@@ -591,6 +617,7 @@ void SurveyDlg::OnItemDelete(wxCommandEvent& event){
 
 
 	m_gdSoundings->DeleteRows(myRows[0],c,true);
+	RequestRefresh(m_parent);
 
 }
 
@@ -601,5 +628,105 @@ wxString SurveyDlg::getInstrumentCaption(unsigned int id)
 		return _("Profile........................................................");
 	}
 	return _T("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
+}
+
+
+void SurveyDlg::OnAddTide(wxCommandEvent& event) {
+
+	wxMessageBox(_("Sorry ... Not yet implemented"));
+		return;
+	//if (NULL == m_pSurveyTidalDialog) {
+		//FunDlg *m_pFunctiondialog = new FunDlg(this);
+		m_pSurveyTidalDialog = new SurveyTidalDlg(this);
+		m_pSurveyTidalDialog->Plugin_Dialog = this;
+	//}
+	    m_pSurveyTidalDialog->Show();
+}
+
+myOffset SurveyDlg::GetOffset(double lat, double lon, double offsetstbd, double offsetfwd, double hdg) {
+
+	myOffset newPos;
+	double distmtr;
+	distmtr = offsetstbd;
+
+	double dist = distmtr / 1852;
+
+	//destLoxodrome(lat, lon, hdg, dist, &newPos.finalLat, &newPos.finalLon);
+
+	return newPos;
+}
+
+
+
+//
+// Now comes the tidal correction work
+//
+
+SurveyTidalDlg::SurveyTidalDlg(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : SurveyTidalDlgDef(parent, id, title, pos, size, style)
+{
+	
+}
+
+void SurveyTidalDlg::OnSaveTides(wxCommandEvent& event)
+{
+	Plugin_Dialog->plugin->dbSaveTideHeights(1);
+}
+
+void SurveyTidalDlg::OnCancelTides(wxCommandEvent& event)
+{
+	this->Close();
+}
+
+void SurveyTidalDlg::AutoFill(wxCommandEvent& event)
+{
+	wxDateTime dm = m_datePicker1->GetValue();
+
+	int h, m, s;
+
+	m_timePicker2->GetTime(&h, &m, &s);
+
+	dm.Add(wxTimeSpan(h, m, s));
+
+	wxDateTime m_dtNow = dm;
+
+	// now for the end date/time
+
+	wxDateTime dm2 = m_datePicker11->GetValue();
+	int h2, m2, s2;
+	m_timePicker21->GetTime(&h2, &m2, &s2);
+	dm2.Add(wxTimeSpan(h2, m2, s2));
+
+	SetGridDateTime(m_dtNow, dm2);
+
+	RequestRefresh(m_parent);
+}
+
+void SurveyTidalDlg::SetGridDateTime(wxDateTime myDT, wxDateTime myDT2) {
+
+	int s = m_choice5->GetSelection();
+	wxString c = m_choice5->GetString(s);
+	double value;
+	c.ToDouble(&value);
+	double m_dInterval = value;
+
+	wxTimeSpan m_ts = wxTimeSpan::Minutes(m_dInterval);
+		
+	int i = 0;
+
+	do
+	{			
+		wxString str = myDT.Format(wxT("%Y-%m-%d %H:%M:%S"));
+
+		m_gdTidalHeights->SetCellValue(i, 0, str);
+		//m_gdTidalHeights->SetCellValue(i, 1, "");
+		m_gdTidalHeights->SetCellValue(i, 2, _T("12"));
+
+		m_gdTidalHeights->AppendRows(1);
+		myDT.Add(m_ts);
+		i++;
+
+	} while (myDT <= myDT2);
+	m_gdTidalHeights->DeleteRows(i, 1, false);
+
 }
 

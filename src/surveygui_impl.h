@@ -46,11 +46,33 @@
 using namespace std;
 
 class survey_pi;
-
 class SurveyOverlayFactory;
 class PlugIn_ViewPort;
+class SurveyDlg;
+class SurveyTidalDlg;
 
 #include <vector>
+
+struct myOffset
+{
+	double finalLat;
+	double finalLon;
+};
+
+class SurveyTidalDlg : public SurveyTidalDlgDef
+{
+public:
+	SurveyTidalDlg(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Add Tidal Data"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(-1, -1), long style = wxCAPTION | wxDEFAULT_DIALOG_STYLE | wxMAXIMIZE_BOX | wxRESIZE_BORDER);
+	void OnSaveTides(wxCommandEvent& event);
+	void OnCancelTides(wxCommandEvent& event);
+	void AutoFill(wxCommandEvent& event);
+	void SetGridDateTime(wxDateTime myDT, wxDateTime myDT2);
+
+	SurveyDlg *Plugin_Dialog;
+
+private:
+
+};
 
 struct SurveyOverlaySettings
 {
@@ -126,6 +148,7 @@ public:
 	void OnSurveyProperties( wxCommandEvent& event );
 	void OnZoomTSurvey( wxCommandEvent& event );
 	void OnMergeSurvey( wxCommandEvent& event );
+	void OnEditSoundings(wxCommandEvent& event);
 	void OnImportSurvey( wxCommandEvent& event );
 	void OnExportSurvey( wxCommandEvent& event );
 	void OnSurveyCancelClick( wxCommandEvent& event );
@@ -134,6 +157,8 @@ public:
 	void SetProfile();
 	void OnItemAdd(wxCommandEvent& event);
 	void OnItemDelete(wxCommandEvent& event);
+	void OnAddTide(wxCommandEvent& event);
+	myOffset GetOffset(double lat, double lon, double offsetstbd, double offsetfwd, double hdg);
 
 	wxString getInstrumentCaption(unsigned int id);
 
@@ -145,6 +170,8 @@ public:
 	DashboardInstrument *mySurveyTrace;
 	ProfileWin* myProfile;
 	SurveyOverlaySettings mySettings;
+
+	SurveyTidalDlg    *m_pSurveyTidalDialog;
 
 private:
 	wxString          m_ifilename;
@@ -158,4 +185,5 @@ private:
 };
 
 #endif
+
 
