@@ -18,7 +18,7 @@ SET(CPACK_PACKAGE_CONTACT "Mike Rossiter")
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 
 SET(VERSION_MAJOR "3")
-SET(VERSION_MINOR "1")
+SET(VERSION_MINOR "2")
 
 SET(NAME_SUFFIX "ov50")
 
@@ -146,8 +146,6 @@ SET(SRC_SURVEY
 	src/baro_history.h
 	src/instrument.cpp
 	src/instrument.h
-	src/tcmgr.cpp
-	src/tcmgr.h
 	src/circle.xpm
 	src/cross.xpm
 	src/square.xpm

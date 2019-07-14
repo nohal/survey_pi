@@ -63,14 +63,17 @@ class SurveyTidalDlg : public SurveyTidalDlgDef
 {
 public:
 	SurveyTidalDlg(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Add Tidal Data"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(-1, -1), long style = wxCAPTION | wxDEFAULT_DIALOG_STYLE | wxMAXIMIZE_BOX | wxRESIZE_BORDER);
+	void OnEditSurveySelection(wxCommandEvent& event);
 	void OnSaveTides(wxCommandEvent& event);
 	void OnCancelTides(wxCommandEvent& event);
 	void AutoFill(wxCommandEvent& event);
 	void SetGridDateTime(wxDateTime myDT, wxDateTime myDT2);
+	void SetTidalHeight(wxCommandEvent& event);
 
 	SurveyDlg *Plugin_Dialog;
 
 private:
+	
 
 };
 
@@ -84,7 +87,7 @@ struct SurveyOverlaySettings
 	bool              m_bRenderAllSurveys;
 	bool              m_bConnectSoundings;
 	bool              m_bRenderSoundingText;
-	bool              m_bRenderWithTide;
+	bool              m_bRenderWithCorrn;
 	int               m_iSoundingShape;
 	bool              m_bUseSymbol;
 	bool              m_bUseDepthColours;
@@ -128,7 +131,7 @@ public:
 class SurveyDlg : public SurveyDlgDef
 {
 public:
-      SurveyDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE );
+      SurveyDlg( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE | wxMINIMIZE_BOX | wxRESIZE_BORDER);
 
 	  void SetViewPort(PlugIn_ViewPort *vp);
 	  void OnClose(wxCloseEvent& event);
@@ -157,6 +160,7 @@ public:
 	void SetProfile();
 	void OnItemAdd(wxCommandEvent& event);
 	void OnItemDelete(wxCommandEvent& event);
+	void OnSetTidalData(wxCommandEvent& event);
 	void OnAddTide(wxCommandEvent& event);
 	myOffset GetOffset(double lat, double lon, double offsetstbd, double offsetfwd, double hdg);
 

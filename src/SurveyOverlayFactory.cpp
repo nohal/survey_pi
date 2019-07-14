@@ -179,7 +179,7 @@ wxColour SurveyOverlayFactory::GetDepthColour(double my_depth) {
 wxImage &SurveyOverlayFactory::DrawGLText(double value, int precision) {
 
 	wxString labels;
-
+	double depth = value;
 	int p = precision;
 
 	labels.Printf(_T("%.*f"), p, value);
@@ -202,6 +202,13 @@ wxImage &SurveyOverlayFactory::DrawGLText(double value, int precision) {
 
 	wxColour text_color;
 	text_color = m_settings.m_sFontColor;
+
+	wxColour f_Colour;
+	if (m_settings.m_bUseDepthColours) {
+		f_Colour = GetDepthColour(depth);
+		text_color = f_Colour;
+	}
+
 
 	//GetGlobalColor(_T("UINFD"), &text_color);
 	wxPen penText(text_color);
@@ -737,10 +744,11 @@ void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, boo
 
 		lat = it->latD;
 		lon = it->lonD;
+		//wxMessageBox(it->depth);
 		it->depth.ToDouble(&depth);
 		sdgid = it->sdgid;
 		surid = it->surid;
-		it->tide.ToDouble(&tid);
+		//it->tide.ToDouble(&tid);
 
 		myLLBox = new LLBBox;
 		wxBoundingBox LLBBox(BBox->lon_min, BBox->lat_min, BBox->lon_max, BBox->lat_max);
@@ -770,12 +778,18 @@ void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, boo
 			else {
 				c_Colour = wxColour(m_settings.m_sFontColor); // wxColour(0, 0, 0);
 			}
+			
+			if (m_settings.m_bRenderWithCorrn) {
+				if (m_settings.m_sCorrection.IsEmpty()) {
+					corrn = 0;
+				}
+				else {
+					m_settings.m_sCorrection.ToDouble(&corrn);
+				}
 
-			if (m_settings.m_bRenderWithTide) {
-				m_settings.m_sCorrection.ToDouble(&corrn);
-				depth = depth - tid + corrn;
+				depth = depth + corrn;												
 			}
-
+			
 			if (!m_pdc) {
 
 				if (m_settings.m_bUseSymbol && (m_settings.m_iSoundingShape == 1 || m_settings.m_iSoundingShape == 2)) {
@@ -813,34 +827,45 @@ void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, in
 	s_Colour = m_settings.m_sSoundingColor;
 
 	if (!m_settings.m_bUseSymbol) {
-		m_settings.m_iSoundingShape = 0;
+		// do nothing 
 	}
+	else {
 
-	wxPen p(s_Colour, 2);
-	dc.SetPen(p);
+		wxPen p(s_Colour, 2);
+		dc.SetPen(p);
 
-
-	switch (m_settings.m_iSoundingShape)
-	{
-	case 0:
-		dc.DrawLine(x - 5, y - 5, x + 5, y + 5);
-		dc.DrawLine(x - 5, y + 5, x + 5, y - 5);
-		break;
-	case 1:
-		dc.DrawCircle(x, y, 5);
-		dc.DrawCircle(x, y, 3);
-		dc.DrawCircle(x, y, 1);
-		break;
-	case 2:
-		dc.DrawRectangle(x - 4, y - 3, 8, 8);
-		dc.DrawRectangle(x - 4, y - 3, 6, 6);
-		dc.DrawRectangle(x - 4, y - 3, 4, 4);
-		dc.DrawRectangle(x - 4, y - 3, 2, 2);
-		break;
+		switch (m_settings.m_iSoundingShape)
+		{
+		case 0:
+			dc.DrawLine(x - 5, y - 5, x + 5, y + 5);
+			dc.DrawLine(x - 5, y + 5, x + 5, y - 5);
+			break;
+		case 1:
+			dc.DrawCircle(x, y, 5);
+			dc.DrawCircle(x, y, 3);
+			dc.DrawCircle(x, y, 1);
+			break;
+		case 2:
+			dc.DrawRectangle(x - 4, y - 3, 8, 8);
+			dc.DrawRectangle(x - 4, y - 3, 6, 6);
+			dc.DrawRectangle(x - 4, y - 3, 4, 4);
+			dc.DrawRectangle(x - 4, y - 3, 2, 2);
+			break;
+		}
 	}
 
 	dc.SetFont(wxFont(m_settings.m_sFont));
-	dc.SetTextForeground(wxColour(m_settings.m_sFontColor));
+
+	wxColour text_color;
+	text_color = m_settings.m_sFontColor;
+
+	wxColour f_Colour;
+	if (m_settings.m_bUseDepthColours) {
+		f_Colour = GetDepthColour(depth);
+		text_color = f_Colour;
+	}
+
+	dc.SetTextForeground(text_color);
 
 	// Want to show depth values
 	if (m_settings.m_bRenderSoundingText) {

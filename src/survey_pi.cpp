@@ -768,12 +768,14 @@ bool survey_pi::dbMergeSurveys(int survey1, int survey2){
 	return true;
 }
 
+
+
 bool survey_pi::dbEditSoundings(int survey1) {
 
 	int surv_id;
 	wxString rawSurveyName, editedSurveyName;
 	rawSurveyName = GetSurveyName(survey1);
-	editedSurveyName = _T("Edited_") + rawSurveyName;
+	editedSurveyName = _T("Edt.") + rawSurveyName;
 	CreateSurvey(editedSurveyName);
 	SetActiveSurvey(editedSurveyName);
 
@@ -810,13 +812,17 @@ bool survey_pi::dbEditSoundings(int survey1) {
 		wxString dep(dpt, wxConvUTF8);
 		dep.ToDouble(&depth);
 
-		depth += offset;
-
 		tim = results[(i * n_columns) + 3];
 		wxString time(tim, wxConvUTF8);
 
 		wxDateTime dt;
 		dt.ParseDateTime(time);
+		
+		double depthCorrection = dbGetHeightOfTide(dt, survey1);
+		depth += depthCorrection;
+
+		//wxString depthOut = wxString::Format("%5.2f", depthCorrection);
+		//wxMessageBox(depthOut);
 
 		time_t timestamp = dt.GetTicks();		
 		
@@ -838,12 +844,13 @@ bool survey_pi::dbEditSoundings(int survey1) {
 		s1 = point.Mid(f + 1, l - f - 2);
 		s1.ToDouble(&lat);
 
-		tid = results[(i * n_columns) + 2];
-		wxString ti(tid, wxConvUTF8);
-		ti.ToDouble(&tide);
+		//tid = results[(i * n_columns) + 2];
+		//wxString ti(tid, wxConvUTF8);
+		//ti.ToDouble(&tide);
 
 		if (time != wxEmptyString) {
-			wxString sql = wxString::Format(_T("INSERT INTO \"edited_sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\") VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time, surv_id, lon, lat, projection, tide);
+			wxString sql = wxString::Format(_T("INSERT INTO \"edited_sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\") VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time, surv_id, lon, lat, projection, depthCorrection);
+			//wxMessageBox(sql);
 			dbQuery(sql);
 		}
 	}
@@ -851,17 +858,18 @@ bool survey_pi::dbEditSoundings(int survey1) {
 	GetEditedSoundings(surv_id);
 	
 	FillSurveyDropdown();
-	FillEditSurveyGrid(surv_id);
+	FillSurveyGrid();
     FillEditSurveyInfo();
+
+	
 
 	return 1;
 }
 
-bool survey_pi::dbSaveTideHeights(int survey1) {
+double survey_pi::dbGetHeightOfTide(wxDateTime depthTime, int surv) {
 
-
-	int surv_id = 1;
-
+	
+	wxString sql = wxString::Format(_T("SELECT measured, height FROM tide_height WHERE survey_id=%i"), surv);
 	char **results;
 	int n_rows;
 	int n_columns;
@@ -871,47 +879,141 @@ bool survey_pi::dbSaveTideHeights(int survey1) {
 	char *tim;
 	string measuredTime;
 
+	wxDateTime dt, prevTime, nextTime, foundTime;
+	double prevDepth, nextDepth;
+
+	//wxString zeroDate = "1970-01-01 00:00:00";
+	//prevTime.ParseDateTime(zeroDate);
+
+	ret = sqlite3_get_table(m_database, sql.mb_str(), &results, &n_rows, &n_columns, &err_msg);
+	if (ret != SQLITE_OK)
+	{
+		/* some error occurred */
+		wxLogMessage(_T("Spatialite SQL error: %s\n"), err_msg);
+		sqlite3_free(err_msg);
+		return false;
+	}
 	int i = 0;
-	double lat, lon;
-	wxString s0, s1;
+	int t = 0;
 	double depth;
 	double tide;
 	double offset = 0;
 
-		
-	n_rows = m_pSurveyDialog->m_pSurveyTidalDialog->m_gdTidalHeights->GetNumberRows();
+	if (n_rows == 0) {
+		wxMessageBox(_("No tides available for this survey"));
+		return 999.9;
+	}
+
+	for (i = 1; i <= n_rows; i++) {
+
+		if (n_rows == 1) {
+			dpt = results[(i * n_columns) + 1];
+			wxString dep(dpt, wxConvUTF8);
+			dep.ToDouble(&depth);
+			return depth;
+		}
+		else {
+
+			tim = results[(i * n_columns) + 0];
+			wxString time(tim, wxConvUTF8);
+
+			dt.ParseDateTime(time);
+			
+			if (dt.IsEarlierThan(depthTime)){
+				 prevTime = dt;
+				 dpt = results[(i * n_columns) + 1];
+				 wxString dep(dpt, wxConvUTF8);
+				 dep.ToDouble(&prevDepth);
+			}
+			
+			if (dt.IsLaterThan(depthTime)) {
+				nextTime = dt;
+				dpt = results[(i * n_columns) + 1];
+				wxString dep(dpt, wxConvUTF8);
+				dep.ToDouble(&nextDepth);
+
+				//wxString depthOut = wxString::Format("%5.2f", nextDepth);
+				//wxMessageBox(depthOut);
+
+				break;
+			}
+			
+		}		
+
+	}
+
+	wxTimeSpan tsp = depthTime - prevTime;
+	wxTimeSpan tsn = nextTime - depthTime;
+
+	if (tsp == 0 || tsn == 0) {
+		foundTime = depthTime;
+	}
+	else {
+
+		if (tsp < tsn) {
+			//wxMessageBox("tsp < tsn");
+			foundTime = prevTime;
+			return prevDepth;
+
+		}
+		else if (tsn < tsp) {
+			//wxMessageBox("tsn < tsp");
+			foundTime = nextTime;
+			return nextDepth;
+
+		}
+
+	}
+
+	return 999.9;
+
+}
+
+bool survey_pi::dbSaveTideHeights(int survey1) {
+
+
+	int surv_id = survey1;
+	int n_rows;
+	int i = 0;
+	double tideheight;
+	wxString tidetime, time;
+	wxDateTime dt;
 	
+	n_rows = m_pSurveyDialog->m_pSurveyTidalDialog->m_gdTidalHeights->GetNumberRows();
+
+	if (n_rows == 0) {
+		wxMessageBox(_("No tides entered"));
+		return 0;
+	}
 
 	int projection = 3395;
 	for (i = 0; i < n_rows; i++) {		
 	
-		wxString time = m_pSurveyDialog->m_pSurveyTidalDialog->m_gdTidalHeights->GetCellValue(i, 0);
+		tidetime = m_pSurveyDialog->m_pSurveyTidalDialog->m_gdTidalHeights->GetCellValue(i, 0);
+		dt.ParseDateTime(tidetime);
 
-		wxDateTime dt;
-		dt.ParseDateTime(time);
+		time_t timestamp = dt.GetTicks();
 
-		time = _T("'") + dt.Format(wxT("%Y-%m-%d %H:%M:%S")) + _T("'");
+		if (timestamp > 0) {
+			time = _T("'") + wxDateTime(timestamp).FormatISODate().Append(_T(" ")).Append(wxDateTime(timestamp).FormatISOTime()) + _T("'");
+		}
 	
 		wxString ti = m_pSurveyDialog->m_pSurveyTidalDialog->m_gdTidalHeights->GetCellValue(i, 1);
-		ti.ToDouble(&tide);
-
-		if (time != wxEmptyString) {
-			wxString sql = wxString::Format(_T("INSERT INTO \"tide_height\" (\"measured\", \"height\", \"survey_id\") VALUES (%s , %f, 1)"), time, tide );
-			
-			wxMessageBox(sql);
-
-			dbQuery(sql);
+		if (!ti.IsEmpty()) {
+			ti.ToDouble(&tideheight);
+		}
+		else {
+			tideheight = 0;
 		}
 
+		if (tidetime != wxEmptyString) {
+			wxString sql = wxString::Format(_T("INSERT INTO \"tide_height\" (\"measured\", \"height\", \"survey_id\") VALUES (%s , %f, %i)"), time, tideheight, surv_id );			
+			//wxMessageBox(sql);
+			dbQuery(sql);
+		}
 		
 	}
-	//SetActiveSurveyId(surv_id);
-	//GetEditedSoundings(surv_id);
-
-	//FillSurveyDropdown();
-	//FillEditSurveyGrid(surv_id);
-	//FillEditSurveyInfo();
-
+	
 	return 1;
 }
 
@@ -1218,13 +1320,22 @@ int survey_pi::CreateSurvey(wxString name)
 
 void survey_pi::DeleteSurvey(int id)
 {
+	   wxString s = m_pSurveyDialog->m_chSurvey->GetStringSelection();
 	   int c = m_pSurveyDialog->m_chSurvey->GetCount();
 	   if (c != 0) {
-
-		   wxString sql = wxString::Format(_T("DELETE FROM sounding WHERE survey_id=%i"), id);
-		   dbQuery(sql);
-		   sql = wxString::Format(_T("DELETE FROM survey WHERE survey_id=%i"), id);
-		   dbQuery(sql);
+		   wxString testEdit = s.Mid(0, 4);
+		   if (testEdit == _T("Edt.")) {
+			   wxString sql = wxString::Format(_T("DELETE FROM edited_sounding WHERE survey_id=%i"), id);
+			   dbQuery(sql);
+			   sql = wxString::Format(_T("DELETE FROM survey WHERE survey_id=%i"), id);
+			   dbQuery(sql);
+		   }
+		   else {
+			   wxString sql = wxString::Format(_T("DELETE FROM sounding WHERE survey_id=%i"), id);
+			   dbQuery(sql);
+			   sql = wxString::Format(_T("DELETE FROM survey WHERE survey_id=%i"), id);
+			   dbQuery(sql);
+		   }
 		   m_activesurvey = 0;
 		   m_activesurveyname = wxEmptyString;
 		   m_pSurveyDialog->mysoundings.clear();
@@ -1232,6 +1343,10 @@ void survey_pi::DeleteSurvey(int id)
 		   FillSurveyGrid();
 		   FillSurveyInfo();
 
+		   return;
+	   }
+	   else {
+		   wxMessageBox(_T("No surveys have been made"));
 	   }
 }
 
@@ -1244,9 +1359,9 @@ void survey_pi::DeleteSounding(int id)
 
 	if (m_activesurvey != 0) {
 		wxString surveyName = GetSurveyName(m_activesurvey);
-		if (s.length() > 7) {
-			wxString testEdit = surveyName.Mid(0, 7);
-			if (testEdit == _T("Edited_")) {
+		if (s.length() > 4) {
+			wxString testEdit = surveyName.Mid(0, 4);
+			if (testEdit == _T("Edt.")) {
 				wxString sql = wxString::Format(_T("DELETE FROM edited_sounding WHERE sounding_id=%i"), id);
 				dbQuery(sql);
 			}
@@ -1499,7 +1614,6 @@ int survey_pi::Init(void)
 
       m_pSurveyDialog = NULL;
 	  m_pSurveyOverlayFactory = NULL;
-	  LoadHarmonics();
 
 	  //DoRenderSurveyOverlay();
 
@@ -1749,7 +1863,7 @@ void survey_pi::OnToolbarToolCallback(int id)
 
 	  //    Toggle dialog?
 	  if (m_bShowSurvey) {
-		  m_pSurveyDialog->Show();
+		  m_pSurveyDialog->Show();		  
 	  }
 	  else {
 		  m_pSurveyDialog->Hide();
@@ -1759,6 +1873,7 @@ void survey_pi::OnToolbarToolCallback(int id)
 	  // to actual status to ensure correct status upon toolbar rebuild
 	  SetToolbarItemState(m_leftclick_tool_id, m_bShowSurvey);
 	  RequestRefresh(m_parent_window); // refresh main window
+	  
 }
 
 void survey_pi::SetSettings(){
@@ -1781,7 +1896,7 @@ void survey_pi::SetSettings(){
 	m_pSurveyDialog->mySettings.m_bRenderAllSurveys = m_bRenderAllSurveys;
 	m_pSurveyDialog->mySettings.m_bConnectSoundings = m_bConnectSoundings;
 	m_pSurveyDialog->mySettings.m_bRenderSoundingText = m_bRenderSoundingText;
-	m_pSurveyDialog->mySettings.m_bRenderWithTide = m_bRenderWithTide;
+	m_pSurveyDialog->mySettings.m_bRenderWithCorrn = m_bRenderWithCorrn;
 	m_pSurveyDialog->mySettings.m_iSoundingShape = m_iSoundingShape;
 	m_pSurveyDialog->mySettings.m_bUseSymbol = m_bUseSymbol;
 	m_pSurveyDialog->mySettings.m_bUseDepthColours = m_bUseDepthColours;
@@ -1796,7 +1911,7 @@ void survey_pi::SetSettings(){
 	m_pSurveyDialog->mySettings.m_fGPSBow = m_fGPSBow;
 	m_pSurveyDialog->mySettings.m_fGPSPort = m_fGPSPort;
 	m_pSurveyDialog->mySettings.m_fMinDistance = m_fMinDistance;
-	m_pSurveyDialog->mySettings.m_fAutoNewDistance = m_fAutoNewDistance;
+	//m_pSurveyDialog->mySettings.m_fAutoNewDistance = m_fAutoNewDistance;
 
 	m_pSurveyDialog->mySettings.mLastSdgId = mLastSdgId;
 	m_pSurveyDialog->mySettings.mLastSurveyId = mLastSurveyId;
@@ -1829,7 +1944,7 @@ bool survey_pi::LoadConfig(void)
             pConf->Read ( _T ( "RenderAll" ), &m_bRenderAllSurveys, true );
             pConf->Read ( _T ( "ConnectSoundings" ), &m_bConnectSoundings, true );
 			pConf->Read ( _T ( "RenderSoundingText" ), &m_bRenderSoundingText, true);
-			pConf->Read ( _T ( "RenderWithTide" ), &m_bRenderWithTide, false);
+			pConf->Read ( _T ( "RenderWithTide" ), &m_bRenderWithCorrn, false);
 
             pConf->Read ( _T ( "SoundingColor" ), &m_sSoundingColor );
             pConf->Read ( _T ( "ConnectorColor" ), &m_sConnectorColor );
@@ -1848,7 +1963,7 @@ bool survey_pi::LoadConfig(void)
             pConf->Read ( _T ( "GPSBow" ), &m_fGPSBow, 0.0 );
             pConf->Read ( _T ( "GPSPort" ), &m_fGPSPort, 0.0 );
             pConf->Read ( _T ( "MinSoundingDist" ), &m_fMinDistance, 0.0 );
-            pConf->Read ( _T ( "AutoNewDistance" ), &m_fAutoNewDistance, 0.0 );
+            //pConf->Read ( _T ( "AutoNewDistance" ), &m_fAutoNewDistance, 0.0 );
 
 			pConf->Read(_T("ShowSurveyIcon"), &m_bSurveyShowIcon, 1);
 
@@ -1880,7 +1995,7 @@ bool survey_pi::SaveConfig(void)
             pConf->Write ( _T ( "RenderAll" ), m_bRenderAllSurveys );
             pConf->Write ( _T ( "ConnectSoundings" ), m_bConnectSoundings );
 			pConf->Write ( _T ( "RenderSoundingText"), m_bRenderSoundingText );
-			pConf->Write ( _T ( "RenderWithTide"), m_bRenderWithTide );
+			pConf->Write ( _T ( "RenderWithTide"), m_bRenderWithCorrn );
             pConf->Write ( _T ( "SoundingColor" ), m_sSoundingColor );
             pConf->Write ( _T ( "ConnectorColor" ), m_sConnectorColor );
             pConf->Write ( _T ( "SoundingFont" ), m_sFont );
@@ -1898,7 +2013,7 @@ bool survey_pi::SaveConfig(void)
             pConf->Write ( _T ( "GPSBow" ), m_fGPSBow );
             pConf->Write ( _T ( "GPSPort" ), m_fGPSPort );
             pConf->Write ( _T ( "MinSoundingDist" ), m_fMinDistance );
-            pConf->Write ( _T ( "AutoNewDistance" ), m_fAutoNewDistance );
+            //pConf->Write ( _T ( "AutoNewDistance" ), m_fAutoNewDistance );
 
 			pConf->Write (_T("ShowSurveyIcon"), m_bSurveyShowIcon);
 
@@ -1934,8 +2049,7 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
             break;
       }
 
-	  // Tide/Correction
-	  dialog->m_cbCalcTide->SetValue(m_bCalcTide);
+	  //dialog->m_cbCalcTide->SetValue(m_bCalcTide);
 	  dialog->m_tCorrection->SetValue(m_sCorrection);
 
 
@@ -1945,7 +2059,7 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
 
 	  // Render text
 	  dialog->m_cbRenderDepthValues->SetValue(m_bRenderSoundingText);
-	  dialog->m_cbSdgsPlusTide->SetValue(m_bRenderWithTide);
+	  dialog->m_cbSdgsPlusCorrn->SetValue(m_bRenderWithCorrn);
 
 	  // Symbols
 	  dialog->m_lSymbolList->SetSelection(m_iSoundingShape);
@@ -1964,7 +2078,7 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
       dialog->m_tGPSBow->SetValue(wxString::Format(wxT("%f"), m_fGPSBow));
       dialog->m_tGPSPort->SetValue(wxString::Format(wxT("%f"), m_fGPSPort));
       dialog->m_tMinDistance->SetValue(wxString::Format(wxT("%f"), m_fMinDistance));
-      dialog->m_tAutoNewDistance->SetValue(wxString::Format(wxT("%f"), m_fAutoNewDistance));
+      //dialog->m_tAutoNewDistance->SetValue(wxString::Format(wxT("%f"), m_fAutoNewDistance));
 
       if(dialog->ShowModal() == wxID_OK)
       {
@@ -1976,8 +2090,8 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
                   m_iUnits = FEET;
             else
                   m_iUnits = FATHOMS;
-			// Tide/Correction
-			m_bCalcTide = dialog->m_cbCalcTide->GetValue();
+			
+			//m_bCalcTide = dialog->m_cbCalcTide->GetValue();
 			m_sCorrection = dialog->m_tCorrection->GetValue();
 
 
@@ -1986,7 +2100,7 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
 
 			// Render Text
 			m_bRenderSoundingText = dialog->m_cbRenderDepthValues->GetValue();
-			m_bRenderWithTide = dialog->m_cbSdgsPlusTide->GetValue();
+			m_bRenderWithCorrn = dialog->m_cbSdgsPlusCorrn->GetValue();
 
 			// Symbols
 			m_iSoundingShape = dialog->m_lSymbolList->GetSelection();
@@ -2012,8 +2126,8 @@ void survey_pi::ShowPreferencesDialog( wxWindow* parent )
             m_fGPSPort = value;
             if(!dialog->m_tMinDistance->GetValue().ToDouble(&value)){ value = 0.0; }
             m_fMinDistance = value;
-            if(!dialog->m_tAutoNewDistance->GetValue().ToDouble(&value)){ value = 0.0; }
-            m_fAutoNewDistance = value;
+           // if(!dialog->m_tAutoNewDistance->GetValue().ToDouble(&value)){ value = 0.0; }
+           // m_fAutoNewDistance = value;
 
             SaveConfig();
 			SetSettings();
@@ -2043,9 +2157,9 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp){
 
 	if (m_activesurvey != 0) {
 
-		if (s.length() > 7) {
-			wxString testEdit = s.Mid(0, 7);
-			if (testEdit == _T("Edited_")) {
+		if (s.length() > 4) {
+			wxString testEdit = s.Mid(0, 4);
+			if (testEdit == _T("Edt.")) {
 				GetEditedSoundings(m_activesurvey);
 				m_pSurveyOverlayFactory->RenderSurveyOverlay(dc, vp);
 			}
@@ -2080,10 +2194,10 @@ bool survey_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 
 	if (m_activesurvey != 0) {
 
-		if (s.length() > 7) {
+		if (s.length() > 4) {
 
-			wxString testEdit = s.Mid(0, 7);
-			if (testEdit == _T("Edited_")) {
+			wxString testEdit = s.Mid(0, 4);
+			if (testEdit == _T("Edt.")) {
 				GetEditedSoundings(m_activesurvey);
 				m_pSurveyOverlayFactory->RenderGLSurveyOverlay(pcontext, vp);
 			}
@@ -2197,10 +2311,7 @@ bool survey_pi::GetEditedSoundings(int as)
 		return false;
 
 	//wxString sql = wxString::Format(_T("SELECT depth, AsText(geom) FROM sounding WHERE Within(geom, PolygonFromText('POLYGON((%f %f, %f %f, %f %f, %f %f))'))"), vp->lat_min, vp->lon_min, vp->lat_min, vp->lon_max, vp->lat_max, vp->lon_max, vp->lat_max, vp->lon_min);
-	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide FROM edited_sounding"));
-	if (as > 0 && !m_bRenderAllSurveys) {
-		sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide FROM edited_sounding WHERE survey_id = %i"), as);
-	}
+	wxString sql = wxString::Format(_T("SELECT depth, AsText(geom), sounding_id, survey_id, measured, tide FROM edited_sounding WHERE survey_id = %i"), as);
 
 	char **results;
 	int n_rows;
@@ -2232,13 +2343,12 @@ bool survey_pi::GetEditedSoundings(int as)
 		tide = results[(i * n_columns) + 5];
 		double depth = atof(dpt);
 		wxString s(pos, wxConvUTF8);
+		
 
 		wxString d(dpt, wxConvUTF8);
 
 		double latl;
 		double lonl;
-
-
 
 		int f = s.First(_T(" "));
 		int l = s.Len();
@@ -2250,19 +2360,34 @@ bool survey_pi::GetEditedSoundings(int as)
 		s1.ToDouble(&latl);
 
 		mySounding.latD = latl;
-		mySounding.lonD = lonl;
+		mySounding.lonD = lonl;		
 
 		wxString ms(tide, wxConvUTF8);
 		mySounding.tide = ms;
 
 		wxString dt(dpt, wxConvUTF8);
+		//wxMessageBox(dt);
 		mySounding.depth = dt;
 		mySounding.surid = atoi(surid);
 		mySounding.sdgid = atoi(sdgid);
 		mySurveySoundings.push_back(mySounding);
-	}
 
+	}
+	
 	m_pSurveyDialog->mysoundings = mySurveySoundings;
+	//int c = m_pSurveyDialog->mysoundings.size();
+	
+
+	//wxMessageBox(m_pSurveyDialog->mysoundings.begin()->depth);
+	//wxMessageBox(m_pSurveyDialog->mysoundings.begin()->lat);
+	//wxString cs = wxString::Format("%f", m_pSurveyDialog->mysoundings.begin()->latD);
+	//wxMessageBox(cs);
+	//wxMessageBox(m_pSurveyDialog->mysoundings.begin()->lon);
+	
+	//cs = wxString::Format("%f", m_pSurveyDialog->mysoundings.begin()->lonD);
+	//wxMessageBox(cs);
+	//cs = GetSurveyName(m_pSurveyDialog->mysoundings.begin()->surid);
+	//wxMessageBox(cs);
 
 	mLastX = -1;
 	mLastY = -1;
@@ -2285,20 +2410,16 @@ void survey_pi::StoreSounding(double depth)
 
 	  dist = 0;
 	  if (m_latprev == 0){
-		  if (m_bCalcTide){
-			  tide = GetPortTideInfo(m_lat, m_lon, dt);
-		  }
-		  else{ tide = 0; }
+	      tide = 0;
+		  depth += m_fWaterlineOffset;
 		  InsertSounding(depth, m_lat, m_lon, tide, 00.0, 3395);
 		  m_pSurveyDialog->mySurveyTrace->SetData(OCPN_DBP_STC_MDA, depth, _("meters"));
 	  }
 	  if (!m_latprev == 0){
 		  DistanceBearingMercator_Plugin(m_latprev, m_lonprev, m_lat, m_lon, &brg, &dist);
 		  if (dist * 1852 >= m_fMinDistance){
-			  if (m_bCalcTide){
-				  tide = GetPortTideInfo(m_lat, m_lon, dt);
-			  }
-			  else{ tide = 0; }
+			  tide = 0; 
+			  depth += m_fWaterlineOffset;
 			  InsertSounding(depth, m_lat, m_lon, tide, 00.0, 3395);
 			  m_pSurveyDialog->mySurveyTrace->SetData(OCPN_DBP_STC_MDA, depth, _("meters"));
 			  m_latprev = m_lat;
@@ -2561,10 +2682,8 @@ void survey_pi::ParseNMEASentence(wxString sentence)
 		double tide;
 
 		if (m_latprev == 0){
-			if (m_bCalcTide){
-				tide = GetPortTideInfo(m_mlat, m_mlon, dt);
-			}
-			else{ tide = 0; }
+			
+			tide = 0; 
 			InsertSounding(depth2, m_mlat, m_mlon, tide, t, 3395);
 			m_latprev = m_mlat;
 			m_lonprev = m_mlon;
@@ -2577,11 +2696,8 @@ void survey_pi::ParseNMEASentence(wxString sentence)
 			wxString str = wxString::Format(wxT("%6.6f"), (double)dist * 1852);
 			//wxMessageBox(str);
 
-			if (dist * 1852 >= m_fMinDistance){
-				if (m_bCalcTide){
-					tide = GetPortTideInfo(m_mlat, m_mlon, dt);
-				}
-				else{ tide = 0; }
+			if (dist * 1852 >= m_fMinDistance){				
+				tide = 0; 
 				InsertSounding(depth2, m_mlat, m_mlon, tide, t, 3395);
 				m_latprev = m_mlat;
 				m_lonprev = m_mlon;
@@ -2681,103 +2797,6 @@ wxString survey_pi::DDMLonToDecimal(wxString myString)
 		return _T("-") + s3;
 	}
 	return _T("");
-}
-
-void survey_pi::LoadHarmonics()
-{
-	//  Establish a "home" location
-	g_SData_Locn = *GetpSharedDataLocation();
-
-	// Establish location of Tide and Current data
-	pTC_Dir = new wxString(_T("tcdata"));
-	pTC_Dir->Prepend(g_SData_Locn);
-	pTC_Dir->Append(wxFileName::GetPathSeparator());
-
-	wxString TCDir;
-	TCDir = *pTC_Dir;
-
-	wxLogMessage(_T("Using Tide/Current data from:  ") + TCDir);
-	wxString cache_locn = TCDir;
-
-	wxString harm2test = TCDir;
-	harm2test.Append(_T("HARMONIC"));
-
-	ptcmgr = new TCMgr(TCDir, cache_locn);
-}
-
-double survey_pi::GetPortTideInfo(double lat, double lon, wxDateTime inTime)
-{
-
-	wxString m_PortName, m_PortNo;
-	int i;
-	//double lat, lon;
-	double m_lat;
-	double m_lon;
-
-	float m_tideheight;
-	float m_dir;
-
-	double dist, brg;
-
-	bool foundPort = false;
-	double radius = 0.1;
-
-	int intPortNo;
-	IDX_entry *pIDX;
-
-	while (!foundPort){
-		for (i = 1; i < ptcmgr->Get_max_IDX() + 1; i++){
-
-			pIDX = ptcmgr->GetIDX_entry(i);
-
-			char type = pIDX->IDX_type;             // Entry "TCtcIUu" identifier
-			if ((type == 't') || (type == 'T'))  // only Tides
-			{
-
-				m_lat = pIDX->IDX_lat;
-				m_lon = pIDX->IDX_lon;
-
-
-				DistanceBearingMercator_Plugin(lat, lon, m_lat, m_lon, &brg, &dist);
-				if (dist < radius){
-					foundPort = true;
-					wxString myInt = wxString::Format(wxT("%5.2f"), (double)dist);
-					wxString locn(pIDX->IDX_station_name, wxConvUTF8);
-					wxString locna, locnb;
-					if (locn.Contains(wxString(_T(",")))) {
-						locna = locn.BeforeFirst(',');
-						locnb = locn.AfterFirst(',');
-					}
-					else {
-						locna = locn;
-						locnb.Empty();
-					}
-
-					m_PortName = locna;
-					intPortNo = pIDX->IDX_rec_num;
-					m_PortNo = wxString::Format(wxT("%i"), intPortNo);
-
-				}
-			}
-
-		}
-
-		radius = radius + 5;
-		if (radius > 15.1){
-			m_tideheight = 0; // We do not calculate tide if too far away from the standard port
-			return m_tideheight;
-		}
-		i = 1;
-	}
-
-	wxDateTime dt = inTime; // This is GMT Time
-	time_t t = dt.GetTicks();
-
-	ptcmgr->GetTideOrCurrent(t, intPortNo, m_tideheight, m_dir);
-	wxString myTide = wxString::Format(wxT("%5.2f"), (float) m_tideheight);
-	wxMessageBox(myTide, _T("tide"));
-	return m_tideheight;
-
 }
 
 int survey_pi::GetSoundingID(wxString lat, wxString lon)

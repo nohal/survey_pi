@@ -54,7 +54,7 @@
 //#include "SurveyOverlayFactory.h"
 
 #define     PLUGIN_VERSION_MAJOR    3
-#define     PLUGIN_VERSION_MINOR    1
+#define     PLUGIN_VERSION_MINOR    2
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
@@ -80,8 +80,6 @@
 #include <sqlite3.h>
 #include <wx/filefn.h>
 
-
-#include "tcmgr.h"
 #include <vector>
 #include <locale>
 
@@ -175,6 +173,7 @@ public:
 	  wxString          GetSurveyMinDepth(int survey_id);
 	  wxString			GetSurveyNumSoundings(int survey_id);
 	  wxString			GetSurveyAreaSoundings(int survey_id);
+
 	  wxString			GetEditSurveyMaxDepth(int survey_id);
 	  wxString          GetEditSurveyMinDepth(int survey_id);
 	  wxString			GetEditSurveyNumSoundings(int survey_id);
@@ -208,16 +207,12 @@ public:
 	  double           viewscale;
 	  bool              dbMergeSurveys(int survey1, int survey2);
 	  bool              dbEditSoundings(int survey1);
+	  double            dbGetHeightOfTide(wxDateTime depthTime, int surv);
 	  bool				dbSaveTideHeights(int survey1);
 	  double			m_latprev;
 	  double       	  m_lonprev;
 
 	  vector<soundingdata>mySurveySoundings;
-
-	  //SurveyOverlayFactory *GetSurveyOverlayFactory(){ return m_pSurveyOverlayFactory; }
-	  //SurveyOverlayFactory *m_pSurveyOverlayFactory;
-	  //SurveyOverlayFactory *GetSurveyOverlayFactory(){ return m_pSurveyOverlayFactory; };
-	  //SurveyOverlayFactory *m_pSurveyOverlayFactory;
 
 	  SurveyOverlayFactory *GetSurveyOverlayFactory(){ return m_pSurveyOverlayFactory; }
 
@@ -233,6 +228,11 @@ public:
 	  wxBitmap  m_panelBitmap;
 	  bool m_bSurveyShowIcon;
 	  SurveyDlg *m_pSurveyDialog;
+
+	  wxString          m_activesurveyname;
+
+	  void              dbGetTable(wxString sql, char ***results, int &n_rows, int &n_columns);
+	  void              dbFreeResults(char **results);
 
 private:
 	
@@ -282,7 +282,7 @@ private:
 	  bool              m_bRenderAllSurveys;
 	  bool              m_bConnectSoundings;
 	  bool				m_bRenderSoundingText;
-	  bool              m_bRenderWithTide;
+	  bool              m_bRenderWithCorrn;
 	  int               m_iSoundingShape;
 	  bool              m_bUseSymbol;
 	  bool              m_bUseDepthColours;
@@ -297,7 +297,7 @@ private:
 	  double            m_fGPSBow;
 	  double            m_fGPSPort;
 	  double            m_fMinDistance;
-	  double            m_fAutoNewDistance;
+	  //double            m_fAutoNewDistance;
 
 	  int               mLastX, mLastY;
 	  long              mLastSdgId, mLastSurveyId;
@@ -305,7 +305,7 @@ private:
       int               m_leftclick_tool_id;
 
       int               m_activesurvey;
-      wxString          m_activesurveyname;
+      
       int               m_projection;
 
       short             mPriPosition, mPriDepth;
@@ -313,18 +313,12 @@ private:
      // long              mLastSdgId, mLastSurveyId;
 
       bool              dbQuery(wxString sql);
-      void              dbGetTable(wxString sql, char ***results, int &n_rows, int &n_columns);
-      void              dbFreeResults(char **results);
+      
+      
       int               dbGetIntNotNullValue(wxString sql);
+
       wxString          dbGetStringValue(wxString sql);
       void              ImportHydromagicTrack(TiXmlElement *track);
-
-	  // Tide parts
-	  void LoadHarmonics();
-	  double GetPortTideInfo(double lat, double lon, wxDateTime inTime);
-	  TCMgr           *ptcmgr;
-	  wxString         g_SData_Locn;
-	  wxString        *pTC_Dir;
 
 	  std::map < double, wxImage > m_labelCache;
 	  std::map < wxString, wxImage > m_labelCacheText;

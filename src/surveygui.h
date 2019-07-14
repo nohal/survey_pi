@@ -74,9 +74,9 @@ class SurveyCfgDlgDef : public wxDialog
 		wxStaticText* m_staticText12;
 		wxStaticText* m_staticText13;
 		wxStaticText* m_staticText14;
-		wxStaticText* m_staticText15;
-		wxStaticText* m_staticText16;
-		wxStaticText* m_staticText22;
+		//wxStaticText* m_staticText15;
+		//wxStaticText* m_staticText16;
+		//wxStaticText* m_staticText22;
 		wxStdDialogButtonSizer* m_sdbSizer1;
 		wxButton* m_sdbSizer1OK;
 		wxButton* m_sdbSizer1Cancel;
@@ -89,14 +89,14 @@ class SurveyCfgDlgDef : public wxDialog
 		wxRadioButton* m_rbMeters;
 		wxRadioButton* m_rbFeet;
 		wxRadioButton* m_rbFathoms;
-		wxCheckBox* m_cbCalcTide;
+		//wxCheckBox* m_cbCalcTide;
 		wxTextCtrl* m_tCorrection;		
 		wxCheckBox* m_cbRenderOverlay;
 		wxRadioButton* m_rbRendedAllSurveys;
 		wxRadioButton* m_rbRenderActiveSurvey;
 		wxCheckBox* m_cbConnectSoundings;
 		wxCheckBox* m_cbRenderDepthValues;
-		wxCheckBox* m_cbSdgsPlusTide;
+		wxCheckBox* m_cbSdgsPlusCorrn;
 		wxColourPickerCtrl* m_cpSoundingColor;
 		wxColourPickerCtrl* m_cpConnectorColor;
 		wxColourPickerCtrl* m_cpFontColor;
@@ -111,7 +111,7 @@ class SurveyCfgDlgDef : public wxDialog
 		wxTextCtrl* m_tGPSBow;
 		wxTextCtrl* m_tGPSPort;
 		wxTextCtrl* m_tMinDistance;
-		wxTextCtrl* m_tAutoNewDistance;
+		//wxTextCtrl* m_tAutoNewDistance;
 		
 		SurveyCfgDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey preferences"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 658,680 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~SurveyCfgDlgDef();
@@ -129,7 +129,7 @@ class SurveyDlgDef : public wxDialog
 		
 		wxStaticText* m_tArea;
 		
-		wxButton*m_btnAddTide;
+		//wxButton*m_btnAddTide;
 		wxButton* m_btnLoadFromFile;
 		wxBitmapToggleButton* m_btbRecord;
 		wxToggleButton* m_tbRecordNMEA;
@@ -145,6 +145,7 @@ class SurveyDlgDef : public wxDialog
 		wxButton* m_btnMerge;
 		wxButton* m_btnImport;
 		wxButton* m_btnExport;
+		wxButton* m_btnTide;
 		wxStdDialogButtonSizer* m_sdbSizer2;
 		wxButton* m_sdbSizer2OK;
 		wxButton* m_sdbSizer2Cancel;
@@ -168,6 +169,7 @@ class SurveyDlgDef : public wxDialog
 		virtual void OnMergeSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnImportSurvey( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnExportSurvey( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSetTidalData(wxCommandEvent& event) { event.Skip(); }
 		virtual void OnSurveyCancelClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSurveyOkClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void IsPanelSelected( wxNotebookEvent& event ) { event.Skip(); }
@@ -188,7 +190,7 @@ class SurveyDlgDef : public wxDialog
 		wxPanel* m_panel2;
 		wxPanel* m_panel3;
 		wxChoice* num_soundings;
-		SurveyDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 700,550 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		SurveyDlgDef( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_DIALOG_STYLE | wxMINIMIZE_BOX | wxRESIZE_BORDER);
 		~SurveyDlgDef();
 	
 };
@@ -306,19 +308,20 @@ protected:
 	wxButton* m_btnCancelTidalHeights;
 	wxButton* m_btnImportTide;
 	wxButton* m_btnExportTide;
+	
 
 	// Virtual event handlers, overide them in your derived class
-	virtual void OnSurveySelection(wxCommandEvent& event) { event.Skip(); }
+	virtual void OnEditSurveySelection(wxCommandEvent& event) { event.Skip(); }
 	virtual void AutoFill(wxCommandEvent& event) { event.Skip(); }
 	virtual void SetTidalHeight(wxCommandEvent& event) { event.Skip(); }
 	virtual void OnSaveTides(wxCommandEvent& event) { event.Skip(); }
 	virtual void OnCancelTides(wxCommandEvent& event) { event.Skip(); }
 	virtual void OnImportTides(wxCommandEvent& event) { event.Skip(); }
 	virtual void OnExportTides(wxCommandEvent& event) { event.Skip(); }
-
+	virtual void OnSetTidalData(wxCommandEvent& event) { event.Skip(); }
 
 public:
-	wxChoice* m_chSurvey;
+	wxChoice* m_chTidalSurvey;
 
 	SurveyTidalDlgDef(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(700, 550), long style = wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
 	~SurveyTidalDlgDef();
