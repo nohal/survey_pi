@@ -1,31 +1,588 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the survey_pi package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#: src/surveygui.cpp:344 src/surveygui.cpp:425 src/surveygui.cpp:644
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: survey_pi 2.6.1310\n"
+"Project-Id-Version: survey_pi 3.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-02-18 12:05+0100\n"
+"POT-Creation-Date: 2019-08-08 15:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/survey_pi.cpp:139 src/survey_pi.cpp:196
+#: src/survey_pi.cpp:116
+msgid "    Survey panel icon NOT loaded"
+msgstr ""
+
+#: src/survey_pi.cpp:182
+msgid "Import Hydromagic file"
+msgstr ""
+
+#: src/survey_pi.cpp:182 src/survey_pi.cpp:667 src/survey_pi.cpp:734
+#: src/survey_pi.cpp:868 src/surveygui_impl.cpp:207
+msgid "Adding soundings"
+msgstr ""
+
+#: src/survey_pi.cpp:204 src/survey_pi.cpp:701 src/survey_pi.cpp:767
+#: src/survey_pi.cpp:884 src/surveygui_impl.cpp:220
+msgid "soundings have been recorded"
+msgstr ""
+
+#: src/survey_pi.cpp:667
+msgid "Import XYZ file"
+msgstr ""
+
+#: src/survey_pi.cpp:734
+msgid "Import CSV file"
+msgstr ""
+
+#: src/survey_pi.cpp:868
+msgid "Import Garmin GPX"
+msgstr ""
+
+#: src/survey_pi.cpp:1103
+msgid "No tides available for this survey"
+msgstr ""
+
+#: src/survey_pi.cpp:1185
+msgid "No tides entered"
+msgstr ""
+
+#: src/survey_pi.cpp:1625
+msgid "No surveys have been made"
+msgstr ""
+
+#: src/survey_pi.cpp:1663 src/surveygui_impl.cpp:466
+msgid "No survey selected, please select or create/select a new survey"
+msgstr ""
+
+#: src/survey_pi.cpp:1879
+msgid "Delete this Sounding"
+msgstr ""
+
+#: src/survey_pi.cpp:1887 src/survey_pi.cpp:1890 src/survey_pi.cpp:1973
+#: src/surveygui.cpp:328 src/surveygui.cpp:759 src/surveygui.h:193
+#: src/surveygui.h:366 src/surveygui_impl.h:149
 msgid "Survey"
 msgstr ""
 
-#: src/survey_pi.cpp:202
+#: src/survey_pi.cpp:1979
 msgid "Survey PlugIn for OpenCPN"
 msgstr ""
 
-#: src/survey_pi.cpp:207
+#: src/survey_pi.cpp:1984
 msgid ""
 "Records depth from the NMEA stream\n"
 "And let's you do various other tricks."
+msgstr ""
+
+#: src/survey_pi.cpp:2100 src/survey_pi.cpp:2115
+msgid "Maximum depth: "
+msgstr ""
+
+#: src/survey_pi.cpp:2100 src/survey_pi.cpp:2101 src/survey_pi.cpp:2115
+#: src/survey_pi.cpp:2116 src/surveygui.cpp:186 src/surveygui.cpp:197
+#: src/surveygui.cpp:208 src/surveygui.cpp:219 src/surveygui.cpp:230
+#: src/surveygui.cpp:241
+msgid "m"
+msgstr ""
+
+#: src/survey_pi.cpp:2101 src/survey_pi.cpp:2116
+msgid "Minimum depth: "
+msgstr ""
+
+#: src/survey_pi.cpp:2102 src/survey_pi.cpp:2117
+msgid "Soundings: "
+msgstr ""
+
+#: src/survey_pi.cpp:2205
+msgid "WITHOUT OpenGL the display must still use a symbol"
+msgstr ""
+
+#: src/survey_pi.cpp:2311
+msgid "Survey Preferences"
+msgstr ""
+
+#: src/survey_pi.cpp:2701 src/survey_pi.cpp:2709
+msgid "meters"
+msgstr ""
+
+#: src/surveygui.cpp:24
+msgid "General settings"
+msgstr ""
+
+#: src/surveygui.cpp:31
+msgid "Opacity"
+msgstr ""
+
+#: src/surveygui.cpp:44
+msgid "Display values as"
+msgstr ""
+
+#: src/surveygui.cpp:48
+msgid "Meters"
+msgstr ""
+
+#: src/surveygui.cpp:52
+msgid "Feet"
+msgstr ""
+
+#: src/surveygui.cpp:55
+msgid "Fathoms"
+msgstr ""
+
+#: src/surveygui.cpp:61
+msgid "Correction \n"
+msgstr ""
+
+#: src/surveygui.cpp:73
+msgid "Overlay settings"
+msgstr ""
+
+#: src/surveygui.cpp:83
+msgid "Render overlay"
+msgstr ""
+
+#: src/surveygui.cpp:86
+msgid "Render all data"
+msgstr ""
+
+#: src/surveygui.cpp:90
+msgid "Render just active survey data"
+msgstr ""
+
+#: src/surveygui.cpp:93
+msgid "Connect soundings"
+msgstr ""
+
+#: src/surveygui.cpp:96
+msgid "Render depth values"
+msgstr ""
+
+#: src/surveygui.cpp:100
+msgid "Render sndgs plus correction"
+msgstr ""
+
+#: src/surveygui.cpp:112
+msgid "Sounding color"
+msgstr ""
+
+#: src/surveygui.cpp:119
+msgid "Connector color"
+msgstr ""
+
+#: src/surveygui.cpp:126
+msgid "Text color"
+msgstr ""
+
+#: src/surveygui.cpp:133
+msgid "Font"
+msgstr ""
+
+#: src/surveygui.cpp:151
+msgid "Cross"
+msgstr ""
+
+#: src/surveygui.cpp:152
+msgid "Circle"
+msgstr ""
+
+#: src/surveygui.cpp:153
+msgid "Square"
+msgstr ""
+
+#: src/surveygui.cpp:156
+msgid "Use this symbol"
+msgstr ""
+
+#: src/surveygui.cpp:159
+msgid "Use variable depth colours"
+msgstr ""
+
+#: src/surveygui.cpp:172
+msgid "Boat size / sensor position"
+msgstr ""
+
+#: src/surveygui.cpp:179
+msgid "LOA"
+msgstr ""
+
+#: src/surveygui.cpp:190
+msgid "Beam"
+msgstr ""
+
+#: src/surveygui.cpp:201
+msgid "Sounder from bow"
+msgstr ""
+
+#: src/surveygui.cpp:212
+msgid "Waterline offset"
+msgstr ""
+
+#: src/surveygui.cpp:223
+msgid "GPS from bow"
+msgstr ""
+
+#: src/surveygui.cpp:234
+msgid "GPS from port"
+msgstr ""
+
+#: src/surveygui.cpp:252
+msgid "Filtering"
+msgstr ""
+
+#: src/surveygui.cpp:259
+msgid "Do not record values if less than"
+msgstr ""
+
+#: src/surveygui.cpp:266
+msgid "m apart"
+msgstr ""
+
+#: src/surveygui.cpp:340
+msgid "Soundings: XXX"
+msgstr ""
+
+#: src/surveygui.cpp:348
+msgid "Minimal depth: XXXm"
+msgstr ""
+
+#: src/surveygui.cpp:352
+msgid "Maximal depth: XXXm"
+msgstr ""
+
+#: src/surveygui.cpp:362
+msgid "Record from NMEA"
+msgstr ""
+
+#: src/surveygui.cpp:382
+msgid "Load NMEA File"
+msgstr ""
+
+#: src/surveygui.cpp:391 src/surveygui.cpp:869
+msgid "Details"
+msgstr ""
+
+#: src/surveygui.cpp:420
+msgid "Depth"
+msgstr ""
+
+#: src/surveygui.cpp:421
+msgid "Measured"
+msgstr ""
+
+#: src/surveygui.cpp:422
+msgid "Lat"
+msgstr ""
+
+#: src/surveygui.cpp:423
+msgid "Lon"
+msgstr ""
+
+#: src/surveygui.cpp:424
+msgid "Survey_id"
+msgstr ""
+
+#: src/surveygui.cpp:435
+msgid "Soundings"
+msgstr ""
+
+#: src/surveygui.cpp:447
+msgid "Trace"
+msgstr ""
+
+#: src/surveygui.cpp:465
+msgid "Profile"
+msgstr ""
+
+#: src/surveygui.cpp:479
+msgid "New"
+msgstr ""
+
+#: src/surveygui.cpp:482
+msgid "Delete"
+msgstr ""
+
+#: src/surveygui.cpp:485
+msgid "Properties"
+msgstr ""
+
+#: src/surveygui.cpp:488
+msgid "Zoom to"
+msgstr ""
+
+#: src/surveygui.cpp:491
+msgid "Edit..."
+msgstr ""
+
+#: src/surveygui.cpp:494
+msgid "Merge..."
+msgstr ""
+
+#: src/surveygui.cpp:497 src/surveygui.cpp:937
+msgid "Import..."
+msgstr ""
+
+#: src/surveygui.cpp:500 src/surveygui.cpp:940
+msgid "Export..."
+msgstr ""
+
+#: src/surveygui.cpp:503
+msgid "Tide Data"
+msgstr ""
+
+#: src/surveygui.cpp:588 src/surveygui.cpp:639
+msgid "Merge survey XXX with"
+msgstr ""
+
+#: src/surveygui.cpp:689 src/surveygui_impl.cpp:356
+msgid "Number of soundings: "
+msgstr ""
+
+#: src/surveygui.cpp:693
+msgid "Maximum Depth: "
+msgstr ""
+
+#: src/surveygui.cpp:697
+msgid "Minimum Depth: "
+msgstr ""
+
+#: src/surveygui.cpp:701
+msgid "Extra: "
+msgstr ""
+
+#: src/surveygui.cpp:769
+msgid "Height every"
+msgstr ""
+
+#: src/surveygui.cpp:773
+msgid "5"
+msgstr ""
+
+#: src/surveygui.cpp:773
+msgid "10"
+msgstr ""
+
+#: src/surveygui.cpp:773
+msgid "15"
+msgstr ""
+
+#: src/surveygui.cpp:773
+msgid "30"
+msgstr ""
+
+#: src/surveygui.cpp:773
+msgid "60"
+msgstr ""
+
+#: src/surveygui.cpp:779
+msgid "minutes"
+msgstr ""
+
+#: src/surveygui.cpp:786
+msgid "Auto-fill times"
+msgstr ""
+
+#: src/surveygui.cpp:792
+msgid "Select all records"
+msgstr ""
+
+#: src/surveygui.cpp:804
+msgid "BeginTime"
+msgstr ""
+
+#: src/surveygui.cpp:813 src/surveygui.cpp:845
+msgid "Date"
+msgstr ""
+
+#: src/surveygui.cpp:820
+msgid "Correction      "
+msgstr ""
+
+#: src/surveygui.cpp:827 src/surveygui.cpp:859
+msgid "Add"
+msgstr ""
+
+#: src/surveygui.cpp:836
+msgid "End   Time"
+msgstr ""
+
+#: src/surveygui.cpp:852
+msgid "Height of Tide"
+msgstr ""
+
+#: src/surveygui.cpp:906
+msgid "Height of tide"
+msgstr ""
+
+#: src/surveygui.cpp:918
+msgid "Tidal Graph"
+msgstr ""
+
+#: src/surveygui.cpp:931
+msgid "Save"
+msgstr ""
+
+#: src/surveygui.cpp:934
+msgid "Cancel"
+msgstr ""
+
+#: src/surveygui.h:116 src/surveygui_impl.h:143
+msgid "Survey preferences"
+msgstr ""
+
+#: src/surveygui.h:219
+msgid "Merge surveys"
+msgstr ""
+
+#: src/surveygui.h:245
+msgid "Edit soundings"
+msgstr ""
+
+#: src/surveygui.h:271 src/surveygui_impl.cpp:353
+msgid "Survey Properties"
+msgstr ""
+
+#: src/surveygui_impl.cpp:92
+msgid "No survey selected"
+msgstr ""
+
+#: src/surveygui_impl.cpp:133 src/surveygui_impl.cpp:173
+#: src/surveygui_impl.cpp:348 src/surveygui_impl.cpp:396
+msgid "No survey selected, please select a survey or create a new survey"
+msgstr ""
+
+#: src/surveygui_impl.cpp:186 src/surveygui_impl.cpp:470
+msgid "Select survey data file"
+msgstr ""
+
+#: src/surveygui_impl.cpp:192
+msgid "No file selected"
+msgstr ""
+
+#: src/surveygui_impl.cpp:207
+msgid "Record from NMEA text file"
+msgstr ""
+
+#: src/surveygui_impl.cpp:297
+msgid "Enter a name for the new survey:"
+msgstr ""
+
+#: src/surveygui_impl.cpp:302
+msgid "Survey name already in use, please use another name"
+msgstr ""
+
+#: src/surveygui_impl.cpp:322
+msgid "No survey selected, please select the survey you want to delete"
+msgstr ""
+
+#: src/surveygui_impl.cpp:326
+#, c-format
+msgid "Are you sure you want to permanently delete the survey %s?"
+msgstr ""
+
+#: src/surveygui_impl.cpp:326
+msgid "Confirm"
+msgstr ""
+
+#: src/surveygui_impl.cpp:358
+msgid "  Maximum depth: "
+msgstr ""
+
+#: src/surveygui_impl.cpp:360
+msgid "  Minimum depth: "
+msgstr ""
+
+#: src/surveygui_impl.cpp:381
+msgid "Survey does not contain any soundings"
+msgstr ""
+
+#: src/surveygui_impl.cpp:401
+msgid "Merging Surveys"
+msgstr ""
+
+#: src/surveygui_impl.cpp:402
+msgid "Copy survey "
+msgstr ""
+
+#: src/surveygui_impl.cpp:425 src/surveygui_impl.cpp:570
+msgid "No survey selected, please select a survey"
+msgstr ""
+
+#: src/surveygui_impl.cpp:431
+msgid ""
+"This survey has already been corrected\n"
+"\n"
+"For amending corrections select a survey with raw data"
+msgstr ""
+
+#: src/surveygui_impl.cpp:436
+msgid "Editing Soundings"
+msgstr ""
+
+#: src/surveygui_impl.cpp:437
+msgid ""
+"\n"
+"Use survey "
+msgstr ""
+
+#: src/surveygui_impl.cpp:437
+msgid ""
+"\n"
+"\n"
+"Adjust the soundings for tide and additional corrections"
+msgstr ""
+
+#: src/surveygui_impl.cpp:498 src/surveygui_impl.cpp:524
+msgid "No file entered"
+msgstr ""
+
+#: src/surveygui_impl.cpp:507
+msgid "Export survey as"
+msgstr ""
+
+#: src/surveygui_impl.cpp:658
+msgid "Not yet implemented"
+msgstr ""
+
+#: src/surveygui_impl.cpp:669
+msgid "No sounding/s selected"
+msgstr ""
+
+#: src/surveygui_impl.cpp:698
+msgid "Profile........................................................"
+msgstr ""
+
+#: src/surveygui_impl.cpp:754
+msgid "Select Garmin GPX file"
+msgstr ""
+
+#: src/surveygui_impl.cpp:854
+msgid "Select Output GPX file"
+msgstr ""
+
+#: src/surveygui_impl.cpp:1017
+msgid "No survey has been selected"
+msgstr ""
+
+#: src/surveygui_impl.cpp:1104 src/surveygui_impl.cpp:1139
+msgid "No row selected"
+msgstr ""
+
+#: src/surveygui_impl.cpp:1117 src/surveygui_impl.cpp:1152
+msgid ""
+"No time entered\n"
+"Use AutoFill"
+msgstr ""
+
+#: src/surveygui_impl.h:78
+msgid "Add Tidal Data"
 msgstr ""

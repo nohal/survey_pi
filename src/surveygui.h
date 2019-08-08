@@ -157,7 +157,7 @@ class SurveyDlgDef : public wxDialog
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose(wxCloseEvent& event) { event.Skip(); }
 		virtual void OnSurveySelection( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnAddTide(wxCommandEvent& event) { event.Skip(); }
+		//virtual void OnAddTide(wxCommandEvent& event) { event.Skip(); }
 		virtual void LoadFromFile( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSurveyRecordToggleNMEA(wxCommandEvent& event) { event.Skip(); }
 		virtual void RecordNMEA(wxCommandEvent& event) { event.Skip(); }
@@ -273,17 +273,49 @@ public:
 
 };
 
+///////////////////////////////////////////////////////////////////////////
+// C++ code generated with wxFormBuilder (version Oct 26 2018)
+// http://www.wxformbuilder.org/
+//
+// PLEASE DO *NOT* EDIT THIS FILE!
+///////////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <wx/artprov.h>
+#include <wx/xrc/xmlres.h>
+#include <wx/intl.h>
+#include <wx/string.h>
+#include <wx/choice.h>
+#include <wx/gdicmn.h>
+#include <wx/font.h>
+#include <wx/colour.h>
+#include <wx/settings.h>
+#include <wx/bitmap.h>
+#include <wx/image.h>
+#include <wx/icon.h>
+#include <wx/button.h>
+#include <wx/stattext.h>
+#include <wx/sizer.h>
+#include <wx/timectrl.h>
+#include <wx/dateevt.h>
+#include <wx/datectrl.h>
+#include <wx/textctrl.h>
+#include <wx/statbox.h>
+#include <wx/grid.h>
+#include <wx/panel.h>
+#include <wx/statbmp.h>
+#include <wx/notebook.h>
+#include <wx/dialog.h>
+
+///////////////////////////////////////////////////////////////////////////
+
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Class SurveyTidalDlgDef
 ///////////////////////////////////////////////////////////////////////////////
 class SurveyTidalDlgDef : public wxDialog
 {
-public: 
-	wxGrid* m_gdTidalHeights;
-	wxNotebook* m_notebook1;	
-	wxPanel* m_panel1;	
-	wxPanel* m_panel2;
-	wxTextCtrl* m_tcHeightOfTide1;
 private:
 
 protected:
@@ -295,39 +327,46 @@ protected:
 	wxTimePickerCtrl* m_timePicker2;
 	wxStaticText* m_staticText40;
 	wxDatePickerCtrl* m_datePicker1;
+	wxStaticText* m_staticText38;
 	wxStaticText* m_staticText391;
 	wxTimePickerCtrl* m_timePicker21;
 	wxStaticText* m_staticText401;
 	wxDatePickerCtrl* m_datePicker11;
 	wxStaticText* m_staticText411;
-	
 	wxButton* m_btnAddTidalHeight1;
-
+	wxNotebook* m_notebook1;
+	wxPanel* m_panel1;
+	wxPanel* m_panel2;
 	wxStaticBitmap* m_profileTide;
 	wxButton* m_btnSave;
 	wxButton* m_btnCancelTidalHeights;
 	wxButton* m_btnImportTide;
 	wxButton* m_btnExportTide;
-	
 
 	// Virtual event handlers, overide them in your derived class
 	virtual void OnEditSurveySelection(wxCommandEvent& event) { event.Skip(); }
 	virtual void AutoFill(wxCommandEvent& event) { event.Skip(); }
+	virtual void OnSelectAll(wxCommandEvent& event) { event.Skip(); }
+	virtual void SetCorrection(wxCommandEvent& event) { event.Skip(); }
 	virtual void SetTidalHeight(wxCommandEvent& event) { event.Skip(); }
 	virtual void OnSaveTides(wxCommandEvent& event) { event.Skip(); }
 	virtual void OnCancelTides(wxCommandEvent& event) { event.Skip(); }
 	virtual void OnImportTides(wxCommandEvent& event) { event.Skip(); }
 	virtual void OnExportTides(wxCommandEvent& event) { event.Skip(); }
-	virtual void OnSetTidalData(wxCommandEvent& event) { event.Skip(); }
+
 
 public:
+	wxButton* m_btnSelectAll;
 	wxChoice* m_chTidalSurvey;
+	wxTextCtrl* m_tcCorrection;
+	wxButton* m_btnAddCorrection;
+	wxTextCtrl* m_tcHeightOfTide1;
+	wxGrid* m_gdTidalHeights;
 
-	SurveyTidalDlgDef(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(700, 550), long style = wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
+	SurveyTidalDlgDef(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Survey"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(700, 550), long style = wxDEFAULT_DIALOG_STYLE | wxMINIMIZE_BOX | wxRESIZE_BORDER);
 	~SurveyTidalDlgDef();
 
 };
-
 
 
 #endif //__SURVEYGUI_H__

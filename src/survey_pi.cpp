@@ -38,6 +38,17 @@
 #include "surveygui.h"
 #include "surveygui_impl.h"
 
+#include <iostream>     // std::cout, std::ios
+#include <sstream>      // std::ostringstream
+#include <fstream>
+#include <wx/vector.h>
+#include <wx/file.h>
+#include <wx/buffer.h>
+
+#include "tinyxml.h"
+
+
+
 class soundingdata;
 
 #include <vector>
@@ -102,7 +113,7 @@ survey_pi::survey_pi(void *ppimgr)
 	  if (panelIcon.IsOk())
 		  m_panelBitmap = wxBitmap(panelIcon);
 	  else
-		  wxLogMessage(_T("    Survey panel icon NOT loaded"));
+		  wxLogMessage(_("    Survey panel icon NOT loaded"));
 
 	  m_bShowSurvey = false;
 }
@@ -165,9 +176,18 @@ void survey_pi::ImportHydromagicTrack(TiXmlElement *track)
             }
             else if (paramname == _T("trackpoints"))
             {
-                  TiXmlElement *trackpoint = parameter->FirstChildElement();
+				int ct = 10000;
+				int ic = 0;
+				wxString msg, newmsg;
+				wxProgressDialog progressdialog(_("Import Hydromagic file"), _("Adding soundings"), ct, m_pSurveyDialog, wxPD_CAN_ABORT | wxPD_APP_MODAL);
+                  
+				TiXmlElement *trackpoint = parameter->FirstChildElement();
                   while (trackpoint)
-                  {
+                  {     
+					    if (!progressdialog.Update(ic)) {
+								// Cancelled by user.
+								break;
+						}
 						//wxMessageBox(_T("trackpoint"));
                         float lat = atof(trackpoint->Attribute("lat"));
                         float lon = atof(trackpoint->Attribute("lon"));
@@ -179,6 +199,11 @@ void survey_pi::ImportHydromagicTrack(TiXmlElement *track)
 
 
                         InsertSounding(dpt, lat, lon, tide, time, 3395);
+
+						msg = wxString::Format("%i", ic);
+						newmsg = msg + "  " + _("soundings have been recorded");
+						progressdialog.Update(ic, newmsg, false);
+						ic++;
 
                         trackpoint = trackpoint->NextSiblingElement();
                   }
@@ -636,9 +661,20 @@ bool survey_pi::ImportXYZ(wxString filename)
 
 	m_istream.Open(filename);
 
+	int ct = 10000;
+	int ic = 0;
+	wxString msg, newmsg;
+	wxProgressDialog progressdialog(_("Import XYZ file"), _("Adding soundings"), ct, m_pSurveyDialog, wxPD_CAN_ABORT | wxPD_APP_MODAL);
+
+
 
 	for (str = m_istream.GetFirstLine(); !m_istream.Eof(); str = m_istream.GetNextLine())
 	{
+		if (!progressdialog.Update(ic)) {
+			// Cancelled by user.
+			break;
+		}
+		
 		wxStringTokenizer tokenizer(str, wxT(" "));
 	    int i = 0;
 		while (tokenizer.HasMoreTokens())	{
@@ -660,6 +696,11 @@ bool survey_pi::ImportXYZ(wxString filename)
 		int64_t tim = *((int64_t*)&t);
 
 		InsertSounding(depth, lat, lon, 0.0, t, 3395);
+
+		msg = wxString::Format("%i", ic);
+		newmsg = msg + "  " + _("soundings have been recorded");
+		progressdialog.Update(ic, newmsg, false);
+		ic++;
 	}
 
 	m_istream.Close();
@@ -681,10 +722,24 @@ bool survey_pi::ImportCSV(wxString filename)
 	int l = 0;
 
 
+
 	m_istream.Open(filename);
+
+	int lc = 0;
+	int ct = 0;
+	m_pSurveyDialog->soundingCount = 0;
+	wxString msg, newmsg;
+	lc = m_istream.GetLineCount();
+
+	wxProgressDialog progressdialog(_("Import CSV file"), _("Adding soundings"), lc, m_parent_window, wxPD_CAN_ABORT | wxPD_APP_MODAL);
 
 	for (str = m_istream.GetFirstLine(); !m_istream.Eof(); str = m_istream.GetNextLine())
 	{
+
+		if (!progressdialog.Update(ct)) {
+			// Cancelled by user.
+			break;
+		}		
 
 		wxStringTokenizer tokenizer(str, wxT(","));
 		int i = 0;
@@ -707,10 +762,155 @@ bool survey_pi::ImportCSV(wxString filename)
 		int64_t tim = *((int64_t*)&t);
 
 		InsertSounding(depth, lat, lon, 0.0, t, 3395);
+
+		msg = wxString::Format("%i", m_pSurveyDialog->soundingCount);
+		newmsg = msg + "  " + _("soundings have been recorded");
+		progressdialog.Update(ct, newmsg, false);
+		ct++;
 	}
 	m_istream.Close();
 	return true;
 }
+
+bool survey_pi::ImportGPX(wxString filename)
+{
+	m_pSurveyDialog->trkpts.clear();
+	m_pSurveyDialog->rtepts.clear();
+
+	int count;
+	TiXmlElement* e;
+	TiXmlElement* f;
+	TiXmlElement* g;
+	TiXmlElement* h;
+	TiXmlElement* j;
+	TiXmlElement* k;
+
+	TiXmlAttribute* t;
+
+	std::ostringstream ostrm;
+	std::ifstream inFile(filename.mb_str());
+	ostrm << inFile.rdbuf();
+
+	TiXmlDocument doc;
+	doc.Parse(ostrm.str().c_str());
+
+	inFile.close();
+
+	TiXmlElement *pRoot = doc.RootElement();
+
+	for (TiXmlElement* e = pRoot->FirstChildElement(); e; e = e->NextSiblingElement())
+		count++;
+	int i = 0;
+	for (e = pRoot->FirstChildElement(); e; e = e->NextSiblingElement(), i++) {
+		wxString s = wxString(e->Value(), wxConvUTF8);
+		//wxMessageBox(s);
+
+		for (f = e->FirstChildElement(); f; f = f->NextSiblingElement()) {
+			wxString s1 = wxString(f->Value(), wxConvUTF8);
+			//wxMessageBox(s1);
+
+			for (g = f->FirstChildElement(); g; g = g->NextSiblingElement()) {
+				wxString s2 = wxString(g->Value(), wxConvUTF8);
+				//wxMessageBox(s2);
+
+				//s2 = wxString(t->Value(), wxConvUTF8);
+				if (s2 == _T("trkpt")) {
+					const char* c = g->Attribute("lat");
+					if (c != NULL) {
+						s2 = wxString(c, wxConvUTF8);
+						m_pSurveyDialog->trkpt.lat = s2;
+					}
+					//wxMessageBox(s2);
+					const char* c1 = g->Attribute("lon");
+					if (c1 != NULL) {
+						s2 = wxString(c1, wxConvUTF8);
+						m_pSurveyDialog->trkpt.lon = s2;
+					}
+					//wxMessageBox(s2);
+
+				}
+				for (h = g->FirstChildElement(); h; h = h->NextSiblingElement()) {
+					wxString s3 = wxString(h->Value(), wxConvUTF8);
+
+
+					//wxMessageBox(s3);
+
+					if (s3 == _T("time")) {
+						wxString tm = wxString(h->GetText(), wxConvUTF8);
+						m_pSurveyDialog->trkpt.time = tm;
+					}
+
+					if (s3 == _T("extensions")) {
+
+						for (j = h->FirstChildElement(); j; j = j->NextSiblingElement()) {
+							wxString s4 = wxString(j->Value(), wxConvUTF8);
+							//wxMessageBox(s4);
+
+							for (k = j->FirstChildElement(); k; k = k->NextSiblingElement()) {
+								wxString s5 = wxString(k->Value(), wxConvUTF8);
+								//wxMessageBox(s5, _T("temp"));
+								if (s5 == _T("gpxtpx:depth") || s5 == _T("gpxx:Depth")) {
+									s5 = wxString(k->GetText(), wxConvUTF8);
+									m_pSurveyDialog->trkpt.depth = s5;
+									m_pSurveyDialog->trkpts.push_back(m_pSurveyDialog->trkpt);
+								}
+								//
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	int ct = m_pSurveyDialog->trkpts.size();
+
+	wxProgressDialog progressdialog(_("Import Garmin GPX"),_("Adding soundings"), ct, m_pSurveyDialog, wxPD_CAN_ABORT | wxPD_APP_MODAL);
+	
+		
+	double depth, lat, lon;
+	wxDateTime dt;
+	wxString m_sDT, sTime, s0, s1, msg, newmsg;
+	int ic = 0;
+	
+	for (std::vector<GPXWayPoint>::iterator it = m_pSurveyDialog->trkpts.begin(); it != m_pSurveyDialog->trkpts.end(); it++) {
+
+		if (!progressdialog.Update(ic)) {
+			// Cancelled by user.
+			break;
+		}
+		
+		msg = wxString::Format("%i", ic);
+		newmsg = msg + "  " + _("soundings have been recorded");
+		progressdialog.Update(ic, newmsg, false);
+		ic++;
+
+		wxString dep((*it).depth);
+		dep.ToDouble(&depth);
+
+		dep = (*it).lat;
+		dep.ToDouble(&lat);
+
+		dep = (*it).lon;
+		dep.ToDouble(&lon);
+
+		sTime = (*it).time;
+		
+		s0 = sTime.Mid(0, 10);
+		s1 = sTime.Mid(11, 8);
+		m_sDT = s0 + _T(" ") + s1;
+
+		dt.ParseDateTime(m_sDT);
+
+		time_t t = dt.GetTicks();
+		int64_t tim = *((int64_t*)&t);
+
+		InsertSounding(depth , lat, lon, 0.0, t, 3395);
+	
+	}
+		
+}
+
 
 bool survey_pi::dbMergeSurveys(int survey1, int survey2){
 
@@ -975,7 +1175,7 @@ bool survey_pi::dbSaveTideHeights(int survey1) {
 	int surv_id = survey1;
 	int n_rows;
 	int i = 0;
-	double tideheight;
+	double tideheight, totalcorrection;
 	wxString tidetime, time;
 	wxDateTime dt;
 	
@@ -999,12 +1199,24 @@ bool survey_pi::dbSaveTideHeights(int survey1) {
 		}
 	
 		wxString ti = m_pSurveyDialog->m_pSurveyTidalDialog->m_gdTidalHeights->GetCellValue(i, 1);
+		wxString tc = m_pSurveyDialog->m_pSurveyTidalDialog->m_gdTidalHeights->GetCellValue(i, 2);
+
+		// the tide heights to apply
 		if (!ti.IsEmpty()) {
 			ti.ToDouble(&tideheight);
 		}
 		else {
 			tideheight = 0;
 		}
+		// the corrections to apply
+		if (!tc.IsEmpty()) {
+			tc.ToDouble(&totalcorrection);
+		}
+		else {
+			totalcorrection = 0;
+		}
+
+		tideheight += totalcorrection;
 
 		if (tidetime != wxEmptyString) {
 			wxString sql = wxString::Format(_T("INSERT INTO \"tide_height\" (\"measured\", \"height\", \"survey_id\") VALUES (%s , %f, %i)"), time, tideheight, surv_id );			
@@ -1224,6 +1436,70 @@ wxArrayString survey_pi::SetSoundings(int i)
       return soundings;
 }
 
+wxString survey_pi::dbGetBeginDate(int surv)
+{
+	
+	char **result;
+	int n_rows;
+	int n_columns;
+	char* measured;
+
+	wxString sql = wxString::Format("SELECT measured FROM sounding WHERE survey_id = %i and sounding_id = (SELECT min(sounding_id) FROM sounding WHERE survey_id = %i ) ", surv, surv);
+	wxString s0, s1;
+	ret = sqlite3_get_table(m_database, sql.mb_str(), &result, &n_rows, &n_columns, &err_msg);
+	if (ret != SQLITE_OK)
+	{
+		/* some error occurred */
+		wxLogMessage(_T("Spatialite SQL error: %s\n"), err_msg);
+		sqlite3_free(err_msg);
+		return "error";
+	}
+	for (int i = 1; i <= n_rows; i++)
+	{		
+		measured = result[(i * n_columns) + 0];
+	}
+
+	dbFreeResults(result);
+
+	wxString time_measured(measured, wxConvUTF8);	
+	return time_measured;
+}
+
+wxString survey_pi::dbGetEndDate(int surv) 
+{
+	char **result;
+	int n_rows;
+	int n_columns;
+	char* measured;
+
+	wxString sql = wxString::Format("SELECT measured FROM sounding WHERE survey_id = %i and sounding_id = (SELECT max(sounding_id) FROM sounding WHERE survey_id = %i )", surv, surv);
+	wxString s0, s1;
+	ret = sqlite3_get_table(m_database, sql.mb_str(), &result, &n_rows, &n_columns, &err_msg);
+	if (ret != SQLITE_OK)
+	{
+		/* some error occurred */
+		wxLogMessage(_T("Spatialite SQL error: %s\n"), err_msg);
+		sqlite3_free(err_msg);
+		return "error";
+	}
+	
+	//wxString test1 = wxString::Format("%i", n_rows);
+	//wxMessageBox(test1);
+	
+	//wxString test2 = wxString::Format("%i", n_columns);
+	//wxMessageBox(test2);
+
+	for (int i = 1; i <= n_rows; i++)
+	{
+		measured = result[(i * n_columns) + 0];
+	}
+
+	dbFreeResults(result);
+
+	wxString time_measured(measured, wxConvUTF8);
+	return time_measured;
+}
+
 wxString survey_pi::dbGetStringValue(wxString sql)
 {
       char **result;
@@ -1346,7 +1622,7 @@ void survey_pi::DeleteSurvey(int id)
 		   return;
 	   }
 	   else {
-		   wxMessageBox(_T("No surveys have been made"));
+		   wxMessageBox(_("No surveys have been made"));
 	   }
 }
 
@@ -1384,7 +1660,7 @@ int survey_pi::InsertSounding(double depth, double lat, double lon, double tide,
 	int t = m_pSurveyDialog->m_chSurvey->GetSelection();
 
 	if (t == -1){
-		wxMessageBox(_T("No survey selected, please select or create/select a new survey"));
+		wxMessageBox(_("No survey selected, please select or create/select a new survey"));
 		return 0;
 	}
       wxString s = m_pSurveyDialog->m_chSurvey->GetStringSelection();
@@ -1397,13 +1673,16 @@ int survey_pi::InsertSounding(double depth, double lat, double lon, double tide,
 
 	  time = _T("'") + dt.Format(wxT("%Y-%m-%d %H:%M:%S")) + _T("'");
 
-	  if (timestamp > 0){
-		  time = _T("'") + wxDateTime(timestamp).FormatISODate().Append(_T(" ")).Append(wxDateTime(timestamp).FormatISOTime()) + _T("'");
+	  wxDateTime wdtDate(timestamp);
+
+	  if (wdtDate.IsValid()){
+		  time = _T("'") + wxDateTime(timestamp).FormatISODate().Append(_T(" ")).Append(wxDateTime(timestamp).FormatISOTime()) + _T("'");		
 	  }
 
 	  wxString sql = wxString::Format(_T("INSERT INTO \"sounding\" (\"depth\", \"measured\", \"survey_id\", \"geom\", \"tide\") VALUES (%f , %s, %i, GeomFromText('POINT(%f %f)', %i), %f)"), depth, time, i, lon, lat, projection, tide);
 	  numsoundings++; // For loading NMEA file
 	  dbQuery (sql);
+	  m_pSurveyDialog->soundingCount++;
       return sqlite3_last_insert_rowid(m_database);
 }
 
@@ -1592,7 +1871,7 @@ int survey_pi::Init(void)
 				_T("FOREIGN KEY(survey_id) REFERENCES survey(survey_id))");
 			dbQuery(sql);
 
-		}
+		}		
 
 	  wxMenu dummy_menu;
 	  m_delete_menu_id = AddCanvasContextMenuItem
@@ -1770,7 +2049,7 @@ void survey_pi::FillSurveyGrid(){
 
 			wxString sid = wxString::Format(wxT("%i"), it->sdgid);
 			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 4, sid);
-			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 5, it->tide);
+			m_pSurveyDialog->m_gdSoundings->HideCol(5);
 
 			m_pSurveyDialog->m_gdSoundings->AppendRows(1);
 			i++;
@@ -1805,6 +2084,7 @@ void survey_pi::FillEditSurveyGrid(int surv_id) {
 
 			wxString sid = wxString::Format(wxT("%i"), it->sdgid);
 			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 4, sid);
+			m_pSurveyDialog->m_gdSoundings->ShowCol(5);
 			m_pSurveyDialog->m_gdSoundings->SetCellValue(i, 5, it->tide);
 
 			m_pSurveyDialog->m_gdSoundings->AppendRows(1);
@@ -1922,7 +2202,7 @@ void survey_pi::SetSettings(){
 	int gl = wxUSE_GLCANVAS;
 
 	if (!m_bUseSymbol && (gl==0)) {
-		wxMessageBox(_T("WITHOUT OpenGL the display must still use a symbol"));
+		wxMessageBox(_("WITHOUT OpenGL the display must still use a symbol"));
 	}
 
 }
@@ -2145,6 +2425,8 @@ bool survey_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp){
 		return false;
 	}
 
+	
+
 	m_pSurveyDialog->SetViewPort(vp);
 	viewscale = vp->view_scale_ppm;
 
@@ -2184,6 +2466,9 @@ bool survey_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 		!m_pSurveyOverlayFactory)
 		return false;
 
+	
+	
+	
 	m_pSurveyDialog->SetViewPort(vp);
 	viewscale = vp->view_scale_ppm;
 	wxString s;
@@ -2697,8 +2982,10 @@ void survey_pi::ParseNMEASentence(wxString sentence)
 			//wxMessageBox(str);
 
 			if (dist * 1852 >= m_fMinDistance){				
-				tide = 0; 
+				tide = 0; 				
 				InsertSounding(depth2, m_mlat, m_mlon, tide, t, 3395);
+				m_pSurveyDialog->soundingCount++;
+
 				m_latprev = m_mlat;
 				m_lonprev = m_mlon;
 			}

@@ -50,11 +50,12 @@
 #include "circle.xpm"
 #include "square.xpm"
 #include <sstream>
+#include "wx/progdlg.h"
 
 //#include "SurveyOverlayFactory.h"
 
 #define     PLUGIN_VERSION_MAJOR    3
-#define     PLUGIN_VERSION_MINOR    2
+#define     PLUGIN_VERSION_MINOR    3
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
@@ -82,6 +83,8 @@
 
 #include <vector>
 #include <locale>
+
+
 
 
 using namespace std;
@@ -152,6 +155,7 @@ public:
       bool              ImportHydromagic(wxString filename);
 	  bool              ImportXYZ(wxString filename);
 	  bool              ImportCSV(wxString filename);
+	  bool				ImportGPX(wxString filename);
       void              ExportHydromagic(int survey_id, wxString filename);
 	  void              ExportXYZ(int survey_id, wxString filename);
 	  void              ExportCSV(int survey_id, wxString filename);
@@ -209,6 +213,8 @@ public:
 	  bool              dbEditSoundings(int survey1);
 	  double            dbGetHeightOfTide(wxDateTime depthTime, int surv);
 	  bool				dbSaveTideHeights(int survey1);
+	  wxString			dbGetBeginDate(int surv);
+	  wxString			dbGetEndDate(int surv);
 	  double			m_latprev;
 	  double       	  m_lonprev;
 
@@ -318,6 +324,7 @@ private:
       int               dbGetIntNotNullValue(wxString sql);
 
       wxString          dbGetStringValue(wxString sql);
+	  
       void              ImportHydromagicTrack(TiXmlElement *track);
 
 	  std::map < double, wxImage > m_labelCache;

@@ -417,12 +417,12 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_gdSoundings->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
 	// Label Appearance
-	m_gdSoundings->SetColLabelValue(0, _T("Depth"));
-	m_gdSoundings->SetColLabelValue(1, _T("Measured"));
-	m_gdSoundings->SetColLabelValue(2, _T("Lat"));
-	m_gdSoundings->SetColLabelValue(3, _T("Lon"));
-	m_gdSoundings->SetColLabelValue(4, _T("Survey_id"));
-	m_gdSoundings->SetColLabelValue(5, _T("Tide"));
+	m_gdSoundings->SetColLabelValue(0, _("Depth"));
+	m_gdSoundings->SetColLabelValue(1, _("Measured"));
+	m_gdSoundings->SetColLabelValue(2, _("Lat"));
+	m_gdSoundings->SetColLabelValue(3, _("Lon"));
+	m_gdSoundings->SetColLabelValue(4, _("Survey_id"));
+	m_gdSoundings->SetColLabelValue(5, _(""));
 
 	// Cell Defaults
 	m_gdSoundings->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
@@ -500,7 +500,7 @@ SurveyDlgDef::SurveyDlgDef( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_btnExport = new wxButton( this, wxID_ANY, _("Export..."), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer9->Add( m_btnExport, 0, wxALL, 5 );
 
-	m_btnTide = new wxButton(this, wxID_ANY, _("Edit Tides"), wxDefaultPosition, wxDefaultSize, 0);
+	m_btnTide = new wxButton(this, wxID_ANY, _("Tide Data"), wxDefaultPosition, wxDefaultSize, 0);
 	bSizer9->Add(m_btnTide, 0, wxALL, 5);
 	
 	bSizer7->Add( bSizer9, 0, wxALL|wxEXPAND, 5 );
@@ -731,7 +731,6 @@ SurveyPropDlgDef::~SurveyPropDlgDef()
 	m_sdbSizer3OK->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyPropDlgDef::OnPropOkClick), NULL, this);
 
 }
-
 ///////////////////////////////////////////////////////////////////////////
 // C++ code generated with wxFormBuilder (version Oct 26 2018)
 // http://www.wxformbuilder.org/
@@ -767,9 +766,6 @@ SurveyTidalDlgDef::SurveyTidalDlgDef(wxWindow* parent, wxWindowID id, const wxSt
 	wxBoxSizer* bSizer12;
 	bSizer12 = new wxBoxSizer(wxHORIZONTAL);
 
-	m_bAutoFill = new wxButton(sbSizer5->GetStaticBox(), wxID_ANY, _("Auto-fill times"), wxDefaultPosition, wxDefaultSize, 0);
-	bSizer12->Add(m_bAutoFill, 0, wxALL, 5);
-
 	m_staticText42 = new wxStaticText(sbSizer5->GetStaticBox(), wxID_ANY, _("Height every"), wxDefaultPosition, wxDefaultSize, 0);
 	m_staticText42->Wrap(-1);
 	bSizer12->Add(m_staticText42, 0, wxALL, 5);
@@ -783,6 +779,21 @@ SurveyTidalDlgDef::SurveyTidalDlgDef(wxWindow* parent, wxWindowID id, const wxSt
 	m_staticText43 = new wxStaticText(sbSizer5->GetStaticBox(), wxID_ANY, _("minutes"), wxDefaultPosition, wxDefaultSize, 0);
 	m_staticText43->Wrap(-1);
 	bSizer12->Add(m_staticText43, 0, wxALL, 5);
+
+
+	bSizer12->Add(0, 0, 1, wxEXPAND, 5);
+
+	m_bAutoFill = new wxButton(sbSizer5->GetStaticBox(), wxID_ANY, _("Auto-fill times"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer12->Add(m_bAutoFill, 0, wxALL, 5);
+
+
+	bSizer12->Add(0, 0, 1, wxEXPAND, 5);
+
+	m_btnSelectAll = new wxButton(sbSizer5->GetStaticBox(), wxID_ANY, _("Select all records"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer12->Add(m_btnSelectAll, 0, wxALL, 5);
+
+
+	bSizer12->Add(0, 0, 1, wxEXPAND, 5);
 
 
 	sbSizer5->Add(bSizer12, 0, wxEXPAND, 5);
@@ -805,6 +816,16 @@ SurveyTidalDlgDef::SurveyTidalDlgDef(wxWindow* parent, wxWindowID id, const wxSt
 
 	m_datePicker1 = new wxDatePickerCtrl(sbSizer5->GetStaticBox(), wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, wxDP_DEFAULT);
 	bSizer121->Add(m_datePicker1, 0, wxALL, 5);
+
+	m_staticText38 = new wxStaticText(sbSizer5->GetStaticBox(), wxID_ANY, _("Correction      "), wxDefaultPosition, wxDefaultSize, 0);
+	m_staticText38->Wrap(-1);
+	bSizer121->Add(m_staticText38, 0, wxALL, 5);
+
+	m_tcCorrection = new wxTextCtrl(sbSizer5->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
+	bSizer121->Add(m_tcCorrection, 0, wxALL, 5);
+
+	m_btnAddCorrection = new wxButton(sbSizer5->GetStaticBox(), wxID_ANY, _("Add"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer121->Add(m_btnAddCorrection, 0, wxALL, 5);
 
 
 	sbSizer5->Add(bSizer121, 1, wxEXPAND, 5);
@@ -918,7 +939,8 @@ SurveyTidalDlgDef::SurveyTidalDlgDef(wxWindow* parent, wxWindowID id, const wxSt
 
 	m_btnExportTide = new wxButton(this, wxID_ANY, _("Export..."), wxDefaultPosition, wxDefaultSize, 0);
 	bSizer9->Add(m_btnExportTide, 0, wxALL, 5);
-	
+
+
 	bSizer7->Add(bSizer9, 0, wxALL | wxEXPAND, 5);
 
 
@@ -933,12 +955,13 @@ SurveyTidalDlgDef::SurveyTidalDlgDef(wxWindow* parent, wxWindowID id, const wxSt
 	// Connect Events
 	m_chTidalSurvey->Connect(wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler(SurveyTidalDlgDef::OnEditSurveySelection), NULL, this);
 	m_bAutoFill->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::AutoFill), NULL, this);
+	m_btnSelectAll->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::OnSelectAll), NULL, this);
+	m_btnAddCorrection->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::SetCorrection), NULL, this);
 	m_btnAddTidalHeight1->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::SetTidalHeight), NULL, this);
 	m_btnSave->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::OnSaveTides), NULL, this);
 	m_btnCancelTidalHeights->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::OnCancelTides), NULL, this);
 	m_btnImportTide->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::OnImportTides), NULL, this);
 	m_btnExportTide->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::OnExportTides), NULL, this);
-
 }
 
 SurveyTidalDlgDef::~SurveyTidalDlgDef()
@@ -946,6 +969,8 @@ SurveyTidalDlgDef::~SurveyTidalDlgDef()
 	// Disconnect Events
 	m_chTidalSurvey->Disconnect(wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler(SurveyTidalDlgDef::OnEditSurveySelection), NULL, this);
 	m_bAutoFill->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::AutoFill), NULL, this);
+	m_btnSelectAll->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::OnSelectAll), NULL, this);
+	m_btnAddCorrection->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::SetCorrection), NULL, this);
 	m_btnAddTidalHeight1->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::SetTidalHeight), NULL, this);
 	m_btnSave->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::OnSaveTides), NULL, this);
 	m_btnCancelTidalHeights->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(SurveyTidalDlgDef::OnCancelTides), NULL, this);

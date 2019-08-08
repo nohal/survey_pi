@@ -43,6 +43,8 @@
 #include "survey_profile.h"
 #include "instrument.h"
 
+#include "tinyxml.h""
+
 using namespace std;
 
 class survey_pi;
@@ -52,6 +54,17 @@ class SurveyDlg;
 class SurveyTidalDlg;
 
 #include <vector>
+
+class GPXWayPoint {
+public:
+
+	wxString lat, lon, ele, time, magvar, geoidheight, name, cmt, desc,
+		src, link, sym, type, fix, sat, hdop, vdop, pdop,
+		ageofdgpsdata, dgpsid, xmltag, speed, depth, temp, ZDA;
+
+private:
+
+};
 
 struct myOffset
 {
@@ -67,8 +80,10 @@ public:
 	void OnSaveTides(wxCommandEvent& event);
 	void OnCancelTides(wxCommandEvent& event);
 	void AutoFill(wxCommandEvent& event);
+	void OnSelectAll(wxCommandEvent& event);
 	void SetGridDateTime(wxDateTime myDT, wxDateTime myDT2);
 	void SetTidalHeight(wxCommandEvent& event);
+	void SetCorrection(wxCommandEvent& event);
 
 	SurveyDlg *Plugin_Dialog;
 
@@ -142,6 +157,7 @@ public:
 
 	  void SetTrace();
 	  void OnSurveySelection( wxCommandEvent& event );
+	  void RefreshSurvey();
       void LoadFromFile( wxCommandEvent& event );
 	  void OnSurveyRecordToggleNMEA(wxCommandEvent& event);
 	  void RecordNMEA(wxCommandEvent& event) ;
@@ -161,7 +177,12 @@ public:
 	void OnItemAdd(wxCommandEvent& event);
 	void OnItemDelete(wxCommandEvent& event);
 	void OnSetTidalData(wxCommandEvent& event);
-	void OnAddTide(wxCommandEvent& event);
+	//void OnAddTide(wxCommandEvent& event);
+	void OnTestViewport();
+	void OnOpenGarminGPX();
+	void WriteGPX(std::vector<GPXWayPoint> inRoute);
+	void Addpoint(TiXmlElement* Route, wxString ptlat, wxString ptlon, wxString ptname, wxString ptsym, wxString pttype);
+
 	myOffset GetOffset(double lat, double lon, double offsetstbd, double offsetfwd, double hdg);
 
 	wxString getInstrumentCaption(unsigned int id);
@@ -176,6 +197,15 @@ public:
 	SurveyOverlaySettings mySettings;
 
 	SurveyTidalDlg    *m_pSurveyTidalDialog;
+
+	//GPXWayPoint trkpt;
+	std::vector<GPXWayPoint>trkpts;
+	std::vector<GPXWayPoint>rtepts;
+	GPXWayPoint trkpt, rtept;
+	wxString m_currentGPXFile;
+
+	int soundingCount;
+	
 
 private:
 	wxString          m_ifilename;

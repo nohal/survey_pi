@@ -342,7 +342,9 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
 #endif
         //  More Info
 
-///
+		int h = 0;
+
+/*
         int station_offset = 0;
         int h = station_offset / m_soundings;
         int m = station_offset - ( h * m_soundings );
@@ -366,6 +368,7 @@ void ProfileWin::OnPaint( wxPaintEvent& event )
         dc.SetFont( *pMFont );
         dc.GetTextExtent( sdate, &w, &h );
         dc.DrawText( sdate, x / 2 - w / 2, y * 92 / 100 );
+*/
 
         ///
 
