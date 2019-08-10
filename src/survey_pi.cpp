@@ -887,6 +887,7 @@ bool survey_pi::ImportGPX(wxString filename)
 
 		wxString dep((*it).depth);
 		dep.ToDouble(&depth);
+		depth += m_fWaterlineOffset;
 
 		dep = (*it).lat;
 		dep.ToDouble(&lat);
