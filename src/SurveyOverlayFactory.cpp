@@ -160,11 +160,13 @@ wxColour SurveyOverlayFactory::GetDepthColour(double my_depth) {
 	wxColour c_green = wxColour(0, 255, 0);
 	wxColour c_lime = wxColour(128, 255, 0);
 	wxColour c_yellow = wxColour(255, 255, 0);
-	wxColour c_brown = wxColour(255, 128, 0);
+	wxColour c_brown = wxColour(255, 191, 0);
+	wxColour c_amber = wxColour(255, 126, 0);
 	wxColour c_red = wxColour(255, 0, 0);
 
 	if (my_depth < 2) { return c_red; }
-	if ((my_depth >= 2) && (my_depth < 4)) { return c_brown; }
+	if ((my_depth >= 2) && (my_depth < 3)) { return c_amber; }
+	if ((my_depth >= 3) && (my_depth < 4)) { return c_brown; }
 	if ((my_depth >= 4) && (my_depth < 6)) { return c_yellow; }
 	if ((my_depth >= 6) && (my_depth < 8)) { return c_lime; }
 	if ((my_depth >= 8) && (my_depth < 10)) { return c_green; }
@@ -203,12 +205,13 @@ wxImage &SurveyOverlayFactory::DrawGLText(double value, int precision) {
 	wxColour text_color;
 	text_color = m_settings.m_sFontColor;
 
+	/*
 	wxColour f_Colour;
 	if (m_settings.m_bUseDepthColours) {
 		f_Colour = GetDepthColour(depth);
 		text_color = f_Colour;
 	}
-
+    */
 
 	//GetGlobalColor(_T("UINFD"), &text_color);
 	wxPen penText(text_color);
@@ -558,13 +561,19 @@ void SurveyOverlayFactory::DrawGLLabels(SurveyOverlayFactory *pof, wxDC *dc,
 
 }
 
-wxImage &SurveyOverlayFactory::DrawGLPolygon() {
+wxImage &SurveyOverlayFactory::DrawGLPolygon(double myDepth) {
 
 	wxString labels;
 	labels = _T("");  // dummy label for drawing with
 
 	wxColour s_Colour;
-	s_Colour = m_settings.m_sSoundingColor;
+
+	if (m_settings.m_bUseDepthColours) {
+		s_Colour = GetDepthColour(myDepth);
+	}
+	else {
+		s_Colour = m_settings.m_sSoundingColor;
+	}
 
 	wxPen penText(s_Colour);
 	wxBrush backBrush(s_Colour);
@@ -793,9 +802,10 @@ void SurveyOverlayFactory::DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, boo
 			if (!m_pdc) {
 
 				if (m_settings.m_bUseSymbol && (m_settings.m_iSoundingShape == 1 || m_settings.m_iSoundingShape == 2)) {
-					drawGLPolygons(this, m_pdc, BBox, DrawGLPolygon(), lat, lon, sdgid, surid, pixxc, pixyc, 0);
+					drawGLPolygons(this, m_pdc, BBox, DrawGLPolygon(depth), lat, lon, sdgid, surid, pixxc, pixyc, 0);
 				}
 				else {
+					s_Colour = GetDepthColour(depth);
 					DrawGLSoundingMark(pixxc, pixyc, 0, depth, sdgid, surid, s_Colour);
 				}
 				//
@@ -831,6 +841,10 @@ void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, in
 	}
 	else {
 
+		if (m_settings.m_bUseDepthColours) {
+			s_Colour = GetDepthColour(depth);
+		}
+
 		wxPen p(s_Colour, 2);
 		dc.SetPen(p);
 
@@ -859,11 +873,13 @@ void SurveyOverlayFactory::DrawSounding(wxDC &dc, int x, int y, double depth, in
 	wxColour text_color;
 	text_color = m_settings.m_sFontColor;
 
+	/*
 	wxColour f_Colour;
 	if (m_settings.m_bUseDepthColours) {
 		f_Colour = GetDepthColour(depth);
 		text_color = f_Colour;
 	}
+	*/
 
 	dc.SetTextForeground(text_color);
 

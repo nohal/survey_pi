@@ -97,7 +97,7 @@ public:
 	wxImage &DrawGLText( double value, int precision);
 	wxImage &DrawGLTextDir( double value, int precision);
 	wxImage &DrawGLTextString( wxString myText);
-	wxImage &DrawGLPolygon();
+	wxImage &DrawGLPolygon(double myDepth);
 
 	void DrawGLLabels(SurveyOverlayFactory *pof, wxDC *dc,
                                PlugIn_ViewPort *vp,

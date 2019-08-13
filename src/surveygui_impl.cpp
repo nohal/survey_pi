@@ -605,6 +605,18 @@ void SurveyDlg::SetProfile(){
 
 
 	for(std::vector<soundingdata>::iterator it = mysoundings.begin();  it != mysoundings.end(); it++){
+
+		if (i > 2999) {
+		
+			wxMessageBox(_("Unable to create a profile if more than 3000 soundings"));
+			
+			tcv[0] = 0;
+			tcd[0] = 0;
+			// Make a blank profile
+			myProfile = new ProfileWin(m_panel3, wxID_ANY, 0, 0, 2, tcv, tcd, 0, 0);			
+			return;
+		}
+
 		it->depth.ToDouble(&value);
 		tcv[i] = value;
 		// Work out distance from first sounding
@@ -629,11 +641,13 @@ void SurveyDlg::SetProfile(){
 	double dMin = 1000;
 
 	int c = i-1;
-	if (c == -1| c < 3){ // We have no soundings or less than 3
+
+	
+	if (c == -1| c < 3 ){ // We have no soundings or less than 3		
 		tcv[0] = 0;
 		tcd[0] = 0;
 		// Make a blank profile
-		myProfile = new ProfileWin(m_panel3, wxID_ANY, 0, 0, 2, tcv, tcd, 10, 0);
+		myProfile = new ProfileWin(m_panel3, wxID_ANY, 0, 0, 2, tcv, tcd, 0, 0);
 		return;
 	}
 	for (i = 0; i<c; i++){
