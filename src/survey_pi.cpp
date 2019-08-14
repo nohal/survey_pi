@@ -2309,7 +2309,7 @@ bool survey_pi::SaveConfig(void)
 
 void survey_pi::ShowPreferencesDialog( wxWindow* parent )
 {
-	SurveyCfgDlg *dialog = new SurveyCfgDlg(parent, wxID_ANY, _("Survey Preferences"), wxPoint(m_survey_dialog_x, m_survey_dialog_y), wxSize(650, 650), wxDEFAULT_DIALOG_STYLE);
+	SurveyCfgDlg *dialog = new SurveyCfgDlg(parent, wxID_ANY, _("Survey Preferences"), wxPoint(m_survey_dialog_x, m_survey_dialog_y), wxSize(650, 650), wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
       dialog->Fit();
       wxColour cl;
 
