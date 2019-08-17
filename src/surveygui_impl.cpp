@@ -613,7 +613,7 @@ void SurveyDlg::SetProfile(){
 			tcv[0] = 0;
 			tcd[0] = 0;
 			// Make a blank profile
-			myProfile = new ProfileWin(m_panel3, wxID_ANY, 0, 0, 2, tcv, tcd, 0, 0);			
+			myProfile = new ProfileWin(m_panel3, wxID_ANY, 0, 0, 2, tcv, tcd, 10, 0);			
 			return;
 		}
 
@@ -647,7 +647,7 @@ void SurveyDlg::SetProfile(){
 		tcv[0] = 0;
 		tcd[0] = 0;
 		// Make a blank profile
-		myProfile = new ProfileWin(m_panel3, wxID_ANY, 0, 0, 2, tcv, tcd, 0, 0);
+		myProfile = new ProfileWin(m_panel3, wxID_ANY, 0, 0, 2, tcv, tcd, 10, 0);
 		return;
 	}
 	for (i = 0; i<c; i++){

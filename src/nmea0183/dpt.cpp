@@ -31,95 +31,109 @@
 
 #include "nmea0183.h"
 
-/*
-** Author: Samuel R. Blackburn
-** CI$: 76300,326
-** Internet: sammy@sed.csc.com
-**
-** You can use it any way you like.
-*/
+ /*
+ ** Author: Samuel R. Blackburn
+ ** CI$: 76300,326
+ ** Internet: sammy@sed.csc.com
+ **
+ ** You can use it any way you like.
+ */
 
-//IMPLEMENT_DYNAMIC( DPT, RESPONSE )
+ //IMPLEMENT_DYNAMIC( DPT, RESPONSE )
 
 DPT::DPT()
 {
-   Mnemonic = _T("DPT");
-   Empty();
+	Mnemonic = _T("DPT");
+	Empty();
 }
 
 DPT::~DPT()
 {
-   Mnemonic.Empty();
-   Empty();
+	Mnemonic.Empty();
+	Empty();
 }
 
-void DPT::Empty( void )
+void DPT::Empty(void)
 {
-//   ASSERT_VALID( this );
+	//   ASSERT_VALID( this );
 
-   DepthMeters                = 0.0;
-   OffsetFromTransducerMeters = 0.0;
+	DepthMeters = 0.0;
+	OffsetFromTransducerMeters = 0.0;
 }
 
-bool DPT::Parse( const SENTENCE& sentence )
+bool DPT::Parse(const SENTENCE& sentence)
 {
-//   ASSERT_VALID( this );
+	//   ASSERT_VALID( this );
+	// $IIDPT,15.3,0.4,100.0*70 NMEA v3.0
+	   /*
+	   ** DPT - Heading - Deviation & Variation
+	   **
+	   **        1   2   3
+	   **        |   |   |
+	   ** $--DPT,x.x,x.x*hh<CR><LF>
+	   **
+	   ** Field Number:
+	   **  1) Depth, meters
+	   **  2) Offset from transducer,
+	   **     positive means distance from tansducer to water line
+	   **     negative means distance from transducer to keel
+	   **  3) Checksum
+	   */
 
-   /*
-   ** DPT - Heading - Deviation & Variation
-   **
-   **        1   2   3
-   **        |   |   |
-   ** $--DPT,x.x,x.x*hh<CR><LF>
-   **
-   ** Field Number: 
-   **  1) Depth, meters
-   **  2) Offset from transducer, 
-   **     positive means distance from tansducer to water line
-   **     negative means distance from transducer to keel
-   **  3) Checksum
-   */
+	   /*
+	   ** First we check the checksum...
+	   */
 
-   /*
-   ** First we check the checksum...
-   */
+	if (sentence.IsChecksumBad(3) == TRUE)
+	{
+		/*
+		* * This may be an NMEA Version 3 sentence, with "Max depth range" field
+		*/
+		wxString checksum_in_sentence = sentence.Field(3);
+		if (checksum_in_sentence.StartsWith(_T("*")))       // Field is a valid erroneous checksum
+		{
+			SetErrorMessage(_T("Invalid Checksum"));
+			return(FALSE);
+		}
+		else
+		{
+			if (sentence.IsChecksumBad(4) == TRUE) {
+				SetErrorMessage(_T("Invalid Checksum"));
+				return(FALSE);
+			}
+		}
+	}
 
-   if ( sentence.IsChecksumBad( 3 ) == TRUE )
-   {
-      SetErrorMessage( _T("Invalid Checksum") );
-      return( FALSE );
-   } 
+	DepthMeters = sentence.Double(1);
+	OffsetFromTransducerMeters = sentence.Double(2);
 
-   DepthMeters                = sentence.Double( 1 );
-   OffsetFromTransducerMeters = sentence.Double( 2 );
-
-   return( TRUE );
+	return(TRUE);
 }
 
-bool DPT::Write( SENTENCE& sentence )
+bool DPT::Write(SENTENCE& sentence)
 {
-//   ASSERT_VALID( this );
+	//   ASSERT_VALID( this );
 
-   /*
-   ** Let the parent do its thing
-   */
-   
-   RESPONSE::Write( sentence );
+	   /*
+	   ** Let the parent do its thing
+	   */
 
-   sentence += DepthMeters;
-   sentence += OffsetFromTransducerMeters;
+	RESPONSE::Write(sentence);
 
-   sentence.Finish();
+	sentence += DepthMeters;
+	sentence += OffsetFromTransducerMeters;
 
-   return( TRUE );
+	sentence.Finish();
+
+	return(TRUE);
 }
 
-const DPT& DPT::operator = ( const DPT& source )
+const DPT& DPT::operator = (const DPT& source)
 {
-//   ASSERT_VALID( this );
+	//   ASSERT_VALID( this );
 
-   DepthMeters                = source.DepthMeters;
-   OffsetFromTransducerMeters = source.OffsetFromTransducerMeters;
+	DepthMeters = source.DepthMeters;
+	OffsetFromTransducerMeters = source.OffsetFromTransducerMeters;
 
-   return( *this );
+	return(*this);
 }
