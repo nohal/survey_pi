@@ -43,13 +43,13 @@
 
 class GPXWayPoint;
 
- 
+
 
 static const wxChar *FILETYPESIMPORT= _T(
 	"HydroMagic files(*.gmp) | *.gmp |"
 	" XYZ files(*.xyz) | *.xyz |"
 	"CSV files(*.csv) | *.csv |"
-	"Garmin GPX Log files(*.gpx) | *.gpx"	
+	"Garmin GPX Log files(*.gpx) | *.gpx"
 	"All files|*.*"
 );
 
@@ -64,7 +64,7 @@ SurveyDlg::SurveyDlg( wxWindow* parent, wxWindowID id, const wxString& title, co
 	first.lonD = -4;
 	mysoundings.push_back(first);
 
-	
+
 }
 
 void SurveyDlg::SetViewPort(PlugIn_ViewPort *vp)
@@ -75,7 +75,7 @@ void SurveyDlg::SetViewPort(PlugIn_ViewPort *vp)
 }
 
 void SurveyDlg::OnClose(wxCloseEvent& event)
-{	
+{
 	plugin->OnSurveyDialogClose();
 }
 
@@ -191,7 +191,7 @@ void SurveyDlg::LoadFromFile( wxCommandEvent& event )
 	else{
 		wxMessageBox(_("No file selected"));
 		return;
-    }	
+    }
 
 	wxString		str;
 	wxTextFile      m_istream;
@@ -204,13 +204,13 @@ void SurveyDlg::LoadFromFile( wxCommandEvent& event )
 	m_istream.Open(s);
 	lc = m_istream.GetLineCount();
 
-	wxProgressDialog progressdialog(_("Record from NMEA text file"), _("Adding soundings"), lc, m_parent , wxPD_CAN_ABORT | wxPD_APP_MODAL);	
+	wxProgressDialog progressdialog(_("Record from NMEA text file"), _("Adding soundings"), lc, m_parent , wxPD_CAN_ABORT | wxPD_APP_MODAL);
 
 	str = m_istream.GetFirstLine();
-    plugin->ParseNMEASentence(str);	
+    plugin->ParseNMEASentence(str);
 
 	while (!m_istream.Eof()) {
-		
+
 		if (!progressdialog.Update(ct)) {
 			// Cancelled by user.
 			break;
@@ -218,13 +218,13 @@ void SurveyDlg::LoadFromFile( wxCommandEvent& event )
 
 		msg = wxString::Format("%i", soundingCount);
 		newmsg = msg + "  " + _("soundings have been recorded");
-		progressdialog.Update(ct, newmsg, false);				
+		progressdialog.Update(ct, newmsg);
 		ct++;
 
-		str = m_istream.GetNextLine();			
+		str = m_istream.GetNextLine();
 		plugin->ParseNMEASentence(str);
 	}
-	
+
 	m_istream.Close();
 
 	RefreshSurvey();
@@ -288,7 +288,7 @@ void SurveyDlg::RefreshSurvey() {
 		plugin->FillSurveyGrid();
 	}
 
-	RequestRefresh(m_parent);	
+	RequestRefresh(m_parent);
 
 }
 
@@ -335,7 +335,7 @@ void SurveyDlg::OnDeleteSurvey( wxCommandEvent& event )
 		  plugin->FillSurveyDropdown();
 		  plugin->FillSurveyGrid();
 		  plugin->FillSurveyInfo();
-		  
+
       }
 	  RequestRefresh(m_parent);
       event.Skip();
@@ -373,10 +373,10 @@ void SurveyDlg::OnZoomTSurvey( wxCommandEvent& event )
 	double mla, mlo;
 	wxString la = m_gdSoundings->GetCellValue(0, 2);
 	//wxMessageBox(la);
-	
+
 	wxString lo = m_gdSoundings->GetCellValue(0, 3);
 	//wxMessageBox(lo);
-	
+
 	if (la.IsEmpty()  || lo.IsEmpty()){
 		wxMessageBox(_("Survey does not contain any soundings"));
 		return;
@@ -427,9 +427,9 @@ void SurveyDlg::OnEditSoundings(wxCommandEvent& event)
 	}
 
 	wxString testEdit = s.Mid(0, 4);
-	if (testEdit == _T("Edt.")) {	
+	if (testEdit == _T("Edt.")) {
 		wxMessageBox(_("This survey has already been corrected\n\nFor amending corrections select a survey with raw data"));
-		return;	
+		return;
 	}
 
 	int t = plugin->GetSurveyId(s);
@@ -496,7 +496,7 @@ void SurveyDlg::OnImportSurvey( wxCommandEvent& event )
 
 		}
 		else wxMessageBox(_("No file entered"));
-		
+
 		RefreshSurvey();
 		event.Skip();
 	}
@@ -526,16 +526,16 @@ void SurveyDlg::OnExportSurvey( wxCommandEvent& event )
 }
 
 void SurveyDlg::OnSurveyCancelClick( wxCommandEvent& event ) {
-	
+
 	plugin->OnSurveyDialogClose();
 	event.Skip();
 
 }
 
 void SurveyDlg::OnSurveyOkClick( wxCommandEvent& event ) {
-	
+
 	plugin->OnSurveyDialogClose();
-	event.Skip(); 
+	event.Skip();
 
 }
 
@@ -567,7 +567,7 @@ void SurveyDlg::SetProfile(){
 	int t = m_chSurvey->GetSelection();
 
 	if (t == -1){
-		wxMessageBox(_("No survey selected, please select a survey"));		
+		wxMessageBox(_("No survey selected, please select a survey"));
 		return;
 	}
 
@@ -586,7 +586,7 @@ void SurveyDlg::SetProfile(){
 	}
 */
 	wxDateTime m_graphday = wxDateTime::Now();
-    double value;	
+    double value;
 
 	int i = 0;
 	//wxArrayInt myRows[1];
@@ -607,13 +607,13 @@ void SurveyDlg::SetProfile(){
 	for(std::vector<soundingdata>::iterator it = mysoundings.begin();  it != mysoundings.end(); it++){
 
 		if (i > 2999) {
-		
+
 			wxMessageBox(_("Unable to create a profile if more than 3000 soundings"));
-			
+
 			tcv[0] = 0;
 			tcd[0] = 0;
 			// Make a blank profile
-			myProfile = new ProfileWin(m_panel3, wxID_ANY, 0, 0, 2, tcv, tcd, 10, 0);			
+			myProfile = new ProfileWin(m_panel3, wxID_ANY, 0, 0, 2, tcv, tcd, 10, 0);
 			return;
 		}
 
@@ -642,8 +642,8 @@ void SurveyDlg::SetProfile(){
 
 	int c = i-1;
 
-	
-	if (c == -1| c < 3 ){ // We have no soundings or less than 3		
+
+	if (c == -1| c < 3 ){ // We have no soundings or less than 3
 		tcv[0] = 0;
 		tcd[0] = 0;
 		// Make a blank profile
@@ -679,9 +679,9 @@ void SurveyDlg::OnItemDelete(wxCommandEvent& event){
 	myRows = m_gdSoundings->GetSelectedRows();
 
 	int c = myRows.Count();
-	if (c == 0){ 
+	if (c == 0){
 		wxMessageBox(_("No sounding/s selected"));
-		return; 	
+		return;
 	}
 
 	int i = 0;
@@ -730,7 +730,7 @@ void SurveyDlg::OnSetTidalData(wxCommandEvent& event) {
 
 
 	//}
-	    
+
 		m_pSurveyTidalDialog->Show();
 		m_pSurveyTidalDialog->Fit();
 		m_pSurveyTidalDialog->Refresh();
@@ -746,7 +746,7 @@ void SurveyDlg::OnTestViewport() {
 	//AdjustVP(PlugIn_ViewPort &vp_last, PlugIn_ViewPort &vp_proposed);
 	PlugIn_ViewPort myViewport;
 	//Dlg->GetParent()->SetCurrentViewPort(myViewport);
-	
+
 
 }
 
@@ -848,7 +848,7 @@ void SurveyDlg::OnOpenGarminGPX() {
 			}
 		}
 
-		
+
 
 
 		int sz = trkpts.size();
@@ -856,14 +856,14 @@ void SurveyDlg::OnOpenGarminGPX() {
 		//wxMessageBox(siz);
 
 		WriteGPX(trkpts);
-	
-	
+
+
 }
 
 void SurveyDlg::WriteGPX(std::vector<GPXWayPoint> inRoute) {
 
 	wxString s;
-	
+
 
 	wxString new_file = ::wxFileSelector(_("Select Output GPX file"), m_currentGPXFile);
 	if (!new_file.empty())
@@ -916,7 +916,7 @@ void SurveyDlg::WriteGPX(std::vector<GPXWayPoint> inRoute) {
 
 		Route->LinkEndChild(Extensions);
 
-		
+
 
 		for (std::vector<GPXWayPoint>::iterator it = inRoute.begin(); it != inRoute.end(); it++) {
 
@@ -989,7 +989,7 @@ myOffset SurveyDlg::GetOffset(double lat, double lon, double offsetstbd, double 
 
 SurveyTidalDlg::SurveyTidalDlg(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : SurveyTidalDlgDef(parent, id, title, pos, size, style)
 {
-	
+
 }
 
 void SurveyTidalDlg::OnEditSurveySelection(wxCommandEvent& event)
@@ -1013,10 +1013,10 @@ void SurveyTidalDlg::OnEditSurveySelection(wxCommandEvent& event)
 	wxString testEdit = s.Mid(0, 4);
 	/*
 	if (testEdit != _T("Edt.")) {
-		
+
 	}
 	else {
-		
+
 	}
 */
 	RequestRefresh(m_parent);
@@ -1072,7 +1072,7 @@ void SurveyTidalDlg::OnSelectAll(wxCommandEvent& event){
 	m_gdTidalHeights->SetSelectionMode(wxGrid::wxGridSelectRows);
 	//wxString myCount = wxString::Format("%i", rowCount);
 	//wxMessageBox(myCount);
-	
+
 	for (int i = 0; i < rowCount; i++)
 	{
 		m_gdTidalHeights->SelectRow(i, true);
@@ -1091,11 +1091,11 @@ void SurveyTidalDlg::SetGridDateTime(wxDateTime myDT, wxDateTime myDT2) {
 	double m_dInterval = value;
 
 	wxTimeSpan m_ts = wxTimeSpan::Minutes(m_dInterval);
-		
+
 	int i = 0;
 
 	do
-	{			
+	{
 		wxString str = myDT.Format(wxT("%Y-%m-%d %H:%M:%S"));
 
 		m_gdTidalHeights->SetCellValue(i, 0, str);
@@ -1116,7 +1116,7 @@ void SurveyTidalDlg::SetTidalHeight(wxCommandEvent& event) {
 	int c = myRows.Count();
 	if (c == 0) {
 		wxMessageBox(_("No row selected"));
-		return; 
+		return;
 	}
 
 	int i = 0;

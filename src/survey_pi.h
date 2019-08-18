@@ -55,7 +55,7 @@
 //#include "SurveyOverlayFactory.h"
 
 #define     PLUGIN_VERSION_MAJOR    3
-#define     PLUGIN_VERSION_MINOR    51
+#define     PLUGIN_VERSION_MINOR    52
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
@@ -207,7 +207,7 @@ public:
 	  SoundingsEditDlgDef *m_pSoundingsEdit;
 	  SurveyMergeDlgDef *m_pSurveyMerge;
 	  SurveyPropDlgDef *m_pSurveyProp;
-	  
+
 	  double           viewscale;
 	  bool              dbMergeSurveys(int survey1, int survey2);
 	  bool              dbEditSoundings(int survey1);
@@ -224,7 +224,7 @@ public:
 
 	  double GetCursorLon(void) { return m_cursor_lon; }
 	  double GetCursorLat(void) { return m_cursor_lat; }
-	  
+
 	  int GetSoundingID(wxString lat, wxString lon);
 
 	  void OnContextMenuItemCallback(int id);
@@ -241,13 +241,13 @@ public:
 	  void              dbFreeResults(char **results);
 
 private:
-	
+
 	int m_delete_menu_id;
 	double m_cursor_lon;
 	double m_cursor_lat;
 
 	  SurveyOverlayFactory *m_pSurveyOverlayFactory;
-	  
+
 
 	 // wxDC *m_pdc;
 	 // wxGraphicsContext *m_gdc;
@@ -311,7 +311,7 @@ private:
       int               m_leftclick_tool_id;
 
       int               m_activesurvey;
-      
+
       int               m_projection;
 
       short             mPriPosition, mPriDepth;
@@ -319,12 +319,12 @@ private:
      // long              mLastSdgId, mLastSurveyId;
 
       bool              dbQuery(wxString sql);
-      
-      
+
+
       int               dbGetIntNotNullValue(wxString sql);
 
       wxString          dbGetStringValue(wxString sql);
-	  
+
       void              ImportHydromagicTrack(TiXmlElement *track);
 
 	  std::map < double, wxImage > m_labelCache;
