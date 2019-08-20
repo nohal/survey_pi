@@ -849,7 +849,7 @@ bool survey_pi::ImportGPX(wxString filename)
 							for (k = j->FirstChildElement(); k; k = k->NextSiblingElement()) {
 								wxString s5 = wxString(k->Value(), wxConvUTF8);
 								//wxMessageBox(s5, _T("temp"));
-								if (s5 == _T("gpxtpx:depth") || s5 == _T("gpxx:Depth")) {
+								if (s5 == _T("gpxtpx:depth") || s5 == _T("gpxx:Depth") || s5 == _T("gpxx:depth")) {
 									s5 = wxString(k->GetText(), wxConvUTF8);
 									m_pSurveyDialog->trkpt.depth = s5;
 									m_pSurveyDialog->trkpts.push_back(m_pSurveyDialog->trkpt);
@@ -1760,9 +1760,18 @@ int survey_pi::Init(void)
       }
 
 
-		char* spatialiteDll = "mod_spatialite";
-		sqlite3_enable_load_extension(m_database, 1);
-		sqlite3_load_extension(m_database, spatialiteDll, 0, &err_msg);
+	  sqlite3_enable_load_extension(m_database, 1);
+	  sql = "SELECT load_extension('mod_spatialite')";
+
+	  ret = sqlite3_exec(m_database, sql.c_str(), nullptr, nullptr, &err_msg);
+	  if (ret != SQLITE_OK) {
+
+		  sqlite3_free(err_msg);
+		  sqlite3_close(m_database);
+		  wxMessageBox("error");
+		  return 0;
+	  }
+
 
 
 		if (newDB && b_dbUsable)
