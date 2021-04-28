@@ -1,0 +1,213 @@
+
+*Using QGIS for contouring depths from the OpenCPN Survey_pi plugin
+*
+*Purpose***
+
+**To demonstrate a workflow for creating contour lines for the soundings
+obtained from the OpenCPN pluginSurvey_pi.
+*
+**Requirements**
+
+**QGIS *
+
+This can be downloaded here:
+
+*https://www.qgis.org    (Windows, Linux, MacOS)*
+
+This guide was written using the Windows version.
+**
+
+
+Not sure if GRASS is necessary but this was the QGIS version used.
+
+Survey_pi holds all the soundings data in an sqlite database. First
+check that QGIS can find the data.
+
+
+
+Use the 'spatialite' option.
+
+
+
+
+The drop-down shows the tables in your database. I only had one survey
+to work with. With more than one survey the workflow may differ
+
+
+
+Now we know that the data is available return to the main screen of QGIS.
+
+'Add Layer'
+'Add Spatialite Layer'
+
+
+
+
+You see the database connection and can select the 'sounding' table.
+Notice the POINTgeometry.
+
+
+
+
+
+Add the database to your project.
+
+
+
+
+
+The connection to the data has been established.
+'Right-Click' on the 'soundings' layer to save a Shapefile.
+
+'Export'
+'Save Features As...'
+
+'Right-Click' again on the Shapefile. 'Zoom to Layer' shows you the
+location of the soundings.
+This demonstrates the density of soundings required if contouring is
+going to be successful. The survey lines are about 10 metres apart.
+
+
+
+Now the interesting bit.
+
+Select 'Vector','Contour' from the menu at the top of the screen.
+
+
+
+The input is the shapefile of soundings. 'depth' is the data value. If
+you go through the list of options and set things up
+correctly QGIS will work out min/max depth and you can choose a suitable
+contour interval. I needed to play with the number of contours
+but eventually a list appeared in the text box. It is possible to apply
+colours but probably better to use a single colour.
+
+
+
+
+
+Magic. The contours appear.
+
+
+
+To make the contours display better 'Right-Click'. Black will show the
+contours best.
+
+
+
+
+
+
+
+
+
+We now add labels to the contours.
+
+'Properties'
+
+
+
+
+
+
+
+
+
+
+The shapefile is in vector format. It has to be converted to raster
+before it can be exported as a geotiff.
+
+
+
+Raster output is shown. Some of the contours are faded but that will not
+affect their display. Unfortunately contour labels disappear. Also the
+datum line (0)
+
+
+
+
+Survey_pi uses the coordinate reference system (CRS) EPSG:3395 (metres
+east/north). To create a geotiff that can be used in OpenCPN the CRS has
+to be set to EPSG:4326 (lat/lon).
+Both CRS are WGS 84 projection.
+
+'Right-Click'
+
+
+
+Set the CRS to EPSG:4326.
+
+
+
+'Right-Click' and 'Export', 'Save as...'
+*Very important that 'Rendered image' is used.*
+
+
+
+This creates the geotiff of the contour lines.
+
+QGIS displays correctly but initially colours may be reversed when
+viewing the geotiff file.
+
+
+
+The survey can be displayed on OpenCPN with PhotoLayer_pi and compared
+with other charts.
+
+The results for this area were significantly different from official
+sources. Recently the author met a
+yachtsman who had anchored at Dandy Hole in what was thought to be the
+deepest position. The boat grounded at low water!
+
+
+
+Geotiffs can only be edited with Microsoft Paint, as far as is known. At
+one point editing resulted in the contour lines turning black.
+Notes can be added with 'Paint'. Numbers against contour lines do not
+seem to be carried through to the geotiff when exporting geotiff
+using QGIS. Notice the lack of the datum line (0)
+
+
+
+
+
+
+It has not been found possible to export a kap chart from PhotoLayer.
+The conversion of GeoTiff to kap can be made with MAPC2MAPC.
+
+*https://www.the-thorns.org.uk/mapping/
+
+
+
+*The problem is that the 'official' data is obscured.
+
+
+*Labelling the contours
+
+*This can be useful for adding labels to contours with *Microsoft
+Paint*. The value for each contour is indicated by the sounding around
+it or you can use the contour labels from QGIS described earlier.
+***
+
+
+*'Right-Click' on the soundings file.
+
+
+For value use 'depth'.
+
+
+
+
+*
+
+
+
+
+*'Apply'
+'OK'
+
+
+
+
+**
+
