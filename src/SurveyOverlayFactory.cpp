@@ -181,7 +181,14 @@ wxColour SurveyOverlayFactory::GetDepthColour(double my_depth) {
 wxImage &SurveyOverlayFactory::DrawGLText(double value, int precision) {
 
 	wxString labels;
-	double depth = value;
+	
+	double coef = 1.0;
+	if (m_settings.m_iUnits == FATHOMS)
+		coef = 1.8288;
+	else if (m_settings.m_iUnits == FEET)
+		coef = 0.3048;
+	
+	double depth = value / coef;
 	int p = precision;
 
 	labels.Printf(_T("%.*f"), p, value);
