@@ -183,10 +183,12 @@ wxImage &SurveyOverlayFactory::DrawGLText(double value, int precision) {
 	wxString labels;
 	
 	double coef = 1.0;
-	if (m_settings.m_iUnits == FATHOMS)
+	int iUnits = PI_GetPLIBDepthUnitInt();
+	if (iUnits == FATHOMS)
 		coef = 1.8288;
-	else if (m_settings.m_iUnits == FEET)
+	else if (iUnits == FEET)
 		coef = 0.3048;
+	else {}
 	
 	double depth = value / coef;
 	int p = precision;
