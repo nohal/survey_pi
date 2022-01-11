@@ -60,9 +60,9 @@
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
 
+#define FEET    0
 #define METERS  1
-#define FEET    2
-#define FATHOMS 3
+#define FATHOMS 2
 
 //World Mercator
 #define PROJECTION 3395

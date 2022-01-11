@@ -2180,7 +2180,7 @@ void survey_pi::SetSettings(){
 	}
 
 	m_pSurveyDialog->mySettings.m_iOpacity = m_iOpacity;
-	m_pSurveyDialog->mySettings.m_iUnits = m_iUnits;
+	m_pSurveyDialog->mySettings.m_iUnits = PI_GetPLIBDepthUnitInt();
 	m_pSurveyDialog->mySettings.m_bCalcTide = m_bCalcTide;
 	m_pSurveyDialog->mySettings.m_sCorrection = m_sCorrection;
 	m_pSurveyDialog->mySettings.m_bRenderAllSurveys = m_bRenderAllSurveys;
@@ -2226,7 +2226,7 @@ bool survey_pi::LoadConfig(void)
             pConf->SetPath ( _T( "/Settings/Survey" ) );
 
             pConf->Read ( _T ( "Opacity" ),  &m_iOpacity, 255 );
-            pConf->Read ( _T ( "Units" ),  &m_iUnits, METERS );
+            pConf->Read ( _T ( "Units" ),  &m_iUnits, PI_GetPLIBDepthUnitInt() );
 			pConf->Read ( _T ( "CalculateTide" ), &m_bCalcTide, false);
 			pConf->Read ( _T ( "Correction" ), &m_sCorrection);
 
@@ -2278,7 +2278,7 @@ bool survey_pi::SaveConfig(void)
       {
             pConf->SetPath ( _T ( "/Settings/Survey" ) );
             pConf->Write ( _T ( "Opacity" ), m_iOpacity );
-            pConf->Write ( _T ( "Units" ), m_iUnits );
+            pConf->Write ( _T ( "Units" ), PI_GetPLIBDepthUnitInt() );
 			pConf->Write ( _T ( "CalculateTide"), m_bCalcTide );
 			pConf->Write ( _T ( "Correction"), m_sCorrection );
             pConf->Write ( _T ( "RenderOverlay" ), m_bRenderOverlay );
