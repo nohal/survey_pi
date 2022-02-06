@@ -49,6 +49,13 @@ set(PKG_IS_OPEN_SOURCE "yes")
 set(PKG_HOMEPAGE https://github.com/Rasbats/survey_pi)
 set(PKG_INFO_URL https://opencpn.org/OpenCPN/plugins/survey.html)
 
+IF(WIN32)
+	SET(sqlite ${CMAKE_SOURCE_DIR}/sqlite-msvc/lib/sqlite3_i.lib)
+	SET(sqlite "${PARENT}.lib")
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/sqlite-msvc/include)
+	LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/sqlite-msvc/lib)
+ENDIF(WIN32)
+
 SET(SRC
     src/survey_pi.h
     src/survey_pi.cpp
@@ -110,9 +117,6 @@ macro(add_plugin_libraries)
 
   add_subdirectory("libs/jsoncpp")
   target_link_libraries(${PACKAGE_NAME} ocpn::jsoncpp)
-
-  add_subdirectory("libs/sqlite")
-  target_link_libraries(${PACKAGE_NAME} sqlite::sqlite)
 
   add_subdirectory("libs/nmea0183")
   target_link_libraries(${PACKAGE_NAME} nmea0183::nmea0183)
