@@ -51,6 +51,7 @@
 #include "square.xpm"
 #include <sstream>
 #include "wx/progdlg.h"
+#include "ocpn_plugin.h"
 
 #include "config.h"
 
@@ -105,7 +106,7 @@ public:
 
 #define SURVEY_TOOL_POSITION    -1          // Request default positioning of toolbar tool
 
-class survey_pi : public opencpn_plugin_116
+class survey_pi : public opencpn_plugin_117
 {
 public:
       survey_pi(void *ppimgr);
