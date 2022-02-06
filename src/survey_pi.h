@@ -52,13 +52,9 @@
 #include <sstream>
 #include "wx/progdlg.h"
 
+#include "config.h"
+
 //#include "SurveyOverlayFactory.h"
-
-#define     PLUGIN_VERSION_MAJOR    3
-#define     PLUGIN_VERSION_MINOR    522
-
-#define     MY_API_VERSION_MAJOR    1
-#define     MY_API_VERSION_MINOR    8
 
 #define FEET    0
 #define METERS  1

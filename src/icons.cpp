@@ -49,14 +49,16 @@ void initialize_images(void)
 
 #ifdef SURVEY_USE_SVG
 	wxFileName fn;
-	fn.SetPath(*GetpSharedDataLocation());
-	fn.AppendDir(_T("plugins"));
-	fn.AppendDir(_T("survey_pi"));
-	fn.AppendDir(_T("data"));
-	fn.SetFullName(_T("survey_pi.svg"));
-	_svg_survey = fn.GetFullPath();
-	fn.SetFullName(_T("survey_pi_toggled.svg"));
-	_svg_survey_toggled = fn.GetFullPath();
+    wxString tmp_path;
+
+    tmp_path = GetPluginDataDir("survey_pi");
+    fn.SetPath(tmp_path);
+    fn.AppendDir(_T("data"));
+
+    fn.SetFullName(_T("survey_pi.svg"));
+    _svg_survey = fn.GetFullPath();
+    fn.SetFullName(_T("survey_pi_toggled.svg"));
+    _svg_survey_toggled = fn.GetFullPath();
 #endif
 
 	return;

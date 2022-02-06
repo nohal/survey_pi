@@ -99,21 +99,47 @@ void appendOSDirSlash(wxString* pString)
 //
 //---------------------------------------------------------------------------------------------------------
 
+/**
+ * Load a icon, possibly using SVG
+ * Parameters
+ *  - api_name: Argument to GetPluginDataDir()
+ *  - icon_name: Base name of icon living in data/ directory. When using
+ *    SVG icon_name.svg is used, otherwise icon_name.png
+ */
+
+static wxBitmap load_plugin(const char* icon_name, const char* api_name) {
+    wxBitmap bitmap; 
+    wxFileName fn;
+    auto path = GetPluginDataDir(api_name);
+    fn.SetPath(path);
+    fn.AppendDir("data");
+    fn.SetName(icon_name);
+#ifdef SHIPDRIVER_USE_SVG
+    wxLogDebug("Loading SVG icon");
+    fn.SetExt("svg");
+    const static int ICON_SIZE = 48;  // FIXME: Needs size from GUI 
+    bitmap = GetBitmapFromSVGFile(fn.GetFullPath(), ICON_SIZE, ICON_SIZE);
+#else
+    wxLogDebug("Loading png icon");
+    fn.SetExt("png");
+    path = fn.GetFullPath();
+    if (!wxImage::CanRead(path)) {
+        wxLogDebug("Initiating image handlers.");
+        wxInitAllImageHandlers();
+    }
+    wxImage panelIcon(path);
+    bitmap = wxBitmap(panelIcon);
+#endif
+    wxLogDebug("Icon loaded, result: %s", bitmap.IsOk() ? "ok" : "fail");
+    return bitmap;
+}
+
 survey_pi::survey_pi(void *ppimgr)
       :opencpn_plugin_116(ppimgr)
 {
-      // Create the PlugIn icons
-      initialize_images();
-
-	  wxString shareLocn = *GetpSharedDataLocation() +
-		  _T("plugins") + wxFileName::GetPathSeparator() +
-		  _T("survey_pi") + wxFileName::GetPathSeparator()
-		  + _T("data") + wxFileName::GetPathSeparator();
-	  wxImage panelIcon(shareLocn + _T("survey_panel_icon.png"));
-	  if (panelIcon.IsOk())
-		  m_panelBitmap = wxBitmap(panelIcon);
-	  else
-		  wxLogMessage(_("    Survey panel icon NOT loaded"));
+       // Create the PlugIn icons
+    initialize_images();
+    m_panelBitmap = load_plugin("survey_panel_icon", "survey_pi");
 
 	  m_bShowSurvey = false;
 }
@@ -1955,12 +1981,14 @@ bool survey_pi::DeInit(void)
 
 int survey_pi::GetAPIVersionMajor()
 {
-      return MY_API_VERSION_MAJOR;
+     return atoi(API_VERSION);
 }
 
 int survey_pi::GetAPIVersionMinor()
 {
-      return MY_API_VERSION_MINOR;
+     std::string v(API_VERSION);
+    size_t dotpos = v.find('.');
+    return atoi(v.substr(dotpos + 1).c_str());
 }
 
 int survey_pi::GetPlugInVersionMajor()
