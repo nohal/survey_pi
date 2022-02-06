@@ -83,7 +83,6 @@ SET(SRC
 	src/SurveyOverlayFactory.cpp
 	src/SurveyOverlayFactory.h
 	src/dychart.h
-	src/ocpn_plugin.h
 	)
 
 
@@ -119,6 +118,6 @@ macro(add_plugin_libraries)
   target_link_libraries(${PACKAGE_NAME} ocpn::jsoncpp)
 
   add_subdirectory("libs/nmea0183")
-  target_link_libraries(${PACKAGE_NAME} nmea0183::nmea0183)
+  target_link_libraries(${PACKAGE_NAME} ocpn::nmea0183)
   
 endmacro ()
