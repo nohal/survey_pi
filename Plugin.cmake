@@ -49,12 +49,7 @@ set(PKG_IS_OPEN_SOURCE "yes")
 set(PKG_HOMEPAGE https://github.com/Rasbats/survey_pi)
 set(PKG_INFO_URL https://opencpn.org/OpenCPN/plugins/survey.html)
 
-IF(WIN32)
-	SET(sqlite ${CMAKE_SOURCE_DIR}/sqlite-msvc/lib/sqlite3_i.lib)
-	SET(sqlite "${PARENT}.lib")
-	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/sqlite-msvc/include)
-	LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/sqlite-msvc/lib)
-ENDIF(WIN32)
+
 
 SET(SRC
     src/survey_pi.h
@@ -92,6 +87,12 @@ macro(late_init)
   # Perform initialization after the PACKAGE_NAME library, compilers
   # and ocpn::api is available.
   ADD_DEFINITIONS(-D SQLITE_ENABLE_RTREE)
+  IF(WIN32)
+	SET(sqlite ${CMAKE_SOURCE_DIR}/sqlite-msvc/lib/sqlite3_i.lib)
+	SET(sqlite "${PARENT}.lib")
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/sqlite-msvc/include)
+	LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/sqlite-msvc/lib)
+ENDIF(WIN32)
 
   IF(WIN32)
 	FIND_LIBRARY(sqlite3_i ${CMAKE_SOURCE_DIR}/sqlite-msvc/lib)
