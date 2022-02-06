@@ -1,91 +1,92 @@
-##---------------------------------------------------------------------------
-## Author:      Sean D'Epagnier
-## Copyright:   
-## License:     GPLv3+
-##---------------------------------------------------------------------------
+# ~~~
+# Summary       Installation items and layout
+# Author:       Pavel Kalian (Based on the work of Sean D'Epagnier)
+# License:      GPLv3+
+# Copyright (c) 2014 Pavel Kallian
+#               2021 Alec Leamas
+# ~~~
 
-IF(NOT APPLE)
-  TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${wxWidgets_LIBRARIES} ${EXTRA_LIBS} )
-ENDIF(NOT APPLE)
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
 
-IF(WIN32)
-  SET(PARENT "opencpn")
+include(Metadata)
 
-  IF(MSVC)
-#    TARGET_LINK_LIBRARIES(${PACKAGE_NAME}
-#	gdiplus.lib
-#	glu32.lib)
-    TARGET_LINK_LIBRARIES(${PACKAGE_NAME} ${OPENGL_LIBRARIES})
-
-    SET(OPENCPN_IMPORT_LIB "${PARENT}.lib")
-  ENDIF(MSVC)
-
-  IF(MINGW)
-# assuming wxwidgets is compiled with unicode, this is needed for mingw headers
-    ADD_DEFINITIONS( " -DUNICODE" )
-    TARGET_LINK_LIBRARIES(${PACKAGE_NAME} ${OPENGL_LIBRARIES})
-    SET(OPENCPN_IMPORT_LIB "${PARENT}.dll")
-    SET( CMAKE_SHARED_LINKER_FLAGS "-L../buildwin" )
-  ENDIF(MINGW)
-
-  TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${OPENCPN_IMPORT_LIB} )
-ENDIF(WIN32)
-
-IF(UNIX)
- IF(PROFILING)
-  find_library(GCOV_LIBRARY
-    NAMES
-    gcov
-    PATHS
-    /usr/lib/gcc/i686-pc-linux-gnu/4.7
+if (APPLE)
+  install(
+    TARGETS ${PACKAGE_NAME}
+    RUNTIME LIBRARY DESTINATION OpenCPN.app/Contents/PlugIns
+  )
+  if (EXISTS ${PROJECT_SOURCE_DIR}/data)
+    install(
+      DIRECTORY data
+      DESTINATION OpenCPN.app/Contents/SharedSupport/plugins/${PACKAGE_NAME}
     )
+  endif ()
 
-  SET(EXTRA_LIBS ${EXTRA_LIBS} ${GCOV_LIBRARY})
- ENDIF(PROFILING)
-ENDIF(UNIX)
+elseif (WIN32)
+  message(STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}")
+  if (CMAKE_CROSSCOMPILING)
+    install(TARGETS ${PACKAGE_NAME} RUNTIME DESTINATION "plugins")
+  else ()
+    install(TARGETS ${PACKAGE_NAME} RUNTIME DESTINATION "plugins")
+  endif ()
+  if (EXISTS ${PROJECT_SOURCE_DIR}/data)
+    install(DIRECTORY data DESTINATION "plugins/${PACKAGE_NAME}")
+  endif ()
 
-IF(APPLE)
-  INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION ${CMAKE_BINARY_DIR}/OpenCPN.app/Contents/SharedSupport/plugins)
- FIND_PACKAGE(ZLIB REQUIRED)
- TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${ZLIB_LIBRARIES} )
-      INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION ${CMAKE_BINARY_DIR}/OpenCPN.app/Contents/PlugIns)
-ENDIF(APPLE)
+elseif (UNIX)
+  install(
+    TARGETS ${PACKAGE_NAME}
+    RUNTIME LIBRARY DESTINATION lib/opencpn
+  )
+  if (EXISTS ${PROJECT_SOURCE_DIR}/data)
+    install(DIRECTORY data DESTINATION share/opencpn/plugins/${PACKAGE_NAME})
+  endif ()
+endif ()
 
-IF(UNIX AND NOT APPLE)
-    FIND_PACKAGE(BZip2 REQUIRED)
-    INCLUDE_DIRECTORIES(${BZIP2_INCLUDE_DIR})
-    FIND_PACKAGE(ZLIB REQUIRED)
-    INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
-    TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${BZIP2_LIBRARIES} ${ZLIB_LIBRARY} )
-ENDIF(UNIX AND NOT APPLE)
+# Hardcoded, absolute destination for tarball generation
+if (${BUILD_TYPE} STREQUAL "tarball" OR ${BUILD_TYPE} STREQUAL "flatpak")
+  install(CODE "
+    configure_file(
+      ${CMAKE_BINARY_DIR}/${pkg_displayname}.xml.in
+      ${CMAKE_BINARY_DIR}/app/files/metadata.xml
+      @ONLY
+    )
+  ")
+endif()
 
-SET(PARENT opencpn)
+# On macos, fix paths which points to the build environment, make sure they
+# refers to runtime locations
+if (${BUILD_TYPE} STREQUAL "tarball" AND APPLE)
+  install(CODE
+    "execute_process(
+      COMMAND bash -c ${PROJECT_SOURCE_DIR}/cmake/fix-macos-libs.sh
+    )"
+  )
+endif()
 
-SET(PREFIX_DATA share)
-SET(PREFIX_LIB lib)
-
-IF(WIN32)
-    MESSAGE (STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}")
-    SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/../OpenCPN)
-  IF(CMAKE_CROSSCOMPILING)
-    INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME DESTINATION "plugins")
-    SET(INSTALL_DIRECTORY "plugins/${PACKAGE_NAME}")
-  ELSE(CMAKE_CROSSCOMPILING)
-    INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME DESTINATION "plugins")
-    SET(INSTALL_DIRECTORY "plugins\\\\${PACKAGE_NAME}")
-  ENDIF(CMAKE_CROSSCOMPILING)
-
-  IF(EXISTS ${PROJECT_SOURCE_DIR}/data)
-    INSTALL(DIRECTORY data DESTINATION "${INSTALL_DIRECTORY}")
-  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/data)
-ENDIF(WIN32)
-
-IF(UNIX AND NOT APPLE)
-  SET(PREFIX_PARENTDATA ${PREFIX_DATA}/${PARENT})
-  SET(PREFIX_PARENTLIB ${PREFIX_LIB}/${PARENT})
-  INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION ${PREFIX_PARENTLIB})
-
- IF(EXISTS ${PROJECT_SOURCE_DIR}/data)
-    INSTALL(DIRECTORY data DESTINATION ${PREFIX_PARENTDATA}/plugins/${PACKAGE_NAME})
-  ENDIF()
-ENDIF(UNIX AND NOT APPLE)
+if (CMAKE_BUILD_TYPE MATCHES "Release|MinSizeRel")
+  if (APPLE)
+    set(_striplib OpenCPN.app/Contents/PlugIns/lib${PACKAGE_NAME}.dylib)
+  elseif (MINGW)
+    set(_striplib plugins/lib${PACKAGE_NAME}.dll)
+  elseif (UNIX AND NOT CMAKE_CROSSCOMPILING AND NOT DEFINED ENV{FLATPAK_ID})
+    # Plain, native linux
+    set(_striplib lib/opencpn/lib${PACKAGE_NAME}.so)
+  endif ()
+  if (BUILD_TYPE STREQUAL "tarball" AND DEFINED _striplib)
+    find_program(STRIP_UTIL NAMES strip REQUIRED)
+    if (APPLE)
+      set(STRIP_UTIL "${STRIP_UTIL} -x")
+    endif ()
+    install(CODE "message(STATUS \"Stripping ${_striplib}\")")
+    install(CODE "
+      execute_process(
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMAND ${STRIP_UTIL} app/files/${_striplib}
+      )
+    ")
+  endif ()
+endif ()
