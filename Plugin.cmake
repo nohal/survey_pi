@@ -13,68 +13,87 @@
 # -------- Options ----------
 
 set(OCPN_TEST_REPO
-    "opencpn/shipdriver-alpha"
+    "opencpn/survey-alpha"
     CACHE STRING "Default repository for untagged builds"
 )
 set(OCPN_BETA_REPO
-    "opencpn/shipdriver-beta"
+    "opencpn/survey-beta"
     CACHE STRING
     "Default repository for tagged builds matching 'beta'"
 )
 set(OCPN_RELEASE_REPO
-    "opencpn/shipdriver-prod"
+    "opencpn/survey-prod"
     CACHE STRING
     "Default repository for tagged builds not matching 'beta'"
 )
 
-option(SHIPDRIVER_USE_SVG "Use SVG graphics" ON)
+option(SURVEY_USE_SVG "Use SVG graphics" ON)
 
 #
 #
 # -------  Plugin setup --------
 #
-set(PKG_NAME ShipDriver_pi)
-set(PKG_VERSION  3.0.0)
+set(PKG_NAME survey_pi)
+set(PKG_VERSION  4.0.0)
 set(PKG_PRERELEASE "")  # Empty, or a tag like 'beta'
 
-set(DISPLAY_NAME ShipDriver)    # Dialogs, installer artifacts, ...
-set(PLUGIN_API_NAME ShipDriver) # As of GetCommonName() in plugin API
-set(PKG_SUMMARY "Simulate ship movements")
+set(DISPLAY_NAME survey)    # Dialogs, installer artifacts, ...
+set(PLUGIN_API_NAME survey) # As of GetCommonName() in plugin API
+set(PKG_SUMMARY "Survey")
 set(PKG_DESCRIPTION [=[
-Simulates navigation of a vessel. Using the sail option and a current
-grib file for wind data, simulates how a sailing vessel might react in
-those conditions. Using 'Preferences' the simulator is able to record AIS
-data from itself. This can be replayed to simulate collision situations.
+Survey
 ]=])
 
 set(PKG_AUTHOR "Mike Rossiter")
 set(PKG_IS_OPEN_SOURCE "yes")
-set(PKG_HOMEPAGE https://github.com/Rasbats/shipdriver_pi)
-set(PKG_INFO_URL https://opencpn.org/OpenCPN/plugins/shipdriver.html)
+set(PKG_HOMEPAGE https://github.com/Rasbats/survey_pi)
+set(PKG_INFO_URL https://opencpn.org/OpenCPN/plugins/survey.html)
 
-set(SRC
-    src/ShipDriver_pi.h
-    src/ShipDriver_pi.cpp
+SET(SRC
+    src/survey_pi.h
+    src/survey_pi.cpp
     src/icons.h
     src/icons.cpp
-    src/ShipDrivergui.h
-    src/ShipDrivergui.cpp
-    src/ShipDrivergui_impl.cpp
-    src/ShipDrivergui_impl.h
-    src/AisMaker.h
-    src/AisMaker.cpp
-    src/GribRecord.cpp
-    src/GribRecordSet.h
-    src/GribRecord.h
-)
+	src/surveygui.h
+	src/surveygui.cpp
+	src/surveygui_impl.cpp
+	src/surveygui_impl.h
+	src/mygridtablebase.cpp
+	src/mygridtablebase.h
+	src/soundinggridtable.cpp
+	src/soundinggridtable.h
+	src/ProfileWin.cpp
+	src/ProfileWin.h
+	src/baro_history.cpp
+	src/baro_history.h
+	src/instrument.cpp
+	src/instrument.h
+	src/circle.xpm
+	src/cross.xpm
+	src/square.xpm
+    src/bbox.cpp
+	src/bbox.h
+	src/SurveyOverlayFactory.cpp
+	src/SurveyOverlayFactory.h
+	src/dychart.h
+	src/ocpn_plugin.h
+	)
+
 
 set(PKG_API_LIB api-16)  #  A directory in libs/ e. g., api-17 or api-16
 
 macro(late_init)
   # Perform initialization after the PACKAGE_NAME library, compilers
   # and ocpn::api is available.
-  if (SHIPDRIVER_USE_SVG)
-    target_compile_definitions(${PACKAGE_NAME} PUBLIC SHIPDRIVER_USE_SVG)
+  ADD_DEFINITIONS(-D SQLITE_ENABLE_RTREE)
+
+  IF(WIN32)
+	FIND_LIBRARY(sqlite3_i ${CMAKE_SOURCE_DIR}/sqlite-msvc/lib)
+	TARGET_LINK_LIBRARIES(${PACKAGE_NAME} sqlite3_i)
+  ENDIF(WIN32)
+  
+  if (SURVEY_USE_SVG)
+    target_compile_definitions(${PACKAGE_NAME} PUBLIC SURVEY_USE_SVG)
   endif ()
 endmacro ()
 
@@ -91,4 +110,11 @@ macro(add_plugin_libraries)
 
   add_subdirectory("libs/jsoncpp")
   target_link_libraries(${PACKAGE_NAME} ocpn::jsoncpp)
+
+  add_subdirectory("libs/sqlite")
+  target_link_libraries(${PACKAGE_NAME} sqlite::sqlite)
+
+  add_subdirectory("libs/nmea0183")
+  target_link_libraries(${PACKAGE_NAME} nmea0183::nmea0183)
+  
 endmacro ()
