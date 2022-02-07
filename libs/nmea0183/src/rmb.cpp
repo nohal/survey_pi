@@ -92,19 +92,34 @@ bool RMB::Parse( const SENTENCE& sentence )
    ** 11) Bearing to destination in degrees True
    ** 12) Destination closing velocity in knots
    ** 13) Arrival Status, A = Arrival Circle Entered
+   ** Version 2.0
    ** 14) Checksum
+
+   Version 2.3
+   ** 14) FAA Mode Indicatior, The value can be A=autonomous, D=differential, E=Estimated, N=not valid, S=Simulator, optional, may be NULL
+   ** 15) Checksum
    */
 
    /*
    ** First we check the checksum...
    */
-
-   NMEA0183_BOOLEAN check = sentence.IsChecksumBad( 14 );
+   int nFields = sentence.GetNumberOfDataFields();
+   NMEA0183_BOOLEAN check = sentence.IsChecksumBad(nFields + 1);
 
    if ( check == NTrue )
    {
        SetErrorMessage( _T("Invalid Checksum") );
       return( FALSE );
+   }
+
+   // If sentence is at least Version 2.3, check the extra FAA mode indicator field
+   bool mode_valid = true;
+   if (nFields >= 14) {
+     wxString mode_string = sentence.Field(14);
+     if (!mode_string.StartsWith(_T("*"))) {
+       if ((mode_string == _T("N")) || (mode_string == _T("S")))     // Not valid, or simulator mode
+         mode_valid = false;
+     }
    }
 
 /*
@@ -114,12 +129,11 @@ bool RMB::Parse( const SENTENCE& sentence )
       return( FALSE );
    }
 */
-
-   IsDataValid                     = sentence.Boolean( 1 );
+   IsDataValid = mode_valid ? sentence.Boolean( 1 ) : NFalse;
    CrossTrackError                 = sentence.Double( 2 );
    DirectionToSteer                = sentence.LeftOrRight( 3 );
-   From                            = sentence.Field( 4 );
-   To                              = sentence.Field( 5 );
+   To                              = sentence.Field( 4 );
+   From                            = sentence.Field( 5 );
    DestinationPosition.Parse( 6, 7, 8, 9, sentence );
    RangeToDestinationNauticalMiles = sentence.Double( 10 );
    BearingToDestinationDegreesTrue = sentence.Double( 11 );
@@ -145,13 +159,14 @@ bool RMB::Write( SENTENCE& sentence )
    else
        sentence += _T("R");
 
-   sentence += From;
    sentence += To;
+   sentence += From;
    sentence += DestinationPosition;
    sentence += RangeToDestinationNauticalMiles;
    sentence += BearingToDestinationDegreesTrue;
    sentence += DestinationClosingVelocityKnots;
    sentence += IsArrivalCircleEntered;
+   sentence += FAAModeIndicator;
 
    sentence.Finish();
 
@@ -166,13 +181,14 @@ const RMB& RMB::operator = ( const RMB& source )
    IsDataValid                     = source.IsDataValid;
    CrossTrackError                 = source.CrossTrackError;
    DirectionToSteer                = source.DirectionToSteer;
-   From                            = source.From;
    To                              = source.To;
+   From                            = source.From;
    DestinationPosition             = source.DestinationPosition;
    RangeToDestinationNauticalMiles = source.RangeToDestinationNauticalMiles;
    BearingToDestinationDegreesTrue = source.BearingToDestinationDegreesTrue;
    DestinationClosingVelocityKnots = source.DestinationClosingVelocityKnots;
    IsArrivalCircleEntered          = source.IsArrivalCircleEntered;
+   FAAModeIndicator                = source.FAAModeIndicator;
 
   return( *this );
 }
