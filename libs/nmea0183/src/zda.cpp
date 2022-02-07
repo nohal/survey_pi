@@ -39,71 +39,71 @@
 ** You can use it any way you like.
 */
 
-//IMPLEMENT_DYNAMIC( MWV, RESPONSE )
+//IMPLEMENT_DYNAMIC( ZDA, RESPONSE )
 
-MWV::MWV()
+ZDA::ZDA()
 {
-   Mnemonic = _T("MWV");
+   Mnemonic = _T("ZDA");
    Empty();
 }
 
-MWV::~MWV()
+ZDA::~ZDA()
 {
    Mnemonic.Empty();
    Empty();
 }
 
-void MWV::Empty( void )
+void ZDA::Empty( void )
 {
 //   ASSERT_VALID( this );
 
-   WindAngle   = 0.0;
-   Reference.Empty();
-   WindSpeed   = 0.0;
-   WindSpeedUnits.Empty();
-   IsDataValid = Unknown0183;
+   UTCTime.Empty();
+   Day                   = 0;
+   Month                 = 0;
+   Year                  = 0;
+   LocalHourDeviation    = 0;
+   LocalMinutesDeviation = 0;
 }
 
-bool MWV::Parse( const SENTENCE& sentence )
+bool ZDA::Parse( const SENTENCE& sentence )
 {
 //   ASSERT_VALID( this );
 
    /*
-   ** MWV - Wind Speed and Angle
+   ** ZDA - Time & Date
+   ** UTC, day, month, year and local time zone
    **
-   **        1   2 3   4 5
-   **        |   | |   | |
-   ** $--MWV,x.x,a,x.x,a*hh<CR><LF>
-   **
-   ** Field Number: 
-   **  1) Wind Angle, 0 to 360 degrees
-   **  2) Reference, R = Relative, T = True
-   **  3) Wind Speed
-   **  4) Wind Speed Units, K/M/N
-   **  5) Status, A = Data Valid
-   **  6) Checksum
+   ** $--ZDA,hhmmss.ss,xx,xx,xxxx,xx,xx*hh<CR><LF>
+   **        |         |  |  |    |  |
+   **        |         |  |  |    |  +- Local zone minutes description, same sign as local hours
+   **        |         |  |  |    +- Local zone description, 00 to +- 13 hours
+   **        |         |  |  +- Year
+   **        |         |  +- Month, 01 to 12
+   **        |         +- Day, 01 to 31
+   **        +- Universal Time Coordinated (UTC)
    */
 
    /*
    ** First we check the checksum...
    */
 
-   if ( sentence.IsChecksumBad( 6 ) == TRUE )
+   if ( sentence.IsChecksumBad( 7 ) == TRUE )
    {
       SetErrorMessage( _T("Invalid Checksum") );
       return( FALSE );
    } 
 
-   WindAngle      = sentence.Double( 1 );
-   Reference      = sentence.Field( 2 );
-   WindSpeed      = sentence.Double( 3 );
-   WindSpeedUnits = sentence.Field( 4 );
-   IsDataValid    = sentence.Boolean( 5 );
+   UTCTime               = sentence.Field( 1 );
+   Day                   = sentence.Integer( 2 );
+   Month                 = sentence.Integer( 3 );
+   Year                  = sentence.Integer( 4 );
+   LocalHourDeviation    = sentence.Integer( 5 );
+   LocalMinutesDeviation = sentence.Integer( 6 );
 
    return( TRUE );
 }
 
-bool MWV::Write( SENTENCE& sentence )
+bool ZDA::Write( SENTENCE& sentence )
 {
 //   ASSERT_VALID( this );
 
@@ -113,26 +113,28 @@ bool MWV::Write( SENTENCE& sentence )
    
    RESPONSE::Write( sentence );
 
-   sentence += WindAngle;
-   sentence += Reference;
-   sentence += WindSpeed;
-   sentence += WindSpeedUnits;
-   sentence += IsDataValid;
+   sentence += UTCTime;
+   sentence += Day;
+   sentence += Month;
+   sentence += Year;
+   sentence += LocalHourDeviation;
+   sentence += LocalMinutesDeviation;
 
    sentence.Finish();
 
    return( TRUE );
 }
 
-const MWV& MWV::operator = ( const MWV& source )
+const ZDA& ZDA::operator = ( const ZDA& source )
 {
 //   ASSERT_VALID( this );
- 
-   WindAngle      = source.WindAngle;
-   Reference      = source.Reference;
-   WindSpeed      = source.WindSpeed;
-   WindSpeedUnits = source.WindSpeedUnits;
-   IsDataValid    = source.IsDataValid;
+
+   UTCTime               = source.UTCTime;
+   Day                   = source.Day;
+   Month                 = source.Month;
+   Year                  = source.Year;
+   LocalHourDeviation    = source.LocalHourDeviation;
+   LocalMinutesDeviation = source.LocalMinutesDeviation;
 
    return( *this );
 }

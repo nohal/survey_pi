@@ -87,18 +87,7 @@ macro(late_init)
   # Perform initialization after the PACKAGE_NAME library, compilers
   # and ocpn::api is available.
   ADD_DEFINITIONS(-D SQLITE_ENABLE_RTREE)
-  IF(WIN32)
-	SET(sqlite ${CMAKE_SOURCE_DIR}/sqlite-msvc/lib/sqlite3_i.lib)
-	SET(sqlite "${PARENT}.lib")
-	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/sqlite-msvc/include)
-	LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/sqlite-msvc/lib)
-ENDIF(WIN32)
 
-  IF(WIN32)
-	FIND_LIBRARY(sqlite3_i ${CMAKE_SOURCE_DIR}/sqlite-msvc/lib)
-	TARGET_LINK_LIBRARIES(${PACKAGE_NAME} sqlite3_i)
-  ENDIF(WIN32)
-  
   if (SURVEY_USE_SVG)
     target_compile_definitions(${PACKAGE_NAME} PUBLIC SURVEY_USE_SVG)
   endif ()
@@ -120,5 +109,8 @@ macro(add_plugin_libraries)
 
   add_subdirectory("libs/nmea0183")
   target_link_libraries(${PACKAGE_NAME} ocpn::nmea0183)
+
+  add_subdirectory("libs/sqlite3_i")
+  target_link_libraries(${PACKAGE_NAME} sqlite3_i::sqlite3_i)
   
 endmacro ()

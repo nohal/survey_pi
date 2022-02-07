@@ -39,71 +39,62 @@
 ** You can use it any way you like.
 */
 
-//IMPLEMENT_DYNAMIC( MWV, RESPONSE )
+//IMPLEMENT_DYNAMIC( MTW, RESPONSE )
 
-MWV::MWV()
+MTW::MTW()
 {
-   Mnemonic = _T("MWV");
+   Mnemonic = _T("MTW");
    Empty();
 }
 
-MWV::~MWV()
+MTW::~MTW()
 {
    Mnemonic.Empty();
    Empty();
 }
 
-void MWV::Empty( void )
+void MTW::Empty( void )
 {
 //   ASSERT_VALID( this );
 
-   WindAngle   = 0.0;
-   Reference.Empty();
-   WindSpeed   = 0.0;
-   WindSpeedUnits.Empty();
-   IsDataValid = Unknown0183;
+   Temperature = 0.0;
+   UnitOfMeasurement.Empty();
 }
 
-bool MWV::Parse( const SENTENCE& sentence )
+bool MTW::Parse( const SENTENCE& sentence )
 {
 //   ASSERT_VALID( this );
 
    /*
-   ** MWV - Wind Speed and Angle
+   ** MTW - Water Temperature
    **
-   **        1   2 3   4 5
-   **        |   | |   | |
-   ** $--MWV,x.x,a,x.x,a*hh<CR><LF>
+   **        1   2 3
+   **        |   | | 
+   ** $--MTW,x.x,C*hh<CR><LF>
    **
    ** Field Number: 
-   **  1) Wind Angle, 0 to 360 degrees
-   **  2) Reference, R = Relative, T = True
-   **  3) Wind Speed
-   **  4) Wind Speed Units, K/M/N
-   **  5) Status, A = Data Valid
-   **  6) Checksum
+   **  1) Degrees
+   **  2) Unit of Measurement, Celcius
+   **  3) Checksum
    */
 
    /*
    ** First we check the checksum...
    */
 
-   if ( sentence.IsChecksumBad( 6 ) == TRUE )
+   if ( sentence.IsChecksumBad( 3 ) == TRUE )
    {
       SetErrorMessage( _T("Invalid Checksum") );
       return( FALSE );
    } 
 
-   WindAngle      = sentence.Double( 1 );
-   Reference      = sentence.Field( 2 );
-   WindSpeed      = sentence.Double( 3 );
-   WindSpeedUnits = sentence.Field( 4 );
-   IsDataValid    = sentence.Boolean( 5 );
+   Temperature       = sentence.Double( 1 );
+   UnitOfMeasurement = sentence.Field( 2 );
 
    return( TRUE );
 }
 
-bool MWV::Write( SENTENCE& sentence )
+bool MTW::Write( SENTENCE& sentence )
 {
 //   ASSERT_VALID( this );
 
@@ -113,26 +104,20 @@ bool MWV::Write( SENTENCE& sentence )
    
    RESPONSE::Write( sentence );
 
-   sentence += WindAngle;
-   sentence += Reference;
-   sentence += WindSpeed;
-   sentence += WindSpeedUnits;
-   sentence += IsDataValid;
+   sentence += Temperature;
+   sentence += UnitOfMeasurement;
 
    sentence.Finish();
 
    return( TRUE );
 }
 
-const MWV& MWV::operator = ( const MWV& source )
+const MTW& MTW::operator = ( const MTW& source )
 {
 //   ASSERT_VALID( this );
- 
-   WindAngle      = source.WindAngle;
-   Reference      = source.Reference;
-   WindSpeed      = source.WindSpeed;
-   WindSpeedUnits = source.WindSpeedUnits;
-   IsDataValid    = source.IsDataValid;
+
+   Temperature       = source.Temperature;
+   UnitOfMeasurement = source.UnitOfMeasurement;
 
    return( *this );
 }

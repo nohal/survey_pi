@@ -46,11 +46,7 @@ int HexValue( const wxString& hex_string )
 
    long scan_value = 0;
 
-   wxCharBuffer abuf = hex_string.ToUTF8();
-   if( !abuf.data() )                            // badly formed sentence?
-        return 0;
-
-   sscanf( abuf.data(), "%lx",  &scan_value );
+   sscanf( hex_string.mb_str(), "%lx",  &scan_value );
 
    return_value = (int)scan_value;
    return( return_value );

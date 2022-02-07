@@ -29,6 +29,7 @@
  *         "It is BSD license, do with it what you will"                   *
  */
 
+
 #include "nmea0183.h"
 
 /*
@@ -39,71 +40,68 @@
 ** You can use it any way you like.
 */
 
-//IMPLEMENT_DYNAMIC( MWV, RESPONSE )
+//IMPLEMENT_DYNAMIC( RSA, RESPONSE )
 
-MWV::MWV()
+RSA::RSA()
 {
-   Mnemonic = _T("MWV");
+   Mnemonic = _T("RSA");
    Empty();
 }
 
-MWV::~MWV()
+RSA::~RSA()
 {
    Mnemonic.Empty();
    Empty();
 }
 
-void MWV::Empty( void )
+void RSA::Empty( void )
 {
 //   ASSERT_VALID( this );
 
-   WindAngle   = 0.0;
-   Reference.Empty();
-   WindSpeed   = 0.0;
-   WindSpeedUnits.Empty();
-   IsDataValid = Unknown0183;
+   Starboard            = 0.0;
+   IsStarboardDataValid = Unknown0183;
+   Port                 = 0.0;
+   IsPortDataValid      = Unknown0183;
 }
 
-bool MWV::Parse( const SENTENCE& sentence )
+bool RSA::Parse( const SENTENCE& sentence )
 {
 //   ASSERT_VALID( this );
 
    /*
-   ** MWV - Wind Speed and Angle
+   ** RSA - Rudder Sensor Angle
    **
    **        1   2 3   4 5
    **        |   | |   | |
-   ** $--MWV,x.x,a,x.x,a*hh<CR><LF>
+   ** $--RSA,x.x,A,x.x,A*hh<CR><LF>
    **
    ** Field Number: 
-   **  1) Wind Angle, 0 to 360 degrees
-   **  2) Reference, R = Relative, T = True
-   **  3) Wind Speed
-   **  4) Wind Speed Units, K/M/N
-   **  5) Status, A = Data Valid
-   **  6) Checksum
+   **  1) Starboard (or single) rudder sensor, "-" means Turn To Port
+   **  2) Status, A means data is valid
+   **  3) Port rudder sensor
+   **  4) Status, A means data is valid
+   **  5) Checksum
    */
 
    /*
    ** First we check the checksum...
    */
 
-   if ( sentence.IsChecksumBad( 6 ) == TRUE )
+   if ( sentence.IsChecksumBad( 5 ) == TRUE )
    {
       SetErrorMessage( _T("Invalid Checksum") );
       return( FALSE );
    } 
 
-   WindAngle      = sentence.Double( 1 );
-   Reference      = sentence.Field( 2 );
-   WindSpeed      = sentence.Double( 3 );
-   WindSpeedUnits = sentence.Field( 4 );
-   IsDataValid    = sentence.Boolean( 5 );
+   Starboard            = sentence.Double(  1 );
+   IsStarboardDataValid = sentence.Boolean( 2 );
+   Port                 = sentence.Double(  3 );
+   IsPortDataValid      = sentence.Boolean( 4 );
 
    return( TRUE );
 }
 
-bool MWV::Write( SENTENCE& sentence )
+bool RSA::Write( SENTENCE& sentence )
 {
 //   ASSERT_VALID( this );
 
@@ -113,26 +111,24 @@ bool MWV::Write( SENTENCE& sentence )
    
    RESPONSE::Write( sentence );
 
-   sentence += WindAngle;
-   sentence += Reference;
-   sentence += WindSpeed;
-   sentence += WindSpeedUnits;
-   sentence += IsDataValid;
-
+   sentence += Starboard;
+   sentence += IsStarboardDataValid;
+   sentence += Port;
+   sentence += IsPortDataValid;
+   
    sentence.Finish();
 
    return( TRUE );
 }
 
-const MWV& MWV::operator = ( const MWV& source )
+const RSA& RSA::operator = ( const RSA& source )
 {
 //   ASSERT_VALID( this );
- 
-   WindAngle      = source.WindAngle;
-   Reference      = source.Reference;
-   WindSpeed      = source.WindSpeed;
-   WindSpeedUnits = source.WindSpeedUnits;
-   IsDataValid    = source.IsDataValid;
+
+   Starboard            = source.Starboard;
+   IsStarboardDataValid = source.IsStarboardDataValid;
+   Port                 = source.Port;
+   IsPortDataValid      = source.IsPortDataValid;
 
    return( *this );
 }

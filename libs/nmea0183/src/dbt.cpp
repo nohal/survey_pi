@@ -39,71 +39,68 @@
 ** You can use it any way you like.
 */
 
-//IMPLEMENT_DYNAMIC( MWV, RESPONSE )
+//IMPLEMENT_DYNAMIC( DBT, RESPONSE )
 
-MWV::MWV()
+DBT::DBT()
 {
-   Mnemonic = _T("MWV");
+   Mnemonic = _T("DBT");
    Empty();
 }
 
-MWV::~MWV()
+DBT::~DBT()
 {
    Mnemonic.Empty();
    Empty();
 }
 
-void MWV::Empty( void )
+void DBT::Empty( void )
 {
 //   ASSERT_VALID( this );
 
-   WindAngle   = 0.0;
-   Reference.Empty();
-   WindSpeed   = 0.0;
-   WindSpeedUnits.Empty();
-   IsDataValid = Unknown0183;
+   DepthFeet    = 0.0;
+   DepthMeters  = 0.0;
+   DepthFathoms = 0.0;
 }
 
-bool MWV::Parse( const SENTENCE& sentence )
+bool DBT::Parse( const SENTENCE& sentence )
 {
 //   ASSERT_VALID( this );
 
    /*
-   ** MWV - Wind Speed and Angle
+   ** DBT - Depth below transducer
    **
-   **        1   2 3   4 5
-   **        |   | |   | |
-   ** $--MWV,x.x,a,x.x,a*hh<CR><LF>
+   **        1   2 3   4 5   6 7
+   **        |   | |   | |   | |
+   ** $--DBT,x.x,f,x.x,M,x.x,F*hh<CR><LF>
    **
    ** Field Number: 
-   **  1) Wind Angle, 0 to 360 degrees
-   **  2) Reference, R = Relative, T = True
-   **  3) Wind Speed
-   **  4) Wind Speed Units, K/M/N
-   **  5) Status, A = Data Valid
-   **  6) Checksum
+   **  1) Depth, feet
+   **  2) f = feet
+   **  3) Depth, meters
+   **  4) M = meters
+   **  5) Depth, Fathoms
+   **  6) F = Fathoms
+   **  7) Checksum
    */
 
    /*
    ** First we check the checksum...
    */
 
-   if ( sentence.IsChecksumBad( 6 ) == TRUE )
+   if ( sentence.IsChecksumBad( 7 ) == TRUE )
    {
       SetErrorMessage( _T("Invalid Checksum") );
       return( FALSE );
    } 
 
-   WindAngle      = sentence.Double( 1 );
-   Reference      = sentence.Field( 2 );
-   WindSpeed      = sentence.Double( 3 );
-   WindSpeedUnits = sentence.Field( 4 );
-   IsDataValid    = sentence.Boolean( 5 );
+   DepthFeet    = sentence.Double( 1 );
+   DepthMeters  = sentence.Double( 3 );
+   DepthFathoms = sentence.Double( 5 );
 
    return( TRUE );
 }
 
-bool MWV::Write( SENTENCE& sentence )
+bool DBT::Write( SENTENCE& sentence )
 {
 //   ASSERT_VALID( this );
 
@@ -113,26 +110,25 @@ bool MWV::Write( SENTENCE& sentence )
    
    RESPONSE::Write( sentence );
 
-   sentence += WindAngle;
-   sentence += Reference;
-   sentence += WindSpeed;
-   sentence += WindSpeedUnits;
-   sentence += IsDataValid;
+   sentence += DepthFeet;
+   sentence += _T("f");
+   sentence += DepthMeters;
+   sentence += _T("M");
+   sentence += DepthFathoms;
+   sentence += _T("F");
 
    sentence.Finish();
 
    return( TRUE );
 }
 
-const MWV& MWV::operator = ( const MWV& source )
+const DBT& DBT::operator = ( const DBT& source )
 {
-//   ASSERT_VALID( this );
- 
-   WindAngle      = source.WindAngle;
-   Reference      = source.Reference;
-   WindSpeed      = source.WindSpeed;
-   WindSpeedUnits = source.WindSpeedUnits;
-   IsDataValid    = source.IsDataValid;
+   //ASSERT_VALID( this );
+
+   DepthFeet    = source.DepthFeet;
+   DepthMeters  = source.DepthMeters;
+   DepthFathoms = source.DepthFathoms;
 
    return( *this );
 }

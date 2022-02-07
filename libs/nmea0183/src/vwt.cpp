@@ -2,7 +2,7 @@
  *
  * Project:  OpenCPN
  * Purpose:  NMEA0183 Support Classes
- * Author:   Samuel R. Blackburn, David S. Register
+ * Author:   Samuel R. Blackburn, David S. Register, Jean-Eudes Onfray
  *
  ***************************************************************************
  *   Copyright (C) 2010 by Samuel R. Blackburn, David S Register           *
@@ -41,69 +41,71 @@
 
 //IMPLEMENT_DYNAMIC( MWV, RESPONSE )
 
-MWV::MWV()
+VWT::VWT()
 {
-   Mnemonic = _T("MWV");
+   Mnemonic = _T("VWT");
    Empty();
 }
 
-MWV::~MWV()
+VWT::~VWT()
 {
    Mnemonic.Empty();
    Empty();
 }
 
-void MWV::Empty( void )
+void VWT::Empty( void )
 {
 //   ASSERT_VALID( this );
 
-   WindAngle   = 0.0;
-   Reference.Empty();
-   WindSpeed   = 0.0;
-   WindSpeedUnits.Empty();
-   IsDataValid = Unknown0183;
+	WindDirectionMagnitude = 0.0;
+	DirectionOfWind = LR_Unknown;
+    WindSpeedKnots = 0.0;
+    WindSpeedms = 0.0;
+    WindSpeedKmh = 0.0;
 }
 
-bool MWV::Parse( const SENTENCE& sentence )
+bool VWT::Parse( const SENTENCE& sentence )
 {
 //   ASSERT_VALID( this );
 
    /*
-   ** MWV - Wind Speed and Angle
-   **
-   **        1   2 3   4 5
-   **        |   | |   | |
-   ** $--MWV,x.x,a,x.x,a*hh<CR><LF>
-   **
-   ** Field Number: 
-   **  1) Wind Angle, 0 to 360 degrees
-   **  2) Reference, R = Relative, T = True
-   **  3) Wind Speed
-   **  4) Wind Speed Units, K/M/N
-   **  5) Status, A = Data Valid
-   **  6) Checksum
+	** VWT - Wind Speed and Angle
+	**
+	**        1   2 3 4   5 6   7   8
+	**        |   | | |   | |   |   |
+	** $--VWT,x.x,L,x.x,N,x.x,M,x.x,K,*hh<CR><LF>
+	**
+	** 1) Wind direction magnitude in degrees
+	** 2) Wind direction Left/Right of bow
+	** 3) Speed
+	** 4) N = Knots
+	** 5) Speed
+	** 6) M = Meters Per Second
+	** 7) Speed
+	** 8) K = Kilometers Per Hour
+	** 9) Checksum
    */
 
    /*
    ** First we check the checksum...
    */
 
-   if ( sentence.IsChecksumBad( 6 ) == TRUE )
+   if ( sentence.IsChecksumBad( 9 ) == TRUE )
    {
       SetErrorMessage( _T("Invalid Checksum") );
       return( FALSE );
    } 
 
-   WindAngle      = sentence.Double( 1 );
-   Reference      = sentence.Field( 2 );
-   WindSpeed      = sentence.Double( 3 );
-   WindSpeedUnits = sentence.Field( 4 );
-   IsDataValid    = sentence.Boolean( 5 );
+   WindDirectionMagnitude = sentence.Double( 1 );
+   DirectionOfWind = sentence.LeftOrRight( 2 );
+   WindSpeedKnots = sentence.Double( 3 );
+   WindSpeedms = sentence.Double( 5 );
+   WindSpeedKmh = sentence.Double( 7 );
 
    return( TRUE );
 }
 
-bool MWV::Write( SENTENCE& sentence )
+bool VWT::Write( SENTENCE& sentence )
 {
 //   ASSERT_VALID( this );
 
@@ -113,26 +115,25 @@ bool MWV::Write( SENTENCE& sentence )
    
    RESPONSE::Write( sentence );
 
-   sentence += WindAngle;
-   sentence += Reference;
-   sentence += WindSpeed;
-   sentence += WindSpeedUnits;
-   sentence += IsDataValid;
-
-   sentence.Finish();
+   sentence += WindDirectionMagnitude;
+   sentence += DirectionOfWind;
+   sentence += WindSpeedKnots;
+   sentence += WindSpeedms;
+   sentence += WindSpeedms;
+   sentence += WindSpeedKmh;
 
    return( TRUE );
 }
 
-const MWV& MWV::operator = ( const MWV& source )
+const VWT& VWT::operator = ( const VWT& source )
 {
 //   ASSERT_VALID( this );
  
-   WindAngle      = source.WindAngle;
-   Reference      = source.Reference;
-   WindSpeed      = source.WindSpeed;
-   WindSpeedUnits = source.WindSpeedUnits;
-   IsDataValid    = source.IsDataValid;
+   WindDirectionMagnitude   = source.WindDirectionMagnitude;
+   DirectionOfWind			= source.DirectionOfWind;
+   WindSpeedKnots			= source.WindSpeedKnots;
+   WindSpeedms				= source.WindSpeedms;
+   WindSpeedKmh				= source.WindSpeedKmh;
 
    return( *this );
 }

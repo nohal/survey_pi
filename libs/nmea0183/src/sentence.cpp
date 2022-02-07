@@ -31,20 +31,6 @@
 
 
 #include "nmea0183.h"
-#include <math.h>
-
-#if !defined(NAN)
-
-//static const long long lNaN = 0x7fffffffffffffff;
-
-//#define NaN (*(double*)&lNaN)
-//#else
-static const long long lNaN = 0xfff8000000000000;
-#define NAN (*(double*)&lNaN)
-
-#endif
-
-
 
 /*
 ** Author: Samuel R. Blackburn
@@ -145,15 +131,18 @@ unsigned char SENTENCE::ComputeChecksum( void ) const
 {
    unsigned char checksum_value = 0;
 
-   int string_length = Sentence.Length();
+   char str_ascii[100];
+   strncpy(str_ascii, (const char *)Sentence.mb_str(), 99);
+
+   int string_length = strlen(str_ascii);
    int index = 1; // Skip over the $ at the begining of the sentence
 
    while( index < string_length    &&
-       Sentence[ index ] != '*' &&
-       Sentence[ index ] != CARRIAGE_RETURN &&
-       Sentence[ index ] != LINE_FEED )
+          str_ascii[ index ] != '*' &&
+          str_ascii[ index ] != CARRIAGE_RETURN &&
+          str_ascii[ index ] != LINE_FEED )
    {
-       checksum_value ^= (char)Sentence[ index ];
+         checksum_value ^= str_ascii[ index ];
          index++;
    }
 
@@ -164,14 +153,9 @@ double SENTENCE::Double( int field_number ) const
 {
  //  ASSERT_VALID( this );
       if(Field( field_number ).Len() == 0)
-            return (NAN);
+            return 999.;
 
-      wxCharBuffer abuf = Field( field_number).ToUTF8();
-      if( !abuf.data() )                            // badly formed sentence?
-        return (NAN);
-
-      return( ::atof( abuf.data() ));
-
+      return( ::atof( Field( field_number ).mb_str() ) );
 }
 
 
@@ -217,8 +201,6 @@ const wxString& SENTENCE::Field( int desired_field_number ) const
          current_field_number++;
       }
 
-      if( Sentence[ index ] == '*')
-          return_string += Sentence[ index ];
       index++;
    }
 
@@ -281,11 +263,8 @@ void SENTENCE::Finish( void )
 int SENTENCE::Integer( int field_number ) const
 {
 //   ASSERT_VALID( this );
-    wxCharBuffer abuf = Field( field_number).ToUTF8();
-    if( !abuf.data() )                            // badly formed sentence?
-        return 0;
 
-    return( ::atoi( abuf.data() ));
+    return( ::atoi( Field( field_number ).mb_str() ) );
 }
 
 NMEA0183_BOOLEAN SENTENCE::IsChecksumBad( int checksum_field_number ) const
@@ -303,8 +282,7 @@ NMEA0183_BOOLEAN SENTENCE::IsChecksumBad( int checksum_field_number ) const
       return( Unknown0183 );
    }
 
-   wxString check = checksum_in_sentence.Mid( 1 );
-   if ( ComputeChecksum() != HexValue( check ) )
+   if ( ComputeChecksum() != HexValue( checksum_in_sentence ) )
    {
       return( NTrue );
    }
@@ -497,21 +475,6 @@ const SENTENCE& SENTENCE::operator += ( double value )
    return( *this );
 }
 
-SENTENCE& SENTENCE::Add ( double value, int precision )
-{
-//   ASSERT_VALID( this );
-
-    wxString temp_string;
-    wxString s_Precision;
-
-    s_Precision.Printf(_T("%c.%if"), '%', precision );
-    temp_string.Printf( s_Precision, value );
-
-    Sentence += _T(",");
-    Sentence += temp_string;
-
-    return( *this );
-}
 const SENTENCE& SENTENCE::operator += ( COMMUNICATIONS_MODE mode )
 {
 //   ASSERT_VALID( this );

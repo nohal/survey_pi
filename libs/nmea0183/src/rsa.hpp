@@ -29,7 +29,9 @@
  *         "It is BSD license, do with it what you will"                   *
  */
 
-#include "nmea0183.h"
+
+#if ! defined( RSA_CLASS_HEADER )
+#define RSA_CLASS_HEADER
 
 /*
 ** Author: Samuel R. Blackburn
@@ -39,100 +41,37 @@
 ** You can use it any way you like.
 */
 
-//IMPLEMENT_DYNAMIC( MWV, RESPONSE )
-
-MWV::MWV()
+class RSA : public RESPONSE
 {
-   Mnemonic = _T("MWV");
-   Empty();
-}
+//   DECLARE_DYNAMIC( RSA )
 
-MWV::~MWV()
-{
-   Mnemonic.Empty();
-   Empty();
-}
+   public:
 
-void MWV::Empty( void )
-{
-//   ASSERT_VALID( this );
+      RSA();
+     ~RSA();
 
-   WindAngle   = 0.0;
-   Reference.Empty();
-   WindSpeed   = 0.0;
-   WindSpeedUnits.Empty();
-   IsDataValid = Unknown0183;
-}
+      /*
+      ** Data
+      */
 
-bool MWV::Parse( const SENTENCE& sentence )
-{
-//   ASSERT_VALID( this );
+      double           Starboard;
+      NMEA0183_BOOLEAN IsStarboardDataValid;
+      double           Port;
+      NMEA0183_BOOLEAN IsPortDataValid;
 
-   /*
-   ** MWV - Wind Speed and Angle
-   **
-   **        1   2 3   4 5
-   **        |   | |   | |
-   ** $--MWV,x.x,a,x.x,a*hh<CR><LF>
-   **
-   ** Field Number: 
-   **  1) Wind Angle, 0 to 360 degrees
-   **  2) Reference, R = Relative, T = True
-   **  3) Wind Speed
-   **  4) Wind Speed Units, K/M/N
-   **  5) Status, A = Data Valid
-   **  6) Checksum
-   */
+      /*
+      ** Methods
+      */
 
-   /*
-   ** First we check the checksum...
-   */
+      virtual void Empty( void );
+      virtual bool Parse( const SENTENCE& sentence );
+      virtual bool Write( SENTENCE& sentence );
 
-   if ( sentence.IsChecksumBad( 6 ) == TRUE )
-   {
-      SetErrorMessage( _T("Invalid Checksum") );
-      return( FALSE );
-   } 
+      /*
+      ** Operators
+      */
 
-   WindAngle      = sentence.Double( 1 );
-   Reference      = sentence.Field( 2 );
-   WindSpeed      = sentence.Double( 3 );
-   WindSpeedUnits = sentence.Field( 4 );
-   IsDataValid    = sentence.Boolean( 5 );
+      virtual const RSA& operator = ( const RSA& source );
+};
 
-   return( TRUE );
-}
-
-bool MWV::Write( SENTENCE& sentence )
-{
-//   ASSERT_VALID( this );
-
-   /*
-   ** Let the parent do its thing
-   */
-   
-   RESPONSE::Write( sentence );
-
-   sentence += WindAngle;
-   sentence += Reference;
-   sentence += WindSpeed;
-   sentence += WindSpeedUnits;
-   sentence += IsDataValid;
-
-   sentence.Finish();
-
-   return( TRUE );
-}
-
-const MWV& MWV::operator = ( const MWV& source )
-{
-//   ASSERT_VALID( this );
- 
-   WindAngle      = source.WindAngle;
-   Reference      = source.Reference;
-   WindSpeed      = source.WindSpeed;
-   WindSpeedUnits = source.WindSpeedUnits;
-   IsDataValid    = source.IsDataValid;
-
-   return( *this );
-}
+#endif // RSA_CLASS_HEADER
