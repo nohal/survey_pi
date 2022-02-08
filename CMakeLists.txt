@@ -32,7 +32,7 @@ include(Plugin.cmake)
 project(${PKG_NAME} VERSION ${PKG_VERSION})
 include(PluginCompiler)
 
-add_library(${CMAKE_PROJECT_NAME} SHARED ${SRC})
+add_library(${CMAKE_PROJECT_NAME} SHARED ${SRC} ${SRC_NMEA0183})
 include_directories(BEFORE ${CMAKE_BINARY_DIR}/include)
 
 add_subdirectory("libs/${PKG_API_LIB}")

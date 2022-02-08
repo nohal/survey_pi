@@ -49,7 +49,64 @@ set(PKG_IS_OPEN_SOURCE "yes")
 set(PKG_HOMEPAGE https://github.com/Rasbats/survey_pi)
 set(PKG_INFO_URL https://opencpn.org/OpenCPN/plugins/survey.html)
 
-
+SET(SRC_NMEA0183
+		src/nmea0183/LatLong.hpp
+		src/nmea0183/latlong.cpp
+		src/nmea0183/long.cpp
+		src/nmea0183/nmea0183.cpp
+		src/nmea0183/nmea0183.hpp
+		src/nmea0183/Response.hpp
+		src/nmea0183/response.cpp
+		src/nmea0183/RMB.hpp
+		src/nmea0183/rmb.cpp
+		src/nmea0183/Sentence.hpp
+		src/nmea0183/sentence.cpp
+		src/nmea0183/talkerid.cpp
+		src/nmea0183/RMC.HPP
+		src/nmea0183/rmc.cpp
+		src/nmea0183/hexvalue.cpp
+		src/nmea0183/lat.cpp
+		src/nmea0183/expid.cpp
+		src/nmea0183/wpl.hpp
+		src/nmea0183/wpl.cpp
+		src/nmea0183/rte.hpp
+		src/nmea0183/rte.cpp
+		src/nmea0183/hdt.hpp
+		src/nmea0183/hdt.cpp
+		src/nmea0183/hdg.hpp
+		src/nmea0183/hdg.cpp
+		src/nmea0183/hdm.hpp
+		src/nmea0183/hdm.cpp
+		src/nmea0183/gll.hpp
+		src/nmea0183/gll.cpp
+		src/nmea0183/vtg.hpp
+		src/nmea0183/vtg.cpp
+		src/nmea0183/gga.hpp
+		src/nmea0183/gga.cpp
+		src/nmea0183/gsv.hpp
+		src/nmea0183/gsv.cpp
+        src/nmea0183/dbt.cpp
+        src/nmea0183/dbt.hpp
+        src/nmea0183/dpt.cpp
+        src/nmea0183/dpt.hpp
+        src/nmea0183/mtw.cpp
+        src/nmea0183/mtw.hpp
+        src/nmea0183/mwv.cpp
+        src/nmea0183/mwv.hpp
+        src/nmea0183/vhw.hpp
+        src/nmea0183/vhw.cpp
+        src/nmea0183/vwr.cpp
+        src/nmea0183/vwr.hpp
+        src/nmea0183/zda.cpp
+        src/nmea0183/zda.hpp
+		src/nmea0183/rsa.hpp
+		src/nmea0183/rsa.cpp
+		src/nmea0183/SatInfo.h
+        src/nmea0183/mwd.cpp
+        src/nmea0183/mwd.hpp
+        src/nmea0183/vwt.cpp
+        src/nmea0183/vwt.hpp
+	)
 
 SET(SRC
     src/survey_pi.h
@@ -106,9 +163,6 @@ macro(add_plugin_libraries)
 
   add_subdirectory("libs/jsoncpp")
   target_link_libraries(${PACKAGE_NAME} ocpn::jsoncpp)
-
-  add_subdirectory("libs/nmea0183")
-  target_link_libraries(${PACKAGE_NAME} ocpn::nmea0183)
 
   add_subdirectory("libs/sqlite3_i")
   target_link_libraries(${PACKAGE_NAME} sqlite3_i::sqlite3_i)
