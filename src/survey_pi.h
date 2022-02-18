@@ -69,7 +69,7 @@
 #include "surveygui_impl.h"
 #include "SurveyOverlayFactory.h"
 
-#include "nmea0183/nmea0183.h"
+#include "nmea0183.h"
 #include <wx/tokenzr.h>
 #include <wx/textfile.h>
 
