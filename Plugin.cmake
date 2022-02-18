@@ -48,32 +48,32 @@ set(PKG_HOMEPAGE https://github.com/Rasbats/survey_pi)
 set(PKG_INFO_URL https://opencpn.org/OpenCPN/plugins/survey.html)
 
 set(SRC
-    src/survey_pi.h
-    src/survey_pi.cpp
-    src/icons.h
-    src/icons.cpp
-    src/surveygui.h
-    src/surveygui.cpp
-    src/surveygui_impl.cpp
-    src/surveygui_impl.h
-    src/mygridtablebase.cpp
-    src/mygridtablebase.h
-    src/soundinggridtable.cpp
-    src/soundinggridtable.h
-    src/ProfileWin.cpp
-    src/ProfileWin.h
     src/baro_history.cpp
     src/baro_history.h
-    src/instrument.cpp
-    src/instrument.h
-    src/circle.xpm
-    src/cross.xpm
-    src/square.xpm
     src/bbox.cpp
     src/bbox.h
+    src/circle.xpm
+    src/cross.xpm
+    src/dychart.h
+    src/icons.cpp
+    src/icons.h
+    src/instrument.cpp
+    src/instrument.h
+    src/mygridtablebase.cpp
+    src/mygridtablebase.h
+    src/ProfileWin.cpp
+    src/ProfileWin.h
+    src/soundinggridtable.cpp
+    src/soundinggridtable.h
+    src/square.xpm
+    src/surveygui.cpp
+    src/surveygui.h
+    src/surveygui_impl.cpp
+    src/surveygui_impl.h
     src/SurveyOverlayFactory.cpp
     src/SurveyOverlayFactory.h
-    src/dychart.h
+    src/survey_pi.cpp
+    src/survey_pi.h
 )
 
 set(PKG_API_LIB api-17) # A directory in libs/ e. g., api-17 or api-16
