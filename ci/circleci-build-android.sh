@@ -13,11 +13,23 @@
 
 set -xe
 
-uname -m
+# Read configuration and check if we should really build this
+here=$(cd $(dirname $0); pwd -P)
+source $here/../build-conf.rc
+if [ "$android_build_rate" -eq 0 ]; then exit 0; fi
+if [ $((CIRCLE_BUILD_NUM % android_build_rate)) -ne 0 ]; then
+    exit 0
+fi
 
 # Load local environment if it exists i. e., this is a local build
 if [ -f ~/.config/local-build.rc ]; then source ~/.config/local-build.rc; fi
 if [ -d /ci-source ]; then cd /ci-source; fi
+
+# Handle possible outdated key for google packages, see #487
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    | sudo apt-key add -
+
+git submodule update --init opencpn-libs
 
 # Set up build directory and a visible link in /
 builddir=build-$OCPN_TARGET
@@ -43,7 +55,7 @@ sudo apt remove python3-six python3-colorama python3-urllib3
 export LC_ALL=C.UTF-8  LANG=C.UTF-8
 python3 -m pip install --user -q cloudsmith-cli cryptography
 
-# Building using NDK requries a recent cmake, the packaged is too old
+# Building using NDK requires a recent cmake, the packaged is too old
 python3 -m pip install --user -q cmake
 
 # Build tarball
