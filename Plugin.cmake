@@ -90,19 +90,19 @@ endmacro ()
 
 macro (add_plugin_libraries)
   # Add libraries required by this plugin
-  add_subdirectory("libs/tinyxml")
+  add_subdirectory("opencpn-libs/tinyxml")
   target_link_libraries(${PACKAGE_NAME} ocpn::tinyxml)
 
-  add_subdirectory("libs/wxJSON")
+  add_subdirectory("opencpn-libs/wxJSON")
   target_link_libraries(${PACKAGE_NAME} ocpn::wxjson)
 
-  add_subdirectory("libs/plugingl")
+  add_subdirectory("opencpn-libs/plugingl")
   target_link_libraries(${PACKAGE_NAME} ocpn::plugingl)
 
-  add_subdirectory("libs/jsoncpp")
+  add_subdirectory("opencpn-libs/jsoncpp")
   target_link_libraries(${PACKAGE_NAME} ocpn::jsoncpp)
 
-  add_subdirectory("libs/nmea0183")
+  add_subdirectory("opencpn-libs/nmea0183")
   target_link_libraries(${PACKAGE_NAME} ocpn::nmea0183)
 
   add_subdirectory("libs/sqlite3_i")
