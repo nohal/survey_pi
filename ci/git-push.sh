@@ -8,3 +8,4 @@ if [ -f ~/.config/local-build.rc ]; then source ~/.config/local-build.rc; fi
 if [ -f ~/.uploadrc ]; then source ~/.uploadrc; fi
 cd $here
 python3 git-push $@
+

@@ -127,7 +127,7 @@ docker run \
     -e "CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM" \
     -e "TRAVIS_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER" \
     -v "$ci_source:/ci-source:rw" \
-    debian:$OCPN_TARGET /bin/bash -xe /ci-source/build.sh
+    debian:$OCPN_TARGET /bin/bash -xe /ci-source/build.sh    
 rm -f $ci_source/build.sh
 
 
@@ -137,6 +137,7 @@ if pyenv versions &>/dev/null;  then
     pyenv versions | tr -d '*' | awk '{print $1}' | tail -1 \
         > $HOME/.python-version
 fi
+python3 -m pip install -q --user "urllib3<2.0.0"   # See #520
 python3 -m pip install -q --user cloudsmith-cli cryptography
 
 # python install scripts in ~/.local/bin, teach upload.sh to use in it's PATH:
