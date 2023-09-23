@@ -5,12 +5,12 @@ name: Linux build
 on:
   push:
     branches:
-      - main
+      - master
     paths-ignore:
       - 'manual/**'
   pull_request:
     branches:
-      - main
+      - master
     paths-ignore:
       - 'manual/**'
 
