@@ -12,17 +12,16 @@
 # -------- Options ----------
 
 set(OCPN_TEST_REPO
-    "opencpn/survey-alpha"
-    CACHE STRING "Default repository for untagged builds"
-)
+    "nohal/opencpn-plugins"
+    CACHE STRING "Default repository for untagged builds")
 set(OCPN_BETA_REPO
-    "opencpn/survey-beta"
-    CACHE STRING "Default repository for tagged builds matching 'beta'"
-)
+    "nohal/survey_pi-beta"
+    CACHE STRING "Default repository for tagged builds matching 'beta'")
 set(OCPN_RELEASE_REPO
-    "opencpn/survey-prod"
-    CACHE STRING "Default repository for tagged builds not matching 'beta'"
-)
+    "nohal/survey_pi-stable"
+    CACHE STRING "Default repository for tagged builds not matching 'beta'")
+
+
 
 option(SURVEY_USE_SVG "Use SVG graphics" ON)
 
@@ -42,9 +41,9 @@ Survey
 ]=]
 )
 
-set(PKG_AUTHOR "Mike Rossiter")
+set(PKG_AUTHOR "Pavel Kalian, Mike Rossiter")
 set(PKG_IS_OPEN_SOURCE "yes")
-set(PKG_HOMEPAGE https://github.com/Rasbats/survey_pi)
+set(PKG_HOMEPAGE https://github.com/nohal/survey_pi)
 set(PKG_INFO_URL https://opencpn.org/OpenCPN/plugins/survey.html)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
