@@ -63,7 +63,7 @@ set(SRC
     src/survey_pi.cpp
 )
 
-set(PKG_API_LIB api-17) # A directory in libs/ e. g., api-17 or api-16
+set(PKG_API_LIB api-18) # A directory in libs/ e. g., api-17 or api-16
 
 macro (late_init)
   # Perform initialization after the PACKAGE_NAME library, compilers and
