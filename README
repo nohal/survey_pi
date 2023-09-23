@@ -17,7 +17,7 @@ the plugin. This will allow separation between raw data and adjusted data.
 Using OpenGL the soundings can be viewed without a sounding mark.
 Now possible to delete a sounding using right-click.
 
-Windows 
+Windows
 The plugin builds standalone without additional files.
 Linux
 Install packages 'libsqlite3','libsqlite3-dev', 'libsqlite3-mod-spatialite' before compiling.

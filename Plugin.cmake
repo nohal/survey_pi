@@ -105,7 +105,7 @@ macro (add_plugin_libraries)
   add_subdirectory("opencpn-libs/nmea0183")
   target_link_libraries(${PACKAGE_NAME} ocpn::nmea0183)
 
-  add_subdirectory("libs/sqlite3_i")
-  target_link_libraries(${PACKAGE_NAME} sqlite3_i::sqlite3_i)
+  #add_subdirectory("libs/sqlite3_i")
+  #target_link_libraries(${PACKAGE_NAME} sqlite3_i::sqlite3_i)
 
 endmacro ()

@@ -32,13 +32,13 @@
 #include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWidgets headers)
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 
 // Warn: div by 0 if count == 1
@@ -47,66 +47,57 @@
 #include "instrument.h"
 #include "surveygui_impl.h"
 
-//#include "dial.h"
+// #include "dial.h"
 
+class survey_profile : public DashboardInstrument {
+public:
+    survey_profile(wxWindow* parent, wxWindowID id, wxString title);
 
+    ~survey_profile(void) { }
 
-class survey_profile: public DashboardInstrument
-{
-      public:
-            survey_profile( wxWindow *parent, wxWindowID id, wxString title);
+    void SetData(int, double, wxString);
+    wxSize GetSize(int orient, wxSize hint);
 
-            ~survey_profile(void){}
-
-            void SetData(int, double, wxString);
-   wxSize GetSize( int orient, wxSize hint );
-
-
-      private:
-    int m_soloInPane ;
-    int    m_SpdRecCnt, m_DirRecCnt, m_SpdStartVal,m_DirStartVal;
+private:
+    int m_soloInPane;
+    int m_SpdRecCnt, m_DirRecCnt, m_SpdStartVal, m_DirStartVal;
     int m_isNULL;
     int m_WindDirShift;
 
-      protected:
-      double alpha;
-            double m_ArrayBaroHistory[BARO_RECORD_COUNT];
-            double m_ArrayPressHistory[BARO_RECORD_COUNT];
-            double m_ExpSmoothArrayPressure[BARO_RECORD_COUNT];
+protected:
+    double alpha;
+    double m_ArrayBaroHistory[BARO_RECORD_COUNT];
+    double m_ArrayPressHistory[BARO_RECORD_COUNT];
+    double m_ExpSmoothArrayPressure[BARO_RECORD_COUNT];
 
-   wxDateTime m_ArrayRecTime[BARO_RECORD_COUNT];
+    wxDateTime m_ArrayRecTime[BARO_RECORD_COUNT];
 
+    double m_MaxPress; //...in array
+    double m_MinPress; //...in array
+    double m_TotalMaxPress; // since O is started
+    double m_TotalMinPress;
+    double m_Press;
+    double m_MaxPressScale;
+    double m_ratioW;
 
+    bool m_IsRunning;
+    int m_SampleCount;
 
-            double m_MaxPress;  //...in array
-            double m_MinPress;  //...in array
-            double m_TotalMaxPress; // since O is started
-            double m_TotalMinPress;
-            double m_Press;
-   double m_MaxPressScale;
-            double m_ratioW;
+    wxRect m_WindowRect;
+    wxRect m_DrawAreaRect; // the coordinates of the real darwing area
+    int m_DrawingWidth, m_TopLineHeight, m_DrawingHeight;
+    int m_width, m_height;
+    int m_LeftLegend, m_RightLegend;
+    int m_currSec, m_lastSec, m_SpdCntperSec;
+    double m_cntSpd, m_cntDir, m_avgSpd, m_avgDir;
 
-   bool m_IsRunning;
-   int m_SampleCount;
+    void Draw(wxGCDC* dc);
+    void DrawBackground(wxGCDC* dc);
+    void DrawForeground(wxGCDC* dc);
+    void SetMinMaxWindScale();
 
-            wxRect m_WindowRect;
-            wxRect m_DrawAreaRect; //the coordinates of the real darwing area
-            int m_DrawingWidth,m_TopLineHeight,m_DrawingHeight;
-   int m_width,m_height;
-            int m_LeftLegend, m_RightLegend;
-            int m_currSec,m_lastSec,m_SpdCntperSec;
-            double m_cntSpd,m_cntDir,m_avgSpd,m_avgDir;
-
-            void Draw(wxGCDC* dc);
-            void DrawBackground(wxGCDC* dc);
-            void DrawForeground(wxGCDC* dc);
-            void SetMinMaxWindScale();
-
-   void DrawWindSpeedScale(wxGCDC* dc);
-   //wxString GetWindDirStr(wxString WindDir);
+    void DrawWindSpeedScale(wxGCDC* dc);
+    // wxString GetWindDirStr(wxString WindDir);
 };
 
-
-
 #endif // __SURVEY_PROFILE_H__
-

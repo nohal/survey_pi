@@ -34,15 +34,13 @@
 
 //    Profiling support
 
-//#include "/usr/include/valgrind/callgrind.h"
+// #include "/usr/include/valgrind/callgrind.h"
 
 //  Chart cacheing policy defaults
 
-#define CACHE_N_LIMIT_DEFAULT 20          // Cache no more than n charts
+#define CACHE_N_LIMIT_DEFAULT 20 // Cache no more than n charts
 
-#define CACHE_MEM_LIMIT_DEFAULT 0       // Application memory useage target, kBytes
-
-
+#define CACHE_MEM_LIMIT_DEFAULT 0 // Application memory useage target, kBytes
 
 //          If defined, update the system time using GPS receiver data.
 //          Time update is applied if the system time and GPS time differ
@@ -60,7 +58,6 @@
 //          For security, this option is not available on the "Options" dialog
 #define ocpnUPDATE_SYSTEM_TIME
 
-
 //------------------------------------------------------------------------------
 //          Some private, app global type definitions
 //------------------------------------------------------------------------------
@@ -70,9 +67,9 @@
 //------------------------------------------------------------------------------
 
 #ifdef __MSVC__
-#pragma warning(disable:4114)
-#pragma warning(disable:4284)             // This one is to do with "reverse iterator UDT..." Huh?
-
+#pragma warning(disable : 4114)
+#pragma warning(disable : 4284) // This one is to do with "reverse iterator
+                                // UDT..." Huh?
 
 #endif
 
@@ -92,16 +89,16 @@
 //    Floating Point Max/Min
 
 #ifndef __max
-      #define __max(a,b)  (((a) > (b)) ? (a) : (b))
+#define __max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
 #ifndef __min
-      #define __min(a,b)  (((a) < (b)) ? (a) : (b))
+#define __min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifdef __MSVC__
-      #define fmin __min
-      #define fmax __max
+#define fmin __min
+#define fmax __max
 
 //      #define round(x) floor(x)
 #endif
@@ -113,48 +110,45 @@
 
 //    Home Base, used if the config file lat/lon seems bogus or missing
 
-//#define START_LAT   35.1025              // New Bern (Ver 1.0)
-//#define START_LON  -77.0342
+// #define START_LAT   35.1025              // New Bern (Ver 1.0)
+// #define START_LON  -77.0342
 
-//#define START_LAT   26.783               // Green Turtle Key  (Ver 1.2)
-//#define START_LON  -77.333
+// #define START_LAT   26.783               // Green Turtle Key  (Ver 1.2)
+// #define START_LON  -77.333
 
-//#define START_LAT   25.786               //  Miami Beach (Ver 1.2.2)
-//#define START_LON  -80.148
+// #define START_LAT   25.786               //  Miami Beach (Ver 1.2.2)
+// #define START_LON  -80.148
 
-#define START_LAT   33.358               //  Georgetown, SC (Ver 1.2.4)
-#define START_LON  -79.282
+#define START_LAT 33.358 //  Georgetown, SC (Ver 1.2.4)
+#define START_LON -79.282
 
 //------------------------------------------------------------------------------
 //          Some MSW and MSVCRT Specific Includes
 //------------------------------------------------------------------------------
 #ifdef __WXMSW__
-    #include "wx/msw/private.h"
+#include "wx/msw/private.h"
 #endif
 
 //------------------------------------------------------------------------------
 //          Some Memory Leak Detection Code
 //------------------------------------------------------------------------------
 
-
-
 #ifdef __MSVC__
-        #ifdef _DEBUG
-            #define _CRTDBG_MAP_ALLOC
-            #include <crtdbg.h>
-            #define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__ )
-            #define new DEBUG_NEW
-        #endif
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#define DEBUG_NEW new (_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
 #endif
-
+#endif
 
 //----------------------------------------------------------------------------
 //          Environment Access functions
 //----------------------------------------------------------------------------
 #ifdef __MSVC__
-#define _putenv _putenv       // This is for MSVC
+#define _putenv _putenv // This is for MSVC
 #else
-#define _putenv putenv        // This is for other Windows compiler
+#define _putenv putenv // This is for other Windows compiler
 #endif
 
 //----------------------------------------------------------------------------
@@ -175,8 +169,6 @@
 #define NULL 0
 #endif
 
-
-
 /***********************************************************************
  * Define __POSIX__ to imply posix thread model compatibility
  * Especially used for communication port multithreading.
@@ -188,40 +180,38 @@
 #undef __POSIX__
 #endif
 
-#ifdef  __WXOSX__
+#ifdef __WXOSX__
 #define __POSIX__
 #endif
 
-#ifdef  __WXGTK__
+#ifdef __WXGTK__
 #define __POSIX__
 #endif
-
 
 #ifndef OCPN_GL_INCLUDES
 #define OCPN_GL_INCLUDES 1
 
 #ifdef __WXMSW__
-    #include "GL/gl.h"            // local copy for Windows
-    #include "GL/glu.h"
+#include "GL/gl.h" // local copy for Windows
+#include "GL/glu.h"
 #else
-    #ifndef __OCPN__ANDROID__
-        #include <GL/gl.h>
-        #include <GL/glu.h>
-        #include <GL/glext.h>
-    #else
-        #include <qopengl.h>
-        #include <GL/gl_private.h>              // this is a cut-down version of gl.h
-                                                // which allows use of gl functions with gles2 headers
-                                                // to be included as well, and avoids colisions.
-    #endif
+#ifndef __OCPN__ANDROID__
+#include <GL/gl.h>
+#include <GL/glext.h>
+#include <GL/glu.h>
+#else
+#include <GL/gl_private.h> // this is a cut-down version of gl.h
+#include <qopengl.h>
+// which allows use of gl functions with gles2 headers
+// to be included as well, and avoids colisions.
+#endif
 
 #endif
 
-#endif      //OCPN_GL_INCLUDES
-
+#endif // OCPN_GL_INCLUDES
 
 #ifdef __OCPN__ANDROID__
 #include "qdebug.h"
 #endif
 
-#endif      // __FILE__
+#endif // __FILE__

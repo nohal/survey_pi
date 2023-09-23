@@ -26,341 +26,384 @@
  */
 
 #include "survey_profile.h"
-//#include "wx28compat.h"
+// #include "wx28compat.h"
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWidgets headers)
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
-
 
 //************************************************************************************************************************
 // History of barometic pressure
 //************************************************************************************************************************
 
-survey_profile::survey_profile( wxWindow *parent, wxWindowID id, wxString title) :
-      DashboardInstrument(parent, id, title, OCPN_DBP_STC_MDA)
-{     SetDrawSoloInPane(true);
+survey_profile::survey_profile(wxWindow* parent, wxWindowID id, wxString title)
+    : DashboardInstrument(parent, id, title, OCPN_DBP_STC_MDA)
+{
+    SetDrawSoloInPane(true);
 
+    m_MaxPress = 10;
+    m_MinPress = (double)0;
+    m_TotalMaxPress = 3;
+    m_TotalMinPress = 0;
+    m_Press = 5;
+    m_TopLineHeight = 30;
+    m_SpdRecCnt = 3000;
+    m_SpdStartVal = 0;
+    m_IsRunning = true;
+    m_SampleCount = 3000;
+    m_LeftLegend = 3;
+    m_RightLegend = 3;
 
-
-      m_MaxPress = 10;
-      m_MinPress =(double)0;
-      m_TotalMaxPress = 3;
-      m_TotalMinPress= 0;
-      m_Press = 5;
-      m_TopLineHeight=30;
-      m_SpdRecCnt=3000;
-      m_SpdStartVal=0;
-      m_IsRunning=true;
-      m_SampleCount=3000;
-      m_LeftLegend=3;
-      m_RightLegend=3;
-
-	  for (int idx = 0; idx < BARO_RECORD_COUNT; idx++) {
-		  m_ArrayPressHistory[idx] = -1;
-		  m_ExpSmoothArrayPressure[idx] = -1;
-		  m_ArrayRecTime[idx] = wxDateTime::Now();
-		  m_ArrayRecTime[idx].SetYear(999);
-	  }
-      alpha=0.01;  //smoothing constant
-      m_WindowRect=GetClientRect();
-      m_DrawAreaRect=GetClientRect();
-      m_DrawAreaRect.SetHeight(m_WindowRect.height-m_TopLineHeight-m_TitleHeight);
+    for (int idx = 0; idx < BARO_RECORD_COUNT; idx++) {
+        m_ArrayPressHistory[idx] = -1;
+        m_ExpSmoothArrayPressure[idx] = -1;
+        m_ArrayRecTime[idx] = wxDateTime::Now();
+        m_ArrayRecTime[idx].SetYear(999);
+    }
+    alpha = 0.01; // smoothing constant
+    m_WindowRect = GetClientRect();
+    m_DrawAreaRect = GetClientRect();
+    m_DrawAreaRect.SetHeight(
+        m_WindowRect.height - m_TopLineHeight - m_TitleHeight);
 }
 
-wxSize survey_profile::GetSize( int orient, wxSize hint )
+wxSize survey_profile::GetSize(int orient, wxSize hint)
 {
-      wxClientDC dc(this);
-      int w;
-      dc.GetTextExtent(m_title, &w, &m_TitleHeight, 0, 0, g_pFontTitle);
-      if( orient == wxHORIZONTAL ) {
-        return wxSize( DefaultWidth, wxMax(m_TitleHeight+140, hint.y) );
-      }
-      else {
-        return wxSize( wxMax(hint.x, DefaultWidth), wxMax(m_TitleHeight+140, hint.y) );
-      }
+    wxClientDC dc(this);
+    int w;
+    dc.GetTextExtent(m_title, &w, &m_TitleHeight, 0, 0, g_pFontTitle);
+    if (orient == wxHORIZONTAL) {
+        return wxSize(DefaultWidth, wxMax(m_TitleHeight + 140, hint.y));
+    } else {
+        return wxSize(
+            wxMax(hint.x, DefaultWidth), wxMax(m_TitleHeight + 140, hint.y));
+    }
 }
 
 void survey_profile::SetData(int st, double data, wxString unit)
 {
-	//wxLogMessage(unit);
+    // wxLogMessage(unit);
 
-	if (st == OCPN_DBP_STC_MDA) {
-		m_Press = data;
-		if (m_SpdRecCnt++ <= 5) m_SpdStartVal += data;
-	}
-	if (m_SpdRecCnt == 5) {
-		m_Press = m_SpdStartVal / 5;
-	}
-	//start working after we collected 5 records each, as start values for the smoothed curves
-	if (m_SpdRecCnt > 5) {
-		m_IsRunning = true;
-		m_SampleCount = m_SampleCount<BARO_RECORD_COUNT ? m_SampleCount + 1 : BARO_RECORD_COUNT;
-		m_MaxPress = 0;
-		;
-		//data shifting
-		for (int idx = 1; idx < BARO_RECORD_COUNT; idx++) {
-			if (BARO_RECORD_COUNT - m_SampleCount <= idx)
-				m_MaxPress = wxMax(m_ArrayPressHistory[idx - 1], m_MaxPress);
-			m_MinPress = wxMin(m_ArrayPressHistory[idx - 1], m_MinPress);
-			m_ArrayPressHistory[idx - 1] = m_ArrayPressHistory[idx];
-			m_ExpSmoothArrayPressure[idx - 1] = m_ExpSmoothArrayPressure[idx];
-			m_ArrayRecTime[idx - 1] = m_ArrayRecTime[idx];
-		}
-		m_ArrayPressHistory[BARO_RECORD_COUNT - 1] = m_Press;
-		if (m_SampleCount<2) {
-			m_ArrayPressHistory[BARO_RECORD_COUNT - 2] = m_Press;
-			m_ExpSmoothArrayPressure[BARO_RECORD_COUNT - 2] = m_Press;
+    if (st == OCPN_DBP_STC_MDA) {
+        m_Press = data;
+        if (m_SpdRecCnt++ <= 5)
+            m_SpdStartVal += data;
+    }
+    if (m_SpdRecCnt == 5) {
+        m_Press = m_SpdStartVal / 5;
+    }
+    // start working after we collected 5 records each, as start values for the
+    // smoothed curves
+    if (m_SpdRecCnt > 5) {
+        m_IsRunning = true;
+        m_SampleCount = m_SampleCount < BARO_RECORD_COUNT ? m_SampleCount + 1
+                                                          : BARO_RECORD_COUNT;
+        m_MaxPress = 0;
+        ;
+        // data shifting
+        for (int idx = 1; idx < BARO_RECORD_COUNT; idx++) {
+            if (BARO_RECORD_COUNT - m_SampleCount <= idx)
+                m_MaxPress = wxMax(m_ArrayPressHistory[idx - 1], m_MaxPress);
+            m_MinPress = wxMin(m_ArrayPressHistory[idx - 1], m_MinPress);
+            m_ArrayPressHistory[idx - 1] = m_ArrayPressHistory[idx];
+            m_ExpSmoothArrayPressure[idx - 1] = m_ExpSmoothArrayPressure[idx];
+            m_ArrayRecTime[idx - 1] = m_ArrayRecTime[idx];
+        }
+        m_ArrayPressHistory[BARO_RECORD_COUNT - 1] = m_Press;
+        if (m_SampleCount < 2) {
+            m_ArrayPressHistory[BARO_RECORD_COUNT - 2] = m_Press;
+            m_ExpSmoothArrayPressure[BARO_RECORD_COUNT - 2] = m_Press;
+        }
+        m_ExpSmoothArrayPressure[BARO_RECORD_COUNT - 1]
+            = alpha * m_ArrayPressHistory[BARO_RECORD_COUNT - 2]
+            + (1 - alpha) * m_ExpSmoothArrayPressure[BARO_RECORD_COUNT - 2];
+        m_ArrayRecTime[BARO_RECORD_COUNT - 1] = wxDateTime::Now();
+        m_MaxPress = wxMax(m_Press, m_MaxPress);
 
-		}
-		m_ExpSmoothArrayPressure[BARO_RECORD_COUNT - 1] = alpha*m_ArrayPressHistory[BARO_RECORD_COUNT - 2] + (1 - alpha)*m_ExpSmoothArrayPressure[BARO_RECORD_COUNT - 2];
-		m_ArrayRecTime[BARO_RECORD_COUNT - 1] = wxDateTime::Now();
-		m_MaxPress = wxMax(m_Press, m_MaxPress);
-
-		m_MinPress = wxMin(m_MinPress, m_Press);
-		if (wxMin(m_Press, m_MinPress) == -1) {
-			m_MinPress = wxMin(m_Press, 1200); // to make a OK inital value
-		}
-		//get the overall max min pressure
-		m_TotalMaxPress = wxMax(m_Press, m_TotalMaxPress);
-		m_TotalMinPress = wxMin(m_Press, m_TotalMinPress);
-	}
+        m_MinPress = wxMin(m_MinPress, m_Press);
+        if (wxMin(m_Press, m_MinPress) == -1) {
+            m_MinPress = wxMin(m_Press, 1200); // to make a OK inital value
+        }
+        // get the overall max min pressure
+        m_TotalMaxPress = wxMax(m_Press, m_TotalMaxPress);
+        m_TotalMinPress = wxMin(m_Press, m_TotalMinPress);
+    }
 }
 
 void survey_profile::Draw(wxGCDC* dc)
 {
-   m_WindowRect = GetClientRect();
-   m_DrawAreaRect=GetClientRect();
-   m_DrawAreaRect.SetHeight(m_WindowRect.height-m_TopLineHeight-m_TitleHeight);
-   m_DrawAreaRect.SetX (m_LeftLegend+3);
-   DrawBackground(dc);
-   DrawForeground(dc);
+    m_WindowRect = GetClientRect();
+    m_DrawAreaRect = GetClientRect();
+    m_DrawAreaRect.SetHeight(
+        m_WindowRect.height - m_TopLineHeight - m_TitleHeight);
+    m_DrawAreaRect.SetX(m_LeftLegend + 3);
+    DrawBackground(dc);
+    DrawForeground(dc);
 }
-
-
 
 //*********************************************************************************
 // draw pressure scale
 //*********************************************************************************
-void  survey_profile::DrawWindSpeedScale(wxGCDC* dc)
+void survey_profile::DrawWindSpeedScale(wxGCDC* dc)
 {
-  wxString label1,label2,label3,label4,label5;
-  wxColour cl;
-  int width, height;
-  cl=wxColour(61,61,204,255);
-  dc->SetTextForeground(cl);
-  dc->SetFont(*g_pFontSmall);
+    wxString label1, label2, label3, label4, label5;
+    wxColour cl;
+    int width, height;
+    cl = wxColour(61, 61, 204, 255);
+    dc->SetTextForeground(cl);
+    dc->SetFont(*g_pFontSmall);
 
- // m_TotalMaxPress=20;
- // m_TotalMinPress=0;
+    // m_TotalMaxPress=20;
+    // m_TotalMinPress=0;
 
+    m_MaxPressScale = (int)((m_MaxPress + 1) - (m_TotalMinPress));
 
-  m_MaxPressScale= (int)((m_MaxPress+1)-(m_TotalMinPress));
+    if (!m_IsRunning) {
+        label1 = _T("-- m");
+        label2 = _T("-- m");
+        label3 = _T("-- m");
+        label4 = _T("-- m");
+        label5 = _T("-- m");
+    } else {
+        /*
+         The goal is to draw the legend with decimals only, if we really have
+         them !
+        */
+        // top legend for max press
+        label1.Printf(_T("%.0f m"), m_MaxPressScale);
 
-  if(!m_IsRunning) {
-    label1=_T("-- m");
-    label2=_T("-- m");
-    label3=_T("-- m");
-    label4=_T("-- m");
-    label5=_T("-- m");
-  }
-  else {
-/*
- The goal is to draw the legend with decimals only, if we really have them !
-*/
-    // top legend for max press
-    label1.Printf(_T("%.0f m"), m_MaxPressScale  );
+        // 3/4 legend
 
-    // 3/4 legend
+        label2.Printf(_T("%.0f m"), m_MaxPressScale * 3. / 4);
 
-      label2.Printf(_T("%.0f m"), m_MaxPressScale *3./4   );
+        // center legend
 
-    // center legend
+        label3.Printf(_T("%.0f m"), m_MaxPressScale / 2);
 
-      label3.Printf(_T("%.0f m"), m_MaxPressScale /2 );
+        // 1/4 legend
 
-    // 1/4 legend
+        label4.Printf(_T("%.0f m"), m_MaxPressScale / 4);
 
-      label4.Printf(_T("%.0f m"), m_MaxPressScale /4   );
-
-    //bottom legend for min wind
-    label5.Printf(_T("%.0f m"), (m_TotalMinPress));
-  }
-  dc->GetTextExtent(label1, &m_LeftLegend, &height, 0, 0, g_pFontSmall);
-  dc->DrawText(label1, 4, (int)(m_TopLineHeight-height/2));
-  dc->GetTextExtent(label2, &width, &height, 0, 0, g_pFontSmall);
-  dc->DrawText(label2, 4, (int)(m_TopLineHeight+m_DrawAreaRect.height/4-height/2));
-  m_LeftLegend = wxMax(width,m_LeftLegend);
-  dc->GetTextExtent(label3, &width, &height, 0, 0, g_pFontSmall);
-  dc->DrawText(label3, 4, (int)(m_TopLineHeight+m_DrawAreaRect.height/2-height/2));
-  m_LeftLegend = wxMax(width,m_LeftLegend);
-  dc->GetTextExtent(label4, &width, &height, 0, 0, g_pFontSmall);
-  dc->DrawText(label4, 4, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.75-height/2));
-  m_LeftLegend = wxMax(width,m_LeftLegend);
-  dc->GetTextExtent(label5, &width, &height, 0, 0, g_pFontSmall);
-  dc->DrawText(label5, 4,  (int)(m_TopLineHeight+m_DrawAreaRect.height-height/2));
-  m_LeftLegend = wxMax(width,m_LeftLegend);
-  m_LeftLegend+=4;
+        // bottom legend for min wind
+        label5.Printf(_T("%.0f m"), (m_TotalMinPress));
+    }
+    dc->GetTextExtent(label1, &m_LeftLegend, &height, 0, 0, g_pFontSmall);
+    dc->DrawText(label1, 4, (int)(m_TopLineHeight - height / 2));
+    dc->GetTextExtent(label2, &width, &height, 0, 0, g_pFontSmall);
+    dc->DrawText(label2, 4,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height / 4 - height / 2));
+    m_LeftLegend = wxMax(width, m_LeftLegend);
+    dc->GetTextExtent(label3, &width, &height, 0, 0, g_pFontSmall);
+    dc->DrawText(label3, 4,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height / 2 - height / 2));
+    m_LeftLegend = wxMax(width, m_LeftLegend);
+    dc->GetTextExtent(label4, &width, &height, 0, 0, g_pFontSmall);
+    dc->DrawText(label4, 4,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height * 0.75 - height / 2));
+    m_LeftLegend = wxMax(width, m_LeftLegend);
+    dc->GetTextExtent(label5, &width, &height, 0, 0, g_pFontSmall);
+    dc->DrawText(
+        label5, 4, (int)(m_TopLineHeight + m_DrawAreaRect.height - height / 2));
+    m_LeftLegend = wxMax(width, m_LeftLegend);
+    m_LeftLegend += 4;
 }
 
 //*********************************************************************************
-//draw background
+// draw background
 //*********************************************************************************
 void survey_profile::DrawBackground(wxGCDC* dc)
 {
-  wxString label,label1,label2,label3,label4,label5;
-  wxColour cl;
-  wxPen pen;
-  //---------------------------------------------------------------------------------
-  // draw legends for spressure
-  //---------------------------------------------------------------------------------
+    wxString label, label1, label2, label3, label4, label5;
+    wxColour cl;
+    wxPen pen;
+    //---------------------------------------------------------------------------------
+    // draw legends for spressure
+    //---------------------------------------------------------------------------------
 
-  DrawWindSpeedScale(dc);
+    DrawWindSpeedScale(dc);
 
-  //---------------------------------------------------------------------------------
-  // horizontal lines
-  //---------------------------------------------------------------------------------
-  GetGlobalColor(_T("UBLCK"), &cl);
-  pen.SetColour(cl);
-  dc->SetPen(pen);
-  dc->DrawLine(m_LeftLegend+3, m_TopLineHeight, m_WindowRect.width-3-m_RightLegend, m_TopLineHeight); // the upper line
-  dc->DrawLine(m_LeftLegend+3, (int)(m_TopLineHeight+m_DrawAreaRect.height), m_WindowRect.width-3-m_RightLegend, (int)(m_TopLineHeight+m_DrawAreaRect.height));
-  pen.SetStyle(wxPENSTYLE_DOT);
-  dc->SetPen(pen);
-  dc->DrawLine(m_LeftLegend+3, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.25), m_WindowRect.width-3-m_RightLegend, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.25));
-  dc->DrawLine(m_LeftLegend+3, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.75), m_WindowRect.width-3-m_RightLegend, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.75));
+    //---------------------------------------------------------------------------------
+    // horizontal lines
+    //---------------------------------------------------------------------------------
+    GetGlobalColor(_T("UBLCK"), &cl);
+    pen.SetColour(cl);
+    dc->SetPen(pen);
+    dc->DrawLine(m_LeftLegend + 3, m_TopLineHeight,
+        m_WindowRect.width - 3 - m_RightLegend,
+        m_TopLineHeight); // the upper line
+    dc->DrawLine(m_LeftLegend + 3,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height),
+        m_WindowRect.width - 3 - m_RightLegend,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height));
+    pen.SetStyle(wxPENSTYLE_DOT);
+    dc->SetPen(pen);
+    dc->DrawLine(m_LeftLegend + 3,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height * 0.25),
+        m_WindowRect.width - 3 - m_RightLegend,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height * 0.25));
+    dc->DrawLine(m_LeftLegend + 3,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height * 0.75),
+        m_WindowRect.width - 3 - m_RightLegend,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height * 0.75));
 #ifdef __WXMSW__
-  pen.SetStyle(wxPENSTYLE_SHORT_DASH);
-  dc->SetPen(pen);
+    pen.SetStyle(wxPENSTYLE_SHORT_DASH);
+    dc->SetPen(pen);
 #endif
-  dc->DrawLine(m_LeftLegend+3, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.5), m_WindowRect.width-3-m_RightLegend, (int)(m_TopLineHeight+m_DrawAreaRect.height*0.5));
+    dc->DrawLine(m_LeftLegend + 3,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height * 0.5),
+        m_WindowRect.width - 3 - m_RightLegend,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height * 0.5));
 
-  dc->DrawLine(m_LeftLegend + 3, (int)(m_TopLineHeight), m_LeftLegend + 3, (int)(m_TopLineHeight + m_DrawAreaRect.height));
-  dc->DrawLine(m_WindowRect.width - 3 - m_RightLegend, (int)(m_TopLineHeight), m_WindowRect.width - 3 - m_RightLegend, (int)(m_TopLineHeight + m_DrawAreaRect.height));
-
+    dc->DrawLine(m_LeftLegend + 3, (int)(m_TopLineHeight), m_LeftLegend + 3,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height));
+    dc->DrawLine(m_WindowRect.width - 3 - m_RightLegend, (int)(m_TopLineHeight),
+        m_WindowRect.width - 3 - m_RightLegend,
+        (int)(m_TopLineHeight + m_DrawAreaRect.height));
 }
 
-
 //*********************************************************************************
-//draw foreground
+// draw foreground
 //*********************************************************************************
 void survey_profile::DrawForeground(wxGCDC* dc)
 {
-  wxColour col;
-  double ratioH;
-  int degw,degh;
-  int width,height,min,hour;
-  wxString WindAngle,WindSpeed;
-  wxPen pen;
-  wxString label;
+    wxColour col;
+    double ratioH;
+    int degw, degh;
+    int width, height, min, hour;
+    wxString WindAngle, WindSpeed;
+    wxPen pen;
+    wxString label;
 
+    //---------------------------------------------------------------------------------
+    // Pressure
+    //---------------------------------------------------------------------------------
+    col = wxColour(61, 61, 204, 255); // blue, opaque
+    dc->SetFont(*g_pFontData);
+    dc->SetTextForeground(col);
+    WindSpeed = wxString::Format(_T("Sounding %3.1f  "), m_Press);
+    dc->GetTextExtent(WindSpeed, &degw, &degh, 0, 0, g_pFontData);
+    dc->DrawText(WindSpeed, m_LeftLegend + 3, m_TopLineHeight - degh);
+    dc->SetFont(*g_pFontLabel);
+    // determine the time range of the available data (=oldest data value)
+    int i = 0;
 
-  //---------------------------------------------------------------------------------
-  // Pressure
-  //---------------------------------------------------------------------------------
-  col=wxColour(61,61,204,255); //blue, opaque
-  dc->SetFont(*g_pFontData);
-  dc->SetTextForeground(col);
-  WindSpeed=wxString::Format(_T("Sounding %3.1f  "), m_Press);
-  dc->GetTextExtent(WindSpeed, &degw, &degh, 0, 0, g_pFontData);
-  dc->DrawText(WindSpeed, m_LeftLegend+3, m_TopLineHeight-degh);
-  dc->SetFont(*g_pFontLabel);
-  //determine the time range of the available data (=oldest data value)
-  int i=0;
+    min = m_ArrayRecTime[i].GetMinute();
+    hour = m_ArrayRecTime[i].GetHour();
 
-    min=m_ArrayRecTime[i].GetMinute();
-    hour=m_ArrayRecTime[i].GetHour();
+    m_ratioW = double(m_DrawAreaRect.width) / (BARO_RECORD_COUNT - 1);
+    // dc->DrawText(wxString::Format(_(" Max %.1f Min %.1f since %02d:%02d
+    // Overall Max %.1f Min %.1f
+    // "),m_MaxPress,m_MinPress,hour,min,m_TotalMaxPress,m_TotalMinPress),
+    // m_LeftLegend+3+2+degw, m_TopLineHeight-degh+5); Cant get the min sice to
+    // work...
+    dc->DrawText(wxString::Format(
+                     _(" Max %.1f since %02d:%02d  Overall Max %.1f Min %.1f "),
+                     m_MaxPress, hour, min, m_TotalMaxPress, m_TotalMinPress),
+        m_LeftLegend + 3 + 2 + degw, m_TopLineHeight - degh + 5);
+    pen.SetStyle(wxPENSTYLE_SOLID);
+    pen.SetColour(wxColour(61, 61, 204, 96)); // blue, transparent
+    pen.SetWidth(1);
+    dc->SetPen(pen);
+    ratioH = (double)m_DrawAreaRect.height / (double)m_MaxPressScale;
 
-  m_ratioW = double(m_DrawAreaRect.width) / (BARO_RECORD_COUNT-1);
- // dc->DrawText(wxString::Format(_(" Max %.1f Min %.1f since %02d:%02d  Overall Max %.1f Min %.1f "),m_MaxPress,m_MinPress,hour,min,m_TotalMaxPress,m_TotalMinPress), m_LeftLegend+3+2+degw, m_TopLineHeight-degh+5);
- // Cant get the min sice to work...
- dc->DrawText(wxString::Format(_(" Max %.1f since %02d:%02d  Overall Max %.1f Min %.1f "),m_MaxPress,hour,min,m_TotalMaxPress,m_TotalMinPress), m_LeftLegend+3+2+degw, m_TopLineHeight-degh+5);
-  pen.SetStyle(wxPENSTYLE_SOLID);
-  pen.SetColour(wxColour(61,61,204,96)); //blue, transparent
-  pen.SetWidth(1);
-  dc->SetPen( pen );
-  ratioH = (double)m_DrawAreaRect.height / (double)m_MaxPressScale ;
+    wxPoint pointsSpd[BARO_RECORD_COUNT + 2], pointSpeed_old;
+    pointSpeed_old.x = m_LeftLegend + 3;
+    pointSpeed_old.y = m_TopLineHeight + m_DrawAreaRect.height
+        - m_ArrayPressHistory[0] * ratioH;
 
-  wxPoint  pointsSpd[BARO_RECORD_COUNT+2],pointSpeed_old;
-  pointSpeed_old.x=m_LeftLegend+3;
- pointSpeed_old.y = m_TopLineHeight+m_DrawAreaRect.height - m_ArrayPressHistory[0] * ratioH;
+    //---------------------------------------------------------------------------------
+    // live pressure data
+    //---------------------------------------------------------------------------------
 
-  //---------------------------------------------------------------------------------
-  // live pressure data
-  //---------------------------------------------------------------------------------
-
-  for (int idx = 1; idx < BARO_RECORD_COUNT; idx++) {
-   // pointsSpd[idx].x = idx  + 3 + m_LeftLegend;
-    //pointsSpd[idx].y = m_TopLineHeight+m_DrawAreaRect.height - m_ArrayPressHistory[idx] * ratioH;
-     pointsSpd[idx].y = m_TopLineHeight+m_DrawAreaRect.height - (m_ArrayPressHistory[idx] * ratioH);
-   pointsSpd[idx].x = idx * m_ratioW -3 ;//- 30 + m_LeftLegend;
-   // pointsSpd[idx].x = idx + m_DrawAreaRect.x;
-   // pointsSpd[idx].y= m_ArrayPressHistory[idx] * ratioH;
-    if(BARO_RECORD_COUNT-m_SampleCount <= idx && pointsSpd[idx].y > m_TopLineHeight && pointSpeed_old.y > m_TopLineHeight && pointsSpd[idx].y <=m_TopLineHeight+m_DrawAreaRect.height && pointSpeed_old.y<=m_TopLineHeight+m_DrawAreaRect.height)
-      dc->DrawLine( pointSpeed_old.x, pointSpeed_old.y, pointsSpd[idx].x,pointsSpd[idx].y );
-  // dc->DrawLine( pointSpeed_old.x, pointSpeed_old.y, pointsSpd[idx].x,pointsSpd[idx].y );
-    pointSpeed_old.x=pointsSpd[idx].x;
-    pointSpeed_old.y=pointsSpd[idx].y;
-  }
-
-  //---------------------------------------------------------------------------------
-  //exponential smoothing of barometric pressure
-  //---------------------------------------------------------------------------------
-/*
- // For now i cant see the reason for implementing smoothing for barometric pressure.
-  pen.SetStyle(wxSOLID);
-  pen.SetColour(wxColour(61,61,204,255)); //blue, opaque
-  pen.SetWidth(2);
-  dc->SetPen( pen );
-  pointSpeed_old.x=m_LeftLegend+3;
-  pointSpeed_old.y = m_TopLineHeight+m_DrawAreaRect.height - m_ExpSmoothArrayWindSpd[0] * ratioH;
-
-  for (int idx = 1; idx < BARO_RECORD_COUNT; idx++) {
-    pointsSpd[idx].x = idx * m_ratioW + 3 + m_LeftLegend;
-    pointsSpd[idx].y = m_ExpSmoothArrayWindSpd[idx] * ratioH;
-    if(BARO_RECORD_COUNT-m_SampleCount <= idx && pointsSpd[idx].y > m_TopLineHeight && pointSpeed_old.y > m_TopLineHeight && pointsSpd[idx].y <=m_TopLineHeight+m_DrawAreaRect.height && pointSpeed_old.y<=m_TopLineHeight+m_DrawAreaRect.height)
-      dc->DrawLine( pointSpeed_old.x, pointSpeed_old.y, pointsSpd[idx].x,pointsSpd[idx].y );
-    pointSpeed_old.x=pointsSpd[idx].x;
-    pointSpeed_old.y=pointsSpd[idx].y;
-  }
-
-*/
-  //---------------------------------------------------------------------------------
-  //draw vertical timelines every 5 minutes
-  //---------------------------------------------------------------------------------
-  GetGlobalColor(_T("UBLCK"), &col);
-  pen.SetColour(col);
-  pen.SetStyle(wxPENSTYLE_DOT);
-  dc->SetPen(pen);
-  dc->SetTextForeground(col);
-  dc->SetFont(*g_pFontSmall);
-  int done=-1;
-  wxPoint pointTime;
-  for (int idx = 0; idx < BARO_RECORD_COUNT; idx++) {
-	min = m_ArrayRecTime[idx].GetMinute();
-    hour=m_ArrayRecTime[idx].GetHour();
-    if(m_ArrayRecTime[idx].GetYear()!= 999) {
-	//wxString sndg = wxString::Format(_T("%i"), (int)hour * 100 + min);
-	// wxMessageBox(sndg);
-	//if ((hour * 100 + min) != done && (min % 5 == 0) && (m_ArrayRecTime[idx].GetSecond() == 0 || m_ArrayRecTime[idx].GetSecond() == 1)) {
-
-	if ((hour * 100 + min) != done && (min % 5 == 0) && (m_ArrayRecTime[idx].GetSecond() == 0 || m_ArrayRecTime[idx].GetSecond() == 1)) {
-		pointTime.x = idx * m_ratioW + 3 + m_LeftLegend;
-        dc->DrawLine( pointTime.x, m_TopLineHeight+1, pointTime.x,(m_TopLineHeight+m_DrawAreaRect.height+1) );
-        label.Printf(_T("%02d:%02d"), hour,min);
-        dc->GetTextExtent(label, &width, &height, 0, 0, g_pFontSmall);
-        dc->DrawText(label, pointTime.x-width/2, m_WindowRect.height-height);
-        done=hour*100+min;
-      }
+    for (int idx = 1; idx < BARO_RECORD_COUNT; idx++) {
+        // pointsSpd[idx].x = idx  + 3 + m_LeftLegend;
+        // pointsSpd[idx].y = m_TopLineHeight+m_DrawAreaRect.height -
+        // m_ArrayPressHistory[idx] * ratioH;
+        pointsSpd[idx].y = m_TopLineHeight + m_DrawAreaRect.height
+            - (m_ArrayPressHistory[idx] * ratioH);
+        pointsSpd[idx].x = idx * m_ratioW - 3; //- 30 + m_LeftLegend;
+        // pointsSpd[idx].x = idx + m_DrawAreaRect.x;
+        // pointsSpd[idx].y= m_ArrayPressHistory[idx] * ratioH;
+        if (BARO_RECORD_COUNT - m_SampleCount <= idx
+            && pointsSpd[idx].y > m_TopLineHeight
+            && pointSpeed_old.y > m_TopLineHeight
+            && pointsSpd[idx].y <= m_TopLineHeight + m_DrawAreaRect.height
+            && pointSpeed_old.y <= m_TopLineHeight + m_DrawAreaRect.height)
+            dc->DrawLine(pointSpeed_old.x, pointSpeed_old.y, pointsSpd[idx].x,
+                pointsSpd[idx].y);
+        // dc->DrawLine( pointSpeed_old.x, pointSpeed_old.y,
+        // pointsSpd[idx].x,pointsSpd[idx].y );
+        pointSpeed_old.x = pointsSpd[idx].x;
+        pointSpeed_old.y = pointsSpd[idx].y;
     }
-  }
+
+    //---------------------------------------------------------------------------------
+    // exponential smoothing of barometric pressure
+    //---------------------------------------------------------------------------------
+    /*
+     // For now i cant see the reason for implementing smoothing for barometric
+     pressure. pen.SetStyle(wxSOLID); pen.SetColour(wxColour(61,61,204,255));
+     //blue, opaque pen.SetWidth(2); dc->SetPen( pen );
+      pointSpeed_old.x=m_LeftLegend+3;
+      pointSpeed_old.y = m_TopLineHeight+m_DrawAreaRect.height -
+     m_ExpSmoothArrayWindSpd[0] * ratioH;
+
+      for (int idx = 1; idx < BARO_RECORD_COUNT; idx++) {
+        pointsSpd[idx].x = idx * m_ratioW + 3 + m_LeftLegend;
+        pointsSpd[idx].y = m_ExpSmoothArrayWindSpd[idx] * ratioH;
+        if(BARO_RECORD_COUNT-m_SampleCount <= idx && pointsSpd[idx].y >
+     m_TopLineHeight && pointSpeed_old.y > m_TopLineHeight && pointsSpd[idx].y
+     <=m_TopLineHeight+m_DrawAreaRect.height &&
+     pointSpeed_old.y<=m_TopLineHeight+m_DrawAreaRect.height) dc->DrawLine(
+     pointSpeed_old.x, pointSpeed_old.y, pointsSpd[idx].x,pointsSpd[idx].y );
+        pointSpeed_old.x=pointsSpd[idx].x;
+        pointSpeed_old.y=pointsSpd[idx].y;
+      }
+
+    */
+    //---------------------------------------------------------------------------------
+    // draw vertical timelines every 5 minutes
+    //---------------------------------------------------------------------------------
+    GetGlobalColor(_T("UBLCK"), &col);
+    pen.SetColour(col);
+    pen.SetStyle(wxPENSTYLE_DOT);
+    dc->SetPen(pen);
+    dc->SetTextForeground(col);
+    dc->SetFont(*g_pFontSmall);
+    int done = -1;
+    wxPoint pointTime;
+    for (int idx = 0; idx < BARO_RECORD_COUNT; idx++) {
+        min = m_ArrayRecTime[idx].GetMinute();
+        hour = m_ArrayRecTime[idx].GetHour();
+        if (m_ArrayRecTime[idx].GetYear() != 999) {
+            // wxString sndg = wxString::Format(_T("%i"), (int)hour * 100 +
+            // min);
+            //  wxMessageBox(sndg);
+            // if ((hour * 100 + min) != done && (min % 5 == 0) &&
+            // (m_ArrayRecTime[idx].GetSecond() == 0 ||
+            // m_ArrayRecTime[idx].GetSecond() == 1)) {
+
+            if ((hour * 100 + min) != done && (min % 5 == 0)
+                && (m_ArrayRecTime[idx].GetSecond() == 0
+                    || m_ArrayRecTime[idx].GetSecond() == 1)) {
+                pointTime.x = idx * m_ratioW + 3 + m_LeftLegend;
+                dc->DrawLine(pointTime.x, m_TopLineHeight + 1, pointTime.x,
+                    (m_TopLineHeight + m_DrawAreaRect.height + 1));
+                label.Printf(_T("%02d:%02d"), hour, min);
+                dc->GetTextExtent(label, &width, &height, 0, 0, g_pFontSmall);
+                dc->DrawText(label, pointTime.x - width / 2,
+                    m_WindowRect.height - height);
+                done = hour * 100 + min;
+            }
+        }
+    }
 }

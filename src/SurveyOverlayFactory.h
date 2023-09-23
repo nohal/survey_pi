@@ -24,21 +24,23 @@
  ***************************************************************************
  */
 
+#include "bbox.h"
+#include "ocpn_plugin.h"
+#include "tcmgr.h"
 #include <map>
 #include <wx/string.h>
-#include "bbox.h"
-#include "tcmgr.h"
 
+struct SurveyOverlaySettings;
 class soundingdata;
 
 using namespace std;
 
-#define PI   3.1412
-#define METERS  1
-#define FEET    2
+#define PI 3.1412
+#define METERS 1
+#define FEET 2
 #define FATHOMS 3
 
-//World Mercator
+// World Mercator
 #define PROJECTION 3395
 
 //----------------------------------------------------------------------------------------------------------
@@ -62,7 +64,7 @@ public:
 
     unsigned int m_iTexture;
 
-    wxBitmap *m_pDCBitmap; 
+    wxBitmap *m_pDCBitmap;
     unsigned char *m_pRGBA;
 
     int m_width;
@@ -76,91 +78,95 @@ class SurveyDlg;
 
 class SurveyOverlayFactory {
 public:
-	SurveyOverlayFactory(SurveyDlg &dlg);
+    SurveyOverlayFactory(SurveyDlg& dlg);
     ~SurveyOverlayFactory();
 
-    void SetSettings( bool hiDefGraphics, bool GradualColors )
+    void SetSettings(bool hiDefGraphics, bool GradualColors)
     {
-      m_hiDefGraphics = hiDefGraphics;
-      m_bGradualColors = GradualColors;
+        m_hiDefGraphics = hiDefGraphics;
+        m_bGradualColors = GradualColors;
     }
 
-    void SetMessage( wxString message ) { m_Message = message; }
-    void SetTimeZone( int TimeZone ) { m_TimeZone = TimeZone; }
-    void SetParentSize( int w, int h ) { m_ParentSize.SetWidth(w) ; m_ParentSize.SetHeight(h) ;}
-	bool RenderGLSurveyOverlay( wxGLContext *pcontext, PlugIn_ViewPort *vp );
-    bool RenderSurveyOverlay( wxDC &dc, PlugIn_ViewPort *vp );
+    void SetMessage(wxString message) { m_Message = message; }
+    void SetTimeZone(int TimeZone) { m_TimeZone = TimeZone; }
+    void SetParentSize(int w, int h)
+    {
+        m_ParentSize.SetWidth(w);
+        m_ParentSize.SetHeight(h);
+    }
+    bool RenderGLSurveyOverlay(wxGLContext* pcontext, PlugIn_ViewPort* vp);
+    bool RenderSurveyOverlay(wxDC& dc, PlugIn_ViewPort* vp);
 
-	void DrawAllSoundingsInViewPort(PlugIn_ViewPort *BBox, bool bRebuildSelList,
-			bool bforce_redraw_currents, bool bdraw_mono_for_mask, wxDateTime myTime);
+    void DrawAllSoundingsInViewPort(PlugIn_ViewPort* BBox, bool bRebuildSelList,
+        bool bforce_redraw_currents, bool bdraw_mono_for_mask,
+        wxDateTime myTime);
     void Reset();
-	wxImage &DrawGLText( double value, int precision);
-	wxImage &DrawGLTextDir( double value, int precision);
-	wxImage &DrawGLTextString( wxString myText);
-	wxImage &DrawGLPolygon(double myDepth);
+    wxImage& DrawGLText(double value, int precision);
+    wxImage& DrawGLTextDir(double value, int precision);
+    wxImage& DrawGLTextString(wxString myText);
+    wxImage& DrawGLPolygon(double myDepth);
 
-	void DrawGLLabels(SurveyOverlayFactory *pof, wxDC *dc,
-                               PlugIn_ViewPort *vp,
-                               wxImage &imageLabel, double myLat, double myLon, int offset);
+    void DrawGLLabels(SurveyOverlayFactory* pof, wxDC* dc, PlugIn_ViewPort* vp,
+        wxImage& imageLabel, double myLat, double myLon, int offset);
 
-	void drawGLPolygons(SurveyOverlayFactory *pof, wxDC *dc,
-                                PlugIn_ViewPort *vp, 
-                                wxImage &imageLabel, double myLat, double myLon, int sdgid, int surid, int pixxc, int pixyc, int offset );
+    void drawGLPolygons(SurveyOverlayFactory* pof, wxDC* dc,
+        PlugIn_ViewPort* vp, wxImage& imageLabel, double myLat, double myLon,
+        int sdgid, int surid, int pixxc, int pixyc, int offset);
 
-	void DrawGLLine( double x1, double y1, double x2, double y2, double width, wxColour myColour );
-    void DrawOLBitmap( const wxBitmap &bitmap, wxCoord x, wxCoord y, bool usemask );
-	PlugIn_ViewPort *vp;
-	wxDateTime        m_dtUseNew;
+    void DrawGLLine(double x1, double y1, double x2, double y2, double width,
+        wxColour myColour);
+    void DrawOLBitmap(
+        const wxBitmap& bitmap, wxCoord x, wxCoord y, bool usemask);
+    PlugIn_ViewPort* vp;
+    wxDateTime m_dtUseNew;
 
 private:
+    bool inGL;
 
-	bool inGL;
-	
-    bool DoRenderSurveyOverlay( PlugIn_ViewPort *vp );
-	void RenderMyArrows(PlugIn_ViewPort *vp );
+    bool DoRenderSurveyOverlay(PlugIn_ViewPort* vp);
+    void RenderMyArrows(PlugIn_ViewPort* vp);
 
-	void DrawGLSoundingMark(int x, int y, double scale, double depth, int sounding_id, int survey_id, wxColour c);
-	void DrawSounding(wxDC &dc, int x, int y, double depth, int sounding_id, int survey_id, int text_offset);
-    void DrawMessageWindow( wxString msg, int x, int y , wxFont *mfont);
+    void DrawGLSoundingMark(int x, int y, double scale, double depth,
+        int sounding_id, int survey_id, wxColour c);
+    void DrawSounding(wxDC& dc, int x, int y, double depth, int sounding_id,
+        int survey_id, int text_offset);
+    void DrawMessageWindow(wxString msg, int x, int y, wxFont* mfont);
 
-    void drawWindArrowWithBarbs( int config, int x, int y, double vx, double vy,
-                                 bool polar, bool south, wxColour arrowColor );
-    void drawWaveArrow( int i, int j, double dir, wxColour arrowColor );
+    void drawWindArrowWithBarbs(int config, int x, int y, double vx, double vy,
+        bool polar, bool south, wxColour arrowColor);
+    void drawWaveArrow(int i, int j, double dir, wxColour arrowColor);
 
-	wxColour GetDepthColour(double my_depth);
-
+    wxColour GetDepthColour(double my_depth);
 
     double m_last_vp_scale;
-	
-	//wxPoint p_basic[9];
-	//
+
+    // wxPoint p_basic[9];
+    //
     wxString m_Message;
     wxString m_Message_Hiden;
-    int  m_TimeZone;
-    wxSize  m_ParentSize;
+    int m_TimeZone;
+    wxSize m_ParentSize;
 
-    wxDC *m_pdc;
-    wxGraphicsContext *m_gdc;
+    wxDC* m_pdc;
+    wxGraphicsContext* m_gdc;
 
-    wxFont *m_dFont_map;
-    wxFont *m_dFont_war;
+    wxFont* m_dFont_map;
+    wxFont* m_dFont_war;
 
     bool m_hiDefGraphics;
     bool m_bGradualColors;
 
-    std::map < double , wxImage > m_labelCache;
-	std::map < wxString , wxImage > m_labelCacheText;
+    std::map<double, wxImage> m_labelCache;
+    std::map<wxString, wxImage> m_labelCacheText;
 
-    SurveyDlg &m_dlg;
-	SurveyOverlaySettings &m_settings;
-	vector<soundingdata>&m_sdgs;
-	
-	wxString myString;
-    TCMgr *ctcmgr;
-    wxBoundingBox *myBox;   
-    LLBBox * myLLBox;
+    SurveyDlg& m_dlg;
+    SurveyOverlaySettings& m_settings;
+    vector<soundingdata>& m_sdgs;
 
-	wxString        *pTC_Dir;
-	
+    wxString myString;
+    TCMgr* ctcmgr;
+    wxBoundingBox* myBox;
+    LLBBox* myLLBox;
 
+    wxString* pTC_Dir;
 };
