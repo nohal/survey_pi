@@ -86,8 +86,11 @@ macro (add_plugin_libraries)
   add_subdirectory("opencpn-libs/plugingl")
   target_link_libraries(${PACKAGE_NAME} ocpn::plugingl)
 
-  add_subdirectory("${CMAKE_SOURCE_DIR}/opencpn-libs/opencpn-glu")
+  add_subdirectory("opencpn-libs/opencpn-glu")
   target_link_libraries(${PACKAGE_NAME} opencpn::glu)
+
+  add_subdirectory("opencpn-libs/libglu")
+  target_link_libraries(${PACKAGE_NAME} ocpn::glu)
 
   add_subdirectory("opencpn-libs/jsoncpp")
   target_link_libraries(${PACKAGE_NAME} ocpn::jsoncpp)
