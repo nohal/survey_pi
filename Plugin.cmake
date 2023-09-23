@@ -48,6 +48,7 @@ set(PKG_HOMEPAGE https://github.com/Rasbats/survey_pi)
 set(PKG_INFO_URL https://opencpn.org/OpenCPN/plugins/survey.html)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
+add_definitions(-DocpnUSE_GL)
 
 set(SRC
     src/baro_history.cpp
@@ -70,6 +71,9 @@ macro (late_init)
   # ocpn::api is available.
   add_definitions(-D SQLITE_ENABLE_RTREE)
 
+  # Fix OpenGL deprecated warnings in Xcode
+  target_compile_definitions(${PACKAGE_NAME} PRIVATE GL_SILENCE_DEPRECATION)
+
   if (SURVEY_USE_SVG)
     target_compile_definitions(${PACKAGE_NAME} PUBLIC SURVEY_USE_SVG)
   endif ()
@@ -77,20 +81,21 @@ endmacro ()
 
 macro (add_plugin_libraries)
   # Add libraries required by this plugin
+  if(WIN32)
+    add_subdirectory("${CMAKE_SOURCE_DIR}/opencpn-libs/WindowsHeaders")
+    target_link_libraries(${PACKAGE_NAME} windows::headers)
+  endif()
+  add_subdirectory("opencpn-libs/plugingl")
+  target_link_libraries(${PACKAGE_NAME} ocpn::plugingl)
+
+  add_subdirectory("opencpn-libs/opencpn-glu")
+  target_link_libraries(${PACKAGE_NAME} opencpn::glu)
+
   add_subdirectory("opencpn-libs/tinyxml")
   target_link_libraries(${PACKAGE_NAME} ocpn::tinyxml)
 
   add_subdirectory("opencpn-libs/wxJSON")
   target_link_libraries(${PACKAGE_NAME} ocpn::wxjson)
-
-  add_subdirectory("opencpn-libs/opencpn-glu")
-  target_link_libraries(${PACKAGE_NAME} opencpn::glu)
-
-  add_subdirectory("opencpn-libs/libglu")
-  target_link_libraries(${PACKAGE_NAME} ocpn::glu)
-
-  add_subdirectory("opencpn-libs/plugingl")
-  target_link_libraries(${PACKAGE_NAME} ocpn::plugingl)
 
   add_subdirectory("opencpn-libs/jsoncpp")
   target_link_libraries(${PACKAGE_NAME} ocpn::jsoncpp)
