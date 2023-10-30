@@ -84,11 +84,8 @@ macro (add_plugin_libraries)
     add_subdirectory("${CMAKE_SOURCE_DIR}/opencpn-libs/WindowsHeaders")
     target_link_libraries(${PACKAGE_NAME} windows::headers)
   endif()
-  add_subdirectory("opencpn-libs/plugingl")
-  target_link_libraries(${PACKAGE_NAME} ocpn::plugingl)
-
-  add_subdirectory("opencpn-libs/opencpn-glu")
-  target_link_libraries(${PACKAGE_NAME} opencpn::glu)
+  add_subdirectory("opencpn-libs/plugin_dc")
+  target_link_libraries(${PACKAGE_NAME} ocpn::plugin-dc)
 
   add_subdirectory("opencpn-libs/tinyxml")
   target_link_libraries(${PACKAGE_NAME} ocpn::tinyxml)
