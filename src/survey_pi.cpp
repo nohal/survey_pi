@@ -1230,7 +1230,7 @@ bool survey_pi::dbQuery(wxString sql)
     if (ret != SQLITE_OK) {
         // some error occurred
         wxLogMessage(
-            _T("Database error: %s in query: %s\n"), *err_msg, sql.c_str());
+            _T("Database error: %s in query: %s\n"), err_msg, sql.c_str());
         sqlite3_free(err_msg);
         b_dbUsable = false;
     }
@@ -1244,7 +1244,7 @@ void survey_pi::dbGetTable(
         m_database, sql.mb_str(), results, &n_rows, &n_columns, &err_msg);
     if (ret != SQLITE_OK) {
         wxLogMessage(
-            _T("Database error: %s in query: %s\n"), *err_msg, sql.c_str());
+            _T("Database error: %s in query: %s\n"), err_msg, sql.c_str());
         sqlite3_free(err_msg);
         b_dbUsable = false;
     }
@@ -1508,12 +1508,13 @@ wxString survey_pi::dbGetStringValue(wxString sql)
     int n_columns;
     dbGetTable(sql, &result, n_rows, n_columns);
     wxArrayString surveys;
-    wxString ret = wxString::FromUTF8(result[1]);
-    dbFreeResults(result);
-    if (n_rows == 1)
-        return ret;
-    else
-        return wxEmptyString;
+    if (result) {
+        wxString ret = wxString::FromUTF8(result[1]);
+        dbFreeResults(result);
+        if (n_rows == 1)
+            return ret;
+    }
+    return wxEmptyString;
 }
 
 int survey_pi::dbGetIntNotNullValue(wxString sql)
@@ -1523,12 +1524,13 @@ int survey_pi::dbGetIntNotNullValue(wxString sql)
     int n_columns;
     dbGetTable(sql, &result, n_rows, n_columns);
     wxArrayString surveys;
-    int ret = atoi(result[1]);
-    dbFreeResults(result);
-    if (n_rows == 1)
-        return ret;
-    else
-        return 0;
+    if (result) {
+        int ret = atoi(result[1]);
+        dbFreeResults(result);
+        if (n_rows == 1)
+            return ret;
+    }
+    return 0;
 }
 
 wxString survey_pi::GetSurveyName(int survey_id)
